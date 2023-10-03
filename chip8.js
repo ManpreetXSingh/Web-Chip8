@@ -1,7 +1,5 @@
 "use strict";
 
-// var CPU = createCPU();
-// var KillSwitch = false;
 const C8FONT = {
     "0": [0xF0, 0x90, 0x90, 0x90, 0xF0],
     "1": [0x20, 0x60, 0x20, 0x20, 0x70],
@@ -22,8 +20,8 @@ const C8FONT = {
 };
 
 // Load JSON
-function loadJson(path, on_load) {
-    if (!rom_path || !on_load) {
+function loadJson(file_path, on_load) {
+    if (!file_path || !on_load) {
         return;
     }
 
@@ -35,14 +33,14 @@ function loadJson(path, on_load) {
         }
         on_load(JSON.parse(request.response));
     }
-    request.open('GET', path, true);
+    request.open('GET', file_path, true);
     request.responseType = 'text';
     request.send();
 }
 
-// Load rom from disk
-function loadRom(rom_path, on_load) {
-    if (!rom_path || !on_load) {
+// Load a file as a Uint8Array
+function loadFileU8(file_path, on_load) {
+    if (!file_path || !on_load) {
         return;
     }
 
@@ -55,7 +53,7 @@ function loadRom(rom_path, on_load) {
         var rom = new Uint8Array(request.response);
         on_load(rom);
     }
-    request.open('GET', rom_path, true);
+    request.open('GET', file_path, true);
     request.responseType = 'arraybuffer';
     request.send();
 }
@@ -160,9 +158,6 @@ class Chip8Emulator {
 
     pressKey(key) {
         this.input.pressKey(key);
-        // setTimeout(() => {
-        //     this.input.releaseKey(key);     // Key will be released next frame
-        // }, 100);
     }
 
     releaseKey(key) {
@@ -170,8 +165,14 @@ class Chip8Emulator {
     }
 
     loadRom(rom) {
+        if (rom.length > this.memory.length - 0x200) {
+            console.error(`Rom is too large. ${rom.length} > ${this.memory.length - 0x200}`);
+            return false;
+        }
         this.#loadedRom = rom;
         this.cpu.loadRom(rom);
+
+        return true;
     }
 
     pause() {
@@ -205,6 +206,49 @@ class Chip8Emulator {
 
     beginProcess() {
         this.resume();
+    }
+
+    step() {
+        if (this.#instructionIdx == this.instructionsPerFrame) {
+            this.#instructionIdx = 0;
+            this.stepFrame();
+        } else {
+            this.#instructionIdx++;
+            this.cpu.processNext();
+            this.cpu.updateScreen();
+            this.updateDebugInfo();
+        }
+    }
+
+    stepFrame() {
+        this.FPSCounter++;
+        for (let i = this.#instructionIdx; i < this.instructionsPerFrame; i++) {
+            this.#instructionIdx++;
+            this.cpu.processNext();
+            // if ((new Instruction(this.cpu._fetch())).type == 0xD) {
+            //     i = this.instructionsPerFrame;
+            // }
+        }
+        this.#instructionIdx = 0;
+        if (this.cpu.soundTimer <= 0) {
+            this.speaker.stop();
+        } else {
+            this.speaker.start();
+        }
+
+        this.cpu.updateScreen();
+        this.cpu.updateTimers();
+        this.updateDebugInfo();
+    }
+
+    process(time) {
+        if (time - this.#time_previous > this.targetFrameInterval) {
+            this.#oneSecTimer += time - this.#time_previous;
+            this.stepFrame();
+            this.#time_previous = time;
+        }
+
+        this.#processId = requestAnimationFrame(this.process.bind(this));
     }
 
     displayDebugInfo() {
@@ -278,107 +322,7 @@ class Chip8Emulator {
         });
         this.#prevProgramCounter = this.programCounter;
     }
-
-    step() {
-        if (this.#instructionIdx == this.instructionsPerFrame) {
-            this.#instructionIdx = 0;
-            this.stepFrame();
-        } else {
-            this.#instructionIdx++;
-            this.cpu.processNext();
-            this.cpu.updateScreen();
-            this.updateDebugInfo();
-        }
-    }
-
-    stepFrame() {
-        this.FPSCounter++;
-        for (let i = this.#instructionIdx; i < this.instructionsPerFrame; i++) {
-            this.#instructionIdx++;
-            this.cpu.processNext();
-            // if ((new Instruction(this.cpu._fetch())).type == 0xD) {
-            //     i = this.instructionsPerFrame;
-            // }
-        }
-        this.#instructionIdx = 0;
-        if (this.cpu.soundTimer <= 0) {
-            this.speaker.stop();
-        } else {
-            this.speaker.start();
-        }
-
-        this.cpu.updateScreen();
-        this.cpu.updateTimers();
-        this.updateDebugInfo();
-    }
-
-    process(time) {
-        if (time - this.#time_previous > this.targetFrameInterval) {
-            this.#oneSecTimer += time - this.#time_previous;
-            this.stepFrame();
-            this.#time_previous = time;
-        }
-
-        this.#processId = requestAnimationFrame(this.process.bind(this));
-    }
 }
-
-// Main
-
-let stackTable = document.getElementById("stack-table");
-let memoryTable = document.getElementById("memory-table");
-let registersTable = document.getElementById("registers-table");
-let pointersTable = document.getElementById("pointers-table");
-let timersTable = document.getElementById("timers-table");
-let fpsDisplay = document.getElementById("fps");
-let ipsDisplay = document.getElementById("ips");
-
-let playPauseBtn = document.getElementById("play-pause");
-
-let chip8;
-window.onload = function () {
-    chip8 = new Chip8Emulator();
-    chip8.displayDebugInfo();
-}
-
-function main(rom) {
-    playPauseBtn.textContent = 'pause';
-    chip8.killProcess();
-    chip8.loadRom(rom);
-    chip8.beginProcess();
-}
-
-// Virtual Keyboard
-let virtualKeyboard = document.getElementById("keyboard");
-let virtualKeys = virtualKeyboard.querySelectorAll('button');
-let debugConsole = document.getElementById("debug-console");
-
-for (let btnIdx=0; virtualKeys[btnIdx]; btnIdx++) {
-    virtualKeys[btnIdx].addEventListener('mousedown', function(e) {
-        console.log("Pressed: " + this.attributes.key.value);
-        debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
-        chip8.pressKey(this.attributes.key.value);
-    });
-    virtualKeys[btnIdx].addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        console.log("Pressed: " + this.attributes.key.value);
-        debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
-        chip8.pressKey(this.attributes.key.value);
-    });
-
-    virtualKeys[btnIdx].addEventListener('mouseup', function(e) {
-        console.log("Released: " + this.attributes.key.value);
-        debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
-        chip8.releaseKey(this.attributes.key.value);
-    })
-    virtualKeys[btnIdx].addEventListener('touchend', function(e) {
-        e.preventDefault();
-        console.log("Released: " + this.attributes.key.value);
-        debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
-        chip8.releaseKey(this.attributes.key.value);
-    })
-}
-
 
 // Controls
 
@@ -411,86 +355,108 @@ function stepFrame() {
 }
 
 
-// Load Rom
+// Load Rom List
 
-function romCard(name, romsrc, imgsrc, author, authorurl, description, event) {
+let romList = document.getElementById("rom-list");
+let loadRomWindow = document.getElementById("load-rom-window");
+
+function romCard(name, romsrc, imgsrc, romAuthors, description, event) {
+    var authorLinks = "";
+    for (const author in romAuthors) {
+        if (romAuthors.hasOwnProperty(author)) {
+            if (romAuthors[author].url) {
+                authorLinks +=`<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a>`;
+            } else {
+                authorLinks += author;
+            }
+        }
+    }
+
     return (
-        `<div class="rom-card" title="${description}" onclick="loadRom('${romsrc}', main)">
+        `<div class="rom-card" title="${description}" onclick="loadFileU8('${romsrc}', (rom) => {hideLoadRomWindow(); runRom(rom);})">
             <img src="${imgsrc}" alt="${name}">
             <div class="rom-card-title">${name}</div>
-            <div class="rom-card-author-event">` +
-                (authorurl) ? `<a href="${authorurl}">${author}</a>` : `${author}` +
-                (event) ? ` • ${event}` : "" +
-            `</div>
+            <div class="rom-card-author-event">
+                ${authorLinks}
+                ${((event) ?  ` • ${event}` : "")}
+            </div>
         </div>`
     )
 }
 
 // Load a list of roms from a json file
-let romList = document.getElementById("rom-list");
-
 function loadRomsList() {
     var authors;
     function onload(json) {
-        if (authors === undefined) {
-            return;
-        }
         var card;
         for (const key in json) {
             if (json.hasOwnProperty(key)) {
-                var author_urls = [];
-                for (const author in json[key].authors) {
-                    if (authors.hasOwnProperty(author)) {
-                        author_urls.push(authors[author]["url"]);
-                    }
+                if (json[key].platform != "chip8"){
+                    continue;
                 }
-                card = romCard(
-                    key,                                        // name
-                    `./chip8Archive/roms/${key}.ch8`,           // rom url
-                    `./chip8Archive/${json[key].images[0]}`,    // image url
-                    json[key].authors,                          // authors
-                    author_urls,                                // authors url
-                    json[key].desc,                             // description
-                    json[key].event                             // event
+                
+                var romAuthors = {};
+                for (const i in json[key].authors) {
+                    var author = (json[key].authors[i] != "your name here") ? json[key].authors[i] : "Unknown";
+                    romAuthors[author] = authors[json[key].authors[i]];
+                }
+
+                romList.innerHTML += romCard(
+                    key,                                                // rom name
+                    `./chip8Archive/roms/${key}.ch8`,                   // rom url
+                    `./chip8Archive/src/${key}/${json[key].images[0]}`, // image url
+                    romAuthors,                                         // authors
+                    json[key].desc,                                     // description
+                    json[key].event                                     // event
                 );
-                romList.innerHTML += card;
             }
         }
+        romList.querySelectorAll("a").forEach((a) => {
+            a.onclick = (e) => {
+                e.stopPropagation();
+            }
+        })
     }
-    loadJson("./chip8Archive/authors.json", (json) => {authors = json});
-    loadJson("./chip8Archive/programs.json", onload);
+    loadJson("./chip8Archive/authors.json", (json) => {
+        authors = json;
+        loadJson("./chip8Archive/programs.json", onload);
+    });
 }
 
+function showLoadRomWindow() {
+    loadRomWindow.classList.remove("hidden");
+}
 
+function hideLoadRomWindow() {
+    loadRomWindow.classList.add("hidden");
+}
 
-// Drag and drop
+// loadRomWindow.addEventListener("click", hideLoadRomWindow);
+
+// Drag and drop rom
+
+var dragLeaveTimeout;
+var fileDropZone = document.querySelector(".file-drop-zone");
 
 document.querySelector("body").addEventListener("dragenter", dragEnterHandler);
 document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
 document.querySelector("body").addEventListener("dragover", dragOverHandler);
-var dragLeaveTimeout;
-var fileDropZone = document.querySelector(".file-drop-zone");
 
 function dropHandler(ev) {
     function onLoad(e2) {
         fileDropZone.classList.remove("drop-zone-active");
         var rom = new Uint8Array(e2.target.result);
-        main(rom);
+        runRom(rom);
     }
-
-    // console.log("File(s) dropped");
 
     // Prevent default behavior
     ev.preventDefault();
     ev.stopPropagation();
 
     if (ev.dataTransfer.items) {
-        // Use DataTransferItemList interface to access the file(s)
-
         for (const fileIdx in ev.dataTransfer.items) {
             var item = ev.dataTransfer.items[fileIdx];
 
-            // If dropped item isn't file, reject it
             if (!(item.kind === "file")) {
                 continue;
             }
@@ -503,7 +469,6 @@ function dropHandler(ev) {
             return;
         }
     } else {
-        // Use DataTransfer interface to access the file(s)
         const file = ev.dataTransfer.files[0]
         var reader = new FileReader();
 
@@ -513,7 +478,6 @@ function dropHandler(ev) {
 }
 
 function dragEnterHandler(ev) {
-    // Prevent default behavior
     ev.preventDefault();
     ev.stopPropagation();
 
@@ -521,7 +485,6 @@ function dragEnterHandler(ev) {
 }
 
 function dragOverHandler(ev) {
-    // Prevent default behavior
     ev.preventDefault();
     ev.stopPropagation();
 
@@ -532,7 +495,6 @@ function dragOverHandler(ev) {
 }
 
 function dragLeaveHandler(ev) {
-    // Prevent default behavior
     ev.preventDefault();
     ev.stopPropagation();
 
@@ -541,4 +503,65 @@ function dragLeaveHandler(ev) {
             fileDropZone.classList.remove("drop-zone-active");
         }, 50)
     }
+}
+
+
+// Main
+
+let stackTable = document.getElementById("stack-table");
+let memoryTable = document.getElementById("memory-table");
+let registersTable = document.getElementById("registers-table");
+let pointersTable = document.getElementById("pointers-table");
+let timersTable = document.getElementById("timers-table");
+let fpsDisplay = document.getElementById("fps");
+let ipsDisplay = document.getElementById("ips");
+
+let playPauseBtn = document.getElementById("play-pause");
+
+let chip8 = new Chip8Emulator();
+function runRom(rom) {
+    playPauseBtn.textContent = 'pause';
+    chip8.killProcess();
+    if (!chip8.loadRom(rom)){
+        return;
+    }
+    chip8.beginProcess();
+}
+
+window.onload = function () {
+    chip8.displayDebugInfo();
+
+    // Virtual Keyboard Events
+
+    let virtualKeyboard = document.getElementById("keyboard");
+    let virtualKeys = virtualKeyboard.querySelectorAll('button');
+    let debugConsole = document.getElementById("debug-console");
+
+    for (let btnIdx=0; virtualKeys[btnIdx]; btnIdx++) {
+        virtualKeys[btnIdx].addEventListener('mousedown', function(e) {
+            console.log("Pressed: " + this.attributes.key.value);
+            debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
+            chip8.pressKey(this.attributes.key.value);
+        });
+        virtualKeys[btnIdx].addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            console.log("Pressed: " + this.attributes.key.value);
+            debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
+            chip8.pressKey(this.attributes.key.value);
+        });
+
+        virtualKeys[btnIdx].addEventListener('mouseup', function(e) {
+            console.log("Released: " + this.attributes.key.value);
+            debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
+            chip8.releaseKey(this.attributes.key.value);
+        })
+        virtualKeys[btnIdx].addEventListener('touchend', function(e) {
+            e.preventDefault();
+            console.log("Released: " + this.attributes.key.value);
+            debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
+            chip8.releaseKey(this.attributes.key.value);
+        })
+    }
+
+    loadRomsList();
 }

@@ -22,6 +22,9 @@
         }
     </style> -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -48,7 +51,7 @@
         </div>
 
         <div id="keyboard-container">
-            <table id="keyboard">
+            <table id="keyboard" hidden>
                 <tr>
                     <td> <button key="1">1</button> </td>
                     <td> <button key="2">2</button> </td>
@@ -78,9 +81,10 @@
 
     </div>
 
-    <button id="reset" onclick="window.location.reload()">Reset</button>
-    <button id="loadrom" onclick="loadRom('examples/chip8-roms-master/games/Brick (Brix hack, 1990).ch8', main)">Load
-        ROM</button>
+    <div id="settings-container">
+        <button id="reset-btn" onclick="window.location.reload()">Reset</button>
+        <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
+    </div>
 
 
     <div id="debug-items-container">
@@ -105,12 +109,20 @@
 
     <div id="debug-console"></div>
 
-    <div id="load-rom-window">
-        <div class="center-text h1">Load ROM</div>
-        <div id="rom-list"></div>
+    <div id="load-rom-window" class="hidden">
+        <div>
+            <button id="hide-rom-list-btn" class="material-icons-round md-light md-24" title="Close" onclick="hideLoadRomWindow()">close</button>
+            <h1>Load ROM</h1>
+            <div id="rom-list"></div>
+        </div>
     </div>
 
-
+    <noscript>
+        <div>
+            <h1>JavaScript is Disabled</h1>
+            <p>JavaScript is disabled in your browser. Please enable it to access this website.</p>
+        </div>
+    </noscript>
 </body>
 <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
 <script src="./JS/Utils.js"></script>
@@ -120,11 +132,5 @@
 <script src="./JS/Chip8Array.js"></script>
 <script src="./JS/Chip8CPU.js"></script>
 <script src="chip8.js"></script>
-
-<noscript>
-    <div class="card center center-text text-size-10 shadow bg-light">
-        Sorry, your browser does not support JavaScript!
-    </div>
-</noscript>
 
 </html>

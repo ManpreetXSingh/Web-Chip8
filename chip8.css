@@ -7,7 +7,6 @@
 
 * {
     box-sizing: border-box;
-    font-family: 'Courier New', Courier, monospace;
     margin: 0;
     padding: 0;
 }
@@ -15,20 +14,46 @@
 html {
     display: flex;
     justify-content: center;
+    align-items: center;
     background: rgb(11,6,105);
     background: linear-gradient(135deg, rgba(11,6,105,1) 0%, rgba(9,9,121,1) 11%, rgba(0,212,255,1) 100%);
-    /* background: rgb(2, 0, 36);
-    background: linear-gradient(135deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 30%, rgba(0,212,255,1) 100%); */
 }
 
 body {
     margin: 0;
     padding: 0;
     background: #FFFFFF;
-    max-width: min(70rem, 100%);
+    font-family: 'Josefin Sans', sans-serif;
+    width: min(70rem, 100%);
+    min-height: 100%;
+}
+
+.body-padded {
     padding-bottom: 50vh; /* For keyboard */
 }
 
+noscript {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background: linear-gradient(135deg, rgba(11,6,105,1) 0%, rgba(9,9,121,1) 11%, rgba(0,212,255,1) 100%);
+    color: #FFFFFF;
+    font-size: x-large;
+    font-weight: bolder;
+    text-align: center;
+    z-index: 20;
+}
+
+.hidden {
+    display: none !important;
+}
 
 /* Scrollbar */
 
@@ -91,6 +116,7 @@ body {
 /* Tables */
 
 .hex-table {
+    font-family: 'Courier New', Courier, monospace;
     border-right: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     border-collapse: separate;
@@ -103,11 +129,13 @@ body {
     top: 0;
     z-index: 1;
 }
+
 .hex-table tbody tr td:first-child {
     border-left: 1px solid #ccc;
     position: sticky;
     left: 0;
 }
+
 .hex-table thead th:first-child {
     border-left: 1px solid #ccc;
     position: sticky;
@@ -133,6 +161,35 @@ body {
 .hex-table td:not(:first-child) {
     user-select: text;
     cursor: default;
+}
+
+
+/* Pointer Highlights */
+
+td[stack-pointer] {
+    color: white;
+    background-color: rgb(54, 153, 199);
+    font-weight: 100;
+    position: relative;
+}
+
+/* td[stack-pointer]::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    transform: translateX(-50%);
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: black;
+} */
+
+td[program-counter] {
+    color: white;
+    background-color: rgb(54, 153, 199);
+    font-weight: 100;
 }
 
 /*
@@ -175,6 +232,7 @@ body {
     /* resize: both; */
     overflow: auto;
 }
+
 /* Control Bar */
 
 .control-bar {
@@ -223,6 +281,18 @@ body {
     /* overflow: auto; */
 }
 
+#settings-container {
+    max-width: 100%;
+    padding-left: 0.25rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#settings-container > button {
+    margin: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid #16c783;
+}
 
 /* Screen */
 
@@ -302,31 +372,75 @@ body {
     background-color: #56e7a6;
 }
 
-
-/* Pointer Highlights */
-
-td[stack-pointer] {
-    color: white;
-    background-color: rgb(54, 153, 199);
-    font-weight: 100;
-    position: relative;
+/* Rom List */
+#load-rom-window {
+    position: fixed;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 20;
 }
 
-/* td[stack-pointer]::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -10px;
-    transform: translateX(-50%);
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-    width: 10px;
-    height: 10px;
-    background-color: black;
-} */
+#load-rom-window > div > h1 {
+    text-align: center;
+}
 
-td[program-counter] {
-    color: white;
-    background-color: rgb(54, 153, 199);
-    font-weight: 100;
+#hide-rom-list-btn {
+    position: absolute;
+    border: none;
+    background: #FFFFFF;
+    color: #abacab;
+    border-radius: 100%;
+    top: 1rem;
+    right: 1rem;
+}
+
+#hide-rom-list-btn::after:hover {
+    background: #1dac1d;
+    color: #FFFFFF;
+}
+
+#load-rom-window > div {
+    position: relative;
+    padding: 1rem;
+    max-width: min(70rem, 100%);
+    max-height: 100%;
+    background-color: #FFFFFF;
+    overflow: auto;
+}
+
+#rom-list {
+    /* display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); */
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.rom-card {
+    width: 15rem;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #dfdede;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0,0,0,0.2);
+}
+
+.rom-card img {
+    width: 100%;
+    max-height: 100%;
+}
+
+.rom-card-title {
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.rom-card-author-event {
+    font-size: 0.75rem;
+    text-wrap: pretty;
 }

@@ -17,10 +17,6 @@ function toHex(number, digits = 2) {
 function getBitness(num) {
     return Math.ceil(Math.log2(num));
 }
-function getCommonBitness(num1) {
-    return Math.ceil(Math.log2(num1));
-}
-
 
 class DisplayTableOptions {
     constructor() {
@@ -31,15 +27,6 @@ class DisplayTableOptions {
         this.tableName=null;
         this.vNames = null;
         this.hNames = null
-        // /**
-        //  * @type {Object.<Number, String[]>}
-        //  */
-        // this.addClassNames = {};
-
-        // /**
-        //  * @type {Object.<Number, String[]>}
-        //  */
-        // this.removeClassNames = {};
     }
 
     get hasVHeader(){
@@ -56,7 +43,7 @@ class DisplayTableOptions {
  * Display an array of numbers as a table in hexadecimal format.
  * @param {HTMLElement} table 
  * @param {Array} array 
- * @param {Number} numCols 
+ * @param {DisplayTableOptions} displayTableOptions 
  */
 function displayTable(table, array, displayTableOptions) {
     bitness = displayTableOptions.bitness;
@@ -66,15 +53,6 @@ function displayTable(table, array, displayTableOptions) {
         if (displayTableOptions.vAddressVisible) {
             throw new Error("vAddressVisible must be false when itemNames is set.");
         }
-        // if (displayTableOptions.vAddressVisible == displayTableOptions.hAddressVisible) {
-        //     throw new Error("vAddressVisible or hAddressVisible must be true when itemNames is set.");
-        // }
-        // if (vNames.length < array.length) {
-        //     throw new Error("itemNames must have at least as many elements as the array.");
-        // }
-        // if (displayTableOptions.numCols != 1) {
-        //     throw new Error("numCols must be 1 when itemNames is set.");
-        // }
     }
     if (displayTableOptions.hNames != null) {
         if (displayTableOptions.hAddressVisible) {
@@ -83,8 +61,8 @@ function displayTable(table, array, displayTableOptions) {
     }
 
     table.innerHTML = "";
-    const thead = document.createElement("thead"); //table.querySelector("thead");
-    const tbody = document.createElement("tbody"); //table.querySelector("tbody");
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody");
 
     const mem_amt = array.length;
     const VAddrBitness = getBitness(mem_amt) + 1;
@@ -144,6 +122,7 @@ function displayTable(table, array, displayTableOptions) {
  * @param {HTMLElement} table 
  * @param {Array} array 
  * @param {Array} changes 
+ * @param {DisplayTableOptions} displayTableOptions
  */
 function updataTable(table, array, changes, displayTableOptions) {
     bitness = displayTableOptions.bitness;

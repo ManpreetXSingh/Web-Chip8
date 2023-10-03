@@ -369,7 +369,6 @@ class Chip8CPU {
                 for (var y = 0; yCondition(y); y++) {
                     var pixel_row = this.memory.get(this.indexRegister + y);
                     for (var x = 0; xCondition(x); x++) {
-                        // this.Registers[0xF] = (this.screen.setPixel(x + screenX, y + screenY, (pixel_row >> (0x7 - x)) & 0b1)) | this.Registers[0xF];
                         this.registers.set(0xF, this.screen.setPixel((x + screenX), (y + screenY), (pixel_row >> 7) & 0b1) || this.registers.get(0xF));
                         pixel_row <<= 1;
                     }
