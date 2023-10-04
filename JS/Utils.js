@@ -24,16 +24,16 @@ class DisplayTableOptions {
         this.bitness = 8;
         this.hAddressVisible = true;
         this.vAddressVisible = true;
-        this.tableName=null;
+        this.tableName = null;
         this.vNames = null;
         this.hNames = null
     }
 
-    get hasVHeader(){
+    get hasVHeader() {
         return (this.vAddressVisible || this.vNames != null);
     }
 
-    get hasHheader(){
+    get hasHheader() {
         return (this.hAddressVisible || this.hNames != null);
     }
 }

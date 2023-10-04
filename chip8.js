@@ -384,7 +384,7 @@ function romCard(name, imgsrc, romAuthors, description, event) {
     for (const author in romAuthors) {
         if (romAuthors.hasOwnProperty(author)) {
             if (romAuthors[author].url) {
-                authorLinks +=`<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a>`;
+                authorLinks += `<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a>`;
             } else {
                 authorLinks += author;
             }
@@ -397,7 +397,7 @@ function romCard(name, imgsrc, romAuthors, description, event) {
             <div class="rom-card-title">${name}</div>
             <div class="rom-card-author-event">
                 ${authorLinks}
-                ${((event) ?  ` • ${event}` : "")}
+                ${((event) ? ` • ${event}` : "")}
             </div>
         </div>`
     )
@@ -411,7 +411,7 @@ function loadRomsList() {
             var card;
             for (const key in roms) {
                 if (roms.hasOwnProperty(key)) {
-                    if (roms[key].platform != "chip8"){
+                    if (roms[key].platform != "chip8") {
                         continue;
                     }
 
@@ -482,7 +482,7 @@ function dropHandler(ev) {
             if (!(item.kind === "file")) {
                 continue;
             }
-            
+
             const file = item.getAsFile();
             var reader = new FileReader();
 
@@ -548,7 +548,7 @@ let chip8 = new Chip8Emulator();
 function runRom(rom) {
     playPauseBtn.textContent = 'pause';
     chip8.killProcess();
-    if (!chip8.loadRom(rom)){
+    if (!chip8.loadRom(rom)) {
         return;
     }
     chip8.beginProcess();
@@ -562,22 +562,22 @@ window.onload = function () {
     let virtualKeyboard = document.getElementById("keyboard");
     let virtualKeys = virtualKeyboard.querySelectorAll('button');
 
-    for (let btnIdx=0; virtualKeys[btnIdx]; btnIdx++) {
-        virtualKeys[btnIdx].addEventListener('mousedown', function(e) {
+    for (let btnIdx = 0; virtualKeys[btnIdx]; btnIdx++) {
+        virtualKeys[btnIdx].addEventListener('mousedown', function (e) {
             console.log("Pressed: " + this.attributes.key.value);
             chip8.pressKey(this.attributes.key.value);
         });
-        virtualKeys[btnIdx].addEventListener('touchstart', function(e) {
+        virtualKeys[btnIdx].addEventListener('touchstart', function (e) {
             e.preventDefault();
             console.log("Pressed: " + this.attributes.key.value);
             chip8.pressKey(this.attributes.key.value);
         });
 
-        virtualKeys[btnIdx].addEventListener('mouseup', function(e) {
+        virtualKeys[btnIdx].addEventListener('mouseup', function (e) {
             console.log("Released: " + this.attributes.key.value);
             chip8.releaseKey(this.attributes.key.value);
         })
-        virtualKeys[btnIdx].addEventListener('touchend', function(e) {
+        virtualKeys[btnIdx].addEventListener('touchend', function (e) {
             e.preventDefault();
             console.log("Released: " + this.attributes.key.value);
             chip8.releaseKey(this.attributes.key.value);

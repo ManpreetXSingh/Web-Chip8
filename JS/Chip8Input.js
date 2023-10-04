@@ -29,11 +29,11 @@ class Chip8Input {
         this.#addEventListners();
     }
 
-    #addEventListners(){
+    #addEventListners() {
         window.addEventListener("keydown", (e) => {
             var key = this.KEYMAP[e.key];
             if (key == null) { return; }
-            
+
             this.pressKey(key);
         })
 
@@ -54,16 +54,16 @@ class Chip8Input {
         }
     }
 
-    releaseKey(key){
+    releaseKey(key) {
         this.#keysReleased.push(key);
     }
 
-    update(){
+    update() {
         // let key;
         // while(key = this.#keysReleased.pop()){
         //     this.keysPressed[key] = false;
         // }
-        for (const keyIdx in this.#keysReleased){
+        for (const keyIdx in this.#keysReleased) {
             this.keysPressed[this.#keysReleased[keyIdx]] = false;
         }
         this.#keysReleased = [];

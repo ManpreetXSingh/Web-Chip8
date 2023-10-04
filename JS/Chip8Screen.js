@@ -41,7 +41,7 @@ class Chip8Screen {
         if (!this.#updated) {
             return;
         }
-        
+
         this.#updated = false;
 
         var cellWidth = this.#canvas.width / this.renderWidth;

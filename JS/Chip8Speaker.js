@@ -12,7 +12,7 @@ class Chip8Speaker {
         this.setVolume(0.025);
         // document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
     }
-    
+
     // /**
     //  * Turn the speaker on or off depending on whether the page is visible.
     //  * @returns {void}

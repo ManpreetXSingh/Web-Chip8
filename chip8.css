@@ -1,6 +1,6 @@
 :root {
     --scrollbar-width: 5px;
-    --scrollbar-color: rgba(0, 0, 0, .5);/*red orange;*/
+    --scrollbar-color: rgba(0, 0, 0, .5);
     --scrollbar-bg-color: rgba(0, 0, 0, 0.100);
 }
 
@@ -15,8 +15,8 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgb(11,6,105);
-    background: linear-gradient(135deg, rgba(11,6,105,1) 0%, rgba(9,9,121,1) 11%, rgba(0,212,255,1) 100%);
+    background: rgb(11, 6, 105);
+    background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%);
 }
 
 body {
@@ -28,8 +28,9 @@ body {
     min-height: 100%;
 }
 
+/* For keyboard */
 .body-padded {
-    padding-bottom: 50vh; /* For keyboard */
+    padding-bottom: 50vh;
 }
 
 noscript {
@@ -42,8 +43,8 @@ noscript {
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    background: linear-gradient(135deg, rgba(11,6,105,1) 0%, rgba(9,9,121,1) 11%, rgba(0,212,255,1) 100%);
+
+    background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%);
     color: #FFFFFF;
     font-size: x-large;
     font-weight: bolder;
@@ -192,19 +193,6 @@ td[program-counter] {
     font-weight: 100;
 }
 
-/*
-#memory-table td::selection {
-    background-color: transparent;
-    /* background-color: #007bff;
-    /* color: #fff;
-}*/
-
-/* .table-highlight{
-    background-color: #f2f2f2;
-} */
-/* #controls, #controls button {
-    display: inline;
-} */
 
 /* General Purpose CSS */
 .hex-edit {
@@ -227,7 +215,7 @@ td[program-counter] {
 
     max-height: 30rem;
     min-height: 1rem;
-    
+
     margin: 0.5rem;
     /* resize: both; */
     overflow: auto;
@@ -288,7 +276,7 @@ td[program-counter] {
     flex-wrap: wrap;
 }
 
-#settings-container > button {
+#settings-container>button {
     margin: 0.25rem;
     padding: 0.5rem;
     border: 1px solid #16c783;
@@ -334,8 +322,8 @@ td[program-counter] {
     width: 100%;
     height: 100%;
     user-select: none;
-    /* aspect-ratio: 3/2; */
-    /* border-top-left-radius: 2rem;
+    /* aspect-ratio: 3/2;
+    border-top-left-radius: 2rem;
     border-top-right-radius: 2rem; */
     overflow: hidden;
     /* border: 1px solid rgb(79, 219, 142); */
@@ -363,7 +351,6 @@ td[program-counter] {
     color: #ffffff;
 }
 
-/* on click */
 #keyboard button:hover {
     background-color: rgb(79, 219, 142);
 }
@@ -414,8 +401,6 @@ td[program-counter] {
 }
 
 #rom-list {
-    /* display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); */
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -427,7 +412,7 @@ td[program-counter] {
     padding: 0.5rem;
     border: 1px solid #dfdede;
     border-radius: 0.5rem;
-    box-shadow: 0 0.2rem 0.4rem 0 rgba(0,0,0,0.2);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
 }
 
 .rom-card img {
