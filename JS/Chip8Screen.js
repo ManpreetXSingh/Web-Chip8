@@ -9,6 +9,9 @@ class Chip8Screen {
         this.renderWidth = width;
         this.renderHeight = height;
 
+        this.fillColor = "#000000";
+        this.backgroundColor = "#FFFFFF";
+
         this.#canvas = canvas;
         this.#ctx = this.#canvas.getContext("2d");
         this.#updated = true;
@@ -47,9 +50,9 @@ class Chip8Screen {
         for (var y = 0; y < this.renderHeight; y++) {
             for (var x = 0; x < this.renderWidth; x++) {
                 if (this.#screenBuffer[y * this.renderWidth + x] != 0) {
-                    this.#ctx.fillStyle = "#FFFFFF";
+                    this.#ctx.fillStyle = this.fillColor;
                 } else {
-                    this.#ctx.fillStyle = "#000000";
+                    this.#ctx.fillStyle = this.backgroundColor;
                 }
                 this.#ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
             }

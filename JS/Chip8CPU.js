@@ -91,13 +91,7 @@ class Chip8CPU {
         this.VBlank = false;
 
         // Quirks //
-
-        this.quirkshift = false;                    // Shift Vy into Vx
-        this.quirkmemoryLeaveIUnchanged = false;    // Leave I unchanged (in save/load instructions)
-        this.quirkmemoryIncrementByX = false;       // Increment I by X (in save/load instructions)
-        this.quirkwrap = false;                     // sprite wrap
-        this.quirkjump = false;                     // jump to <address+vx> instead of <address+v0>
-        this.quirklogic = true;                     // reset vf to 0
+        this.resetQuirks();
     }
 
     /**
@@ -122,7 +116,7 @@ class Chip8CPU {
         }
     }
 
-    resetAll() {
+    resetCPU() {
         this.screen.clear();
         this.speaker.stop();
         this.memory.clear();
@@ -137,6 +131,15 @@ class Chip8CPU {
         this.waitForInput = false;
         this.waitForVBlank = true;
         this.loadFont(this._font);
+    }
+
+    resetQuirks() {
+        this.quirkshift = false;                    // Shift Vy into Vx
+        this.quirkmemoryLeaveIUnchanged = false;    // Leave I unchanged (in save/load instructions)
+        this.quirkmemoryIncrementByX = false;       // Increment I by X (in save/load instructions)
+        this.quirkwrap = false;                     // sprite wrap
+        this.quirkjump = false;                     // jump to <address+vx> instead of <address+v0>
+        this.quirklogic = false;                     // reset vf to 0
     }
 
     updateTimers() {

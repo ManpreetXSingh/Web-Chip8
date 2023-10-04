@@ -68,21 +68,19 @@ class Chip8Emulator {
     #adjustedTargetFPS;
     #pointersDisplayOptions;
     #timersDisplayOptions;
-    #audio_start_time;
 
     #prevStackPointer;
     #prevProgramCounter;
 
     constructor(fps = 60, ipf = 7) {
         this.targetFps = fps;
-        this.#adjustedTargetFPS = fps;
+        this.#adjustedTargetFPS = fps + 3;
         this.targetFrameInterval = 1000 / this.#adjustedTargetFPS;
         this.FPSCounter = 0;
         this.instructionsPerFrame = ipf;
 
         this.#processId = null;
         this.#time_previous = 0;
-        this.#audio_start_time = 0;
         this.#loadedRom = null;
         this.#instructionIdx = 0;
         this.#oneSecTimer = 0;
@@ -153,7 +151,7 @@ class Chip8Emulator {
     }
 
     get paused() {
-        return this.#processId == null
+        return this.#processId == null;
     }
 
     pressKey(key) {
@@ -196,7 +194,7 @@ class Chip8Emulator {
 
     killProcess() {
         this.pause();
-        this.cpu.resetAll();
+        this.cpu.resetCPU();
         this.#instructionIdx = 0;
         this.#oneSecTimer = 0;
         if (this.#loadedRom != null) {
@@ -359,8 +357,29 @@ function stepFrame() {
 
 let romList = document.getElementById("rom-list");
 let loadRomWindow = document.getElementById("load-rom-window");
+let romsJSON;
 
-function romCard(name, romsrc, imgsrc, romAuthors, description, event) {
+function runRomByName(name) {
+    let romsrc = `./chip8Archive/roms/${name}.ch8`;
+
+    chip8.screen.fillColor = romsJSON[name]["options"]["fillColor"] ? romsJSON[name]["options"]["fillColor"] : "#FFFFFF";
+    chip8.screen.backgroundColor = romsJSON[name]["options"]["backgroundColor"] ? romsJSON[name]["options"]["backgroundColor"] : "#000000";
+    chip8.instructionsPerFrame = romsJSON[name]["options"]["tickrate"];
+
+    chip8.cpu.resetQuirks();
+    chip8.cpu.quirkshift = romsJSON[name]["options"]["shiftQuirks"] ? romsJSON[name]["options"]["shiftQuirks"] : chip8.cpu.quirkshift;
+    chip8.cpu.loadStoreQuirks = romsJSON[name]["options"]["loadStoreQuirks"] ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.loadStoreQuirks;
+    chip8.cpu.quirkjump = romsJSON[name]["options"]["jumpQuirks"] ? romsJSON[name]["options"]["jumpQuirks"] : chip8.cpu.quirkjump;
+    chip8.cpu.quirkwrap = romsJSON[name]["options"]["clipQuirks"] ? romsJSON[name]["options"]["clipQuirks"] : chip8.cpu.quirkwrap;
+    chip8.cpu.quirklogic = romsJSON[name]["options"]["logicQuirks"] ? romsJSON[name]["options"]["logicQuirks"] : chip8.cpu.quirklogic;
+
+    loadFileU8(romsrc, (rom) => {
+        hideLoadRomWindow();
+        runRom(rom);
+    });
+}
+
+function romCard(name, imgsrc, romAuthors, description, event) {
     var authorLinks = "";
     for (const author in romAuthors) {
         if (romAuthors.hasOwnProperty(author)) {
@@ -373,7 +392,7 @@ function romCard(name, romsrc, imgsrc, romAuthors, description, event) {
     }
 
     return (
-        `<div class="rom-card" title="${description}" onclick="loadFileU8('${romsrc}', (rom) => {hideLoadRomWindow(); runRom(rom);})">
+        `<div class="rom-card" title="${description}" onclick="runRomByName('${name}')">
             <img src="${imgsrc}" alt="${name}">
             <div class="rom-card-title">${name}</div>
             <div class="rom-card-author-event">
@@ -386,40 +405,38 @@ function romCard(name, romsrc, imgsrc, romAuthors, description, event) {
 
 // Load a list of roms from a json file
 function loadRomsList() {
-    var authors;
-    function onload(json) {
-        var card;
-        for (const key in json) {
-            if (json.hasOwnProperty(key)) {
-                if (json[key].platform != "chip8"){
-                    continue;
-                }
-                
-                var romAuthors = {};
-                for (const i in json[key].authors) {
-                    var author = (json[key].authors[i] != "your name here") ? json[key].authors[i] : "Unknown";
-                    romAuthors[author] = authors[json[key].authors[i]];
-                }
+    loadJson("./chip8Archive/authors.json", (authors) => {
+        loadJson("./chip8Archive/programs.json", (roms) => {
+            romsJSON = roms;
+            var card;
+            for (const key in roms) {
+                if (roms.hasOwnProperty(key)) {
+                    if (roms[key].platform != "chip8"){
+                        continue;
+                    }
 
-                romList.innerHTML += romCard(
-                    key,                                                // rom name
-                    `./chip8Archive/roms/${key}.ch8`,                   // rom url
-                    `./chip8Archive/src/${key}/${json[key].images[0]}`, // image url
-                    romAuthors,                                         // authors
-                    json[key].desc,                                     // description
-                    json[key].event                                     // event
-                );
+                    var romAuthors = {};
+                    for (const i in roms[key].authors) {
+                        var author = (roms[key].authors[i] != "your name here") ? roms[key].authors[i] : "Unknown";
+                        romAuthors[author] = authors[roms[key].authors[i]];
+                    }
+
+                    romList.innerHTML += romCard(
+                        key,                                                // rom name
+                        // `./chip8Archive/roms/${key}.ch8`,                   // rom url
+                        `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
+                        romAuthors,                                         // authors
+                        roms[key].desc,                                     // description
+                        roms[key].event                                     // event
+                    );
+                }
             }
-        }
-        romList.querySelectorAll("a").forEach((a) => {
-            a.onclick = (e) => {
-                e.stopPropagation();
-            }
-        })
-    }
-    loadJson("./chip8Archive/authors.json", (json) => {
-        authors = json;
-        loadJson("./chip8Archive/programs.json", onload);
+            romList.querySelectorAll("a").forEach((a) => {
+                a.onclick = (e) => {
+                    e.stopPropagation();
+                }
+            })
+        });
     });
 }
 
@@ -431,7 +448,11 @@ function hideLoadRomWindow() {
     loadRomWindow.classList.add("hidden");
 }
 
-// loadRomWindow.addEventListener("click", hideLoadRomWindow);
+loadRomWindow.addEventListener("click", hideLoadRomWindow);
+loadRomWindow.firstChild.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+});
 
 // Drag and drop rom
 
@@ -440,6 +461,7 @@ var fileDropZone = document.querySelector(".file-drop-zone");
 
 document.querySelector("body").addEventListener("dragenter", dragEnterHandler);
 document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
+document.querySelector("body").addEventListener("drop", dropCancelHandler);
 document.querySelector("body").addEventListener("dragover", dragOverHandler);
 
 function dropHandler(ev) {
@@ -475,6 +497,10 @@ function dropHandler(ev) {
         reader.onload = onLoad;
         reader.readAsArrayBuffer(file);
     }
+}
+
+function dropCancelHandler(ev) {
+    fileDropZone.classList.remove("drop-zone-active");
 }
 
 function dragEnterHandler(ev) {
@@ -535,30 +561,25 @@ window.onload = function () {
 
     let virtualKeyboard = document.getElementById("keyboard");
     let virtualKeys = virtualKeyboard.querySelectorAll('button');
-    let debugConsole = document.getElementById("debug-console");
 
     for (let btnIdx=0; virtualKeys[btnIdx]; btnIdx++) {
         virtualKeys[btnIdx].addEventListener('mousedown', function(e) {
             console.log("Pressed: " + this.attributes.key.value);
-            debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
             chip8.pressKey(this.attributes.key.value);
         });
         virtualKeys[btnIdx].addEventListener('touchstart', function(e) {
             e.preventDefault();
             console.log("Pressed: " + this.attributes.key.value);
-            debugConsole.innerHTML += "Pressed: " + this.attributes.key.value + '<br>';
             chip8.pressKey(this.attributes.key.value);
         });
 
         virtualKeys[btnIdx].addEventListener('mouseup', function(e) {
             console.log("Released: " + this.attributes.key.value);
-            debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
             chip8.releaseKey(this.attributes.key.value);
         })
         virtualKeys[btnIdx].addEventListener('touchend', function(e) {
             e.preventDefault();
             console.log("Released: " + this.attributes.key.value);
-            debugConsole.innerHTML += "Released: " + this.attributes.key.value + '<br>'
             chip8.releaseKey(this.attributes.key.value);
         })
     }

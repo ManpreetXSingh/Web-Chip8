@@ -11,16 +11,7 @@
     <link rel="manifest" href="./favicon/site.webmanifest">
 
     <link rel="stylesheet" href="chip8.css">
-    <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <style>
-        .material-symbols-rounded {
-          font-variation-settings:
-          'FILL' 0,
-          'wght' 300,
-          'GRAD' 0,
-          'opsz' 24
-        }
-    </style> -->
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +19,7 @@
 </head>
 
 <body>
-    <div id="emulator-window" class="window fit-content file-drop-zone" ondrop="dropHandler(event);"><!-- ondragover="dragOverHandler(event);" -->
+    <div id="emulator-window" class="window fit-content file-drop-zone" ondrop="dropHandler(event);">
 
         <div class="control-bar">
             <div id="controls">
@@ -50,8 +41,8 @@
             <canvas id="screen" width="320" height="160" style="border:1px solid #000000;"></canvas>
         </div>
 
-        <div id="keyboard-container">
-            <table id="keyboard" hidden>
+        <div id="keyboard-container" hidden>
+            <table id="keyboard">
                 <tr>
                     <td> <button key="1">1</button> </td>
                     <td> <button key="2">2</button> </td>
@@ -82,7 +73,7 @@
     </div>
 
     <div id="settings-container">
-        <button id="reset-btn" onclick="window.location.reload()">Reset</button>
+        <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
         <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
     </div>
 
@@ -107,8 +98,6 @@
         </div>
     </div>
 
-    <div id="debug-console"></div>
-
     <div id="load-rom-window" class="hidden">
         <div>
             <button id="hide-rom-list-btn" class="material-icons-round md-light md-24" title="Close" onclick="hideLoadRomWindow()">close</button>
@@ -124,7 +113,7 @@
         </div>
     </noscript>
 </body>
-<!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
+
 <script src="./JS/Utils.js"></script>
 <script src="./JS/Chip8Input.js"></script>
 <script src="./JS/Chip8Screen.js"></script>
