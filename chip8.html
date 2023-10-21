@@ -76,8 +76,47 @@
 
             <div id="settings-container" class="window-item">
                 <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
-                <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
-                <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
+                <div>
+                    <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
+                    <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
+                </div>
+                <div>
+                    <h2>Quirks</h2>
+                    <div id="quirk-checkboxes">
+                        <label title="Shift Quirk">
+                            <input type="checkbox" name="quirkshift" id="quirkshift">
+                            <code>&lt;&lt;=</code> and <code>&gt;&gt;=</code> modify <var>Vx</var> in place and leave
+                            <var>Vy</var> unchanged
+                        </label>
+
+                        <label title="Memory Quirk Leave I Unchanged">
+                            <input type="checkbox" name="quirkmemoryLeaveIUnchanged" id="quirkmemoryLeaveIUnchanged">
+                            Load and Store operations leave <var>I</var> unchanged
+                        </label>
+
+                        <label title="Memory Quirk Increment I By X">
+                            <input type="checkbox" name="quirkmemoryIncrementByX" id="quirkmemoryIncrementByX">
+                            Load and Store operations Increment <var>I</var> by <var>X</var>
+                        </label>
+
+                        <label title="Jump Quirk">
+                            <input type="checkbox" name="quirkjump" id="quirkjump">
+                            Jump to <code><var>address</var> + <var>Vx</var></code> instead of
+                            <code><var>address</var> + <var>V0</var></code>
+                        </label>
+
+                        <label title="Wrap Quirk">
+                            <input type="checkbox" name="quirkwrap" id="quirkwrap">
+                            Sprite wrap
+                        </label>
+
+                        <label title="Logic Quirk">
+                            <input type="checkbox" name="quirklogic" id="quirklogic">
+                            Reset <var>Vf</var> after <code><var>Vx</var> |= <var>Vy</var></code>,
+                            <code><var>Vx</var> &= <var>Vy</var></code> and <code><var>Vx</var> ^= <var>Vy</var></code>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 

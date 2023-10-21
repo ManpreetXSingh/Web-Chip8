@@ -9,8 +9,8 @@ class Chip8Screen {
         this.renderWidth = width;
         this.renderHeight = height;
 
-        this.fillColor = "#000000";
-        this.backgroundColor = "#FFFFFF";
+        this.fillColor = "#FFFFFF";
+        this.backgroundColor = "#000000";
 
         this.#canvas = canvas;
         this.#ctx = this.#canvas.getContext("2d");

@@ -139,7 +139,7 @@ class Chip8CPU {
         this.quirkmemoryIncrementByX = false;       // Increment I by X (in save/load instructions)
         this.quirkwrap = false;                     // sprite wrap
         this.quirkjump = false;                     // jump to <address+vx> instead of <address+v0>
-        this.quirklogic = false;                     // reset vf to 0
+        this.quirklogic = true;                     // reset vf to 0
     }
 
     updateTimers() {

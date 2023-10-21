@@ -380,11 +380,13 @@ function runRomByName(name) {
     chip8.instructionsPerFrame = romsJSON[name]["options"]["tickrate"];
 
     chip8.cpu.resetQuirks();
-    chip8.cpu.quirkshift = romsJSON[name]["options"]["shiftQuirks"] ? romsJSON[name]["options"]["shiftQuirks"] : chip8.cpu.quirkshift;
-    chip8.cpu.quirkmemoryLeaveIUnchanged = romsJSON[name]["options"]["loadStoreQuirks"] ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.quirkmemoryLeaveIUnchanged;
-    chip8.cpu.quirkjump = romsJSON[name]["options"]["jumpQuirks"] ? romsJSON[name]["options"]["jumpQuirks"] : chip8.cpu.quirkjump;
-    chip8.cpu.quirkwrap = romsJSON[name]["options"]["clipQuirks"] ? !(romsJSON[name]["options"]["clipQuirks"]) : chip8.cpu.quirkwrap;
-    chip8.cpu.quirklogic = romsJSON[name]["options"]["logicQuirks"] ? romsJSON[name]["options"]["logicQuirks"] : chip8.cpu.quirklogic;
+    chip8.cpu.quirkmemoryLeaveIUnchanged = ('loadStoreQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.quirkmemoryLeaveIUnchanged;
+    chip8.cpu.quirkmemoryIncrementByX = chip8.cpu.quirkmemoryLeaveIUnchanged ? false : chip8.cpu.quirkmemoryIncrementByX;
+    chip8.cpu.quirkshift = ('shiftQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["shiftQuirks"] : chip8.cpu.quirkshift;
+    chip8.cpu.quirkjump = ('jumpQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["jumpQuirks"] : chip8.cpu.quirkjump;
+    chip8.cpu.quirkwrap = ('clipQuirks' in romsJSON[name]["options"]) ? !(romsJSON[name]["options"]["clipQuirks"]) : chip8.cpu.quirkwrap;
+    chip8.cpu.quirklogic = ('logicQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["logicQuirks"] : chip8.cpu.quirklogic;
+    updateQuirksUI();
 
     loadFileU8(romsrc, (rom) => {
         hideLoadRomWindow();
@@ -565,6 +567,40 @@ function dragLeaveHandler(ev) {
 }
 
 
+// Quirks
+let quirkCheckboxes = document.getElementById("quirk-checkboxes").querySelectorAll('input[type="checkbox"]');
+// .querySelectorAll('input[type="checkbox"][name^="quirk"]');
+
+function updateQuirksUI() {
+    for (let i = 0; i < quirkCheckboxes.length; i++) {
+        let quirkName = quirkCheckboxes[i].name;
+        let quirkValue;
+
+        switch (quirkName) {
+            case "quirkshift":
+                quirkValue = chip8.cpu.quirkshift;
+                break;
+            case "quirkmemoryLeaveIUnchanged":
+                quirkValue = chip8.cpu.quirkmemoryLeaveIUnchanged;
+                break;
+            case "quirkmemoryIncrementByX":
+                quirkValue = chip8.cpu.quirkmemoryIncrementByX;
+                break;
+            case "quirkjump":
+                quirkValue = chip8.cpu.quirkjump;
+                break;
+            case "quirkwrap":
+                quirkValue = chip8.cpu.quirkwrap;
+                break;
+            case "quirklogic":
+                quirkValue = chip8.cpu.quirklogic;
+                break;
+        }
+        quirkCheckboxes[i].checked = quirkValue;
+    }
+}
+
+
 // Main
 
 let stackTable = document.getElementById("stack-table");
@@ -617,5 +653,38 @@ window.onload = function () {
         })
     }
 
+    // Quirk Checkbox Events
+    for (let checkbox of quirkCheckboxes) {
+        checkbox.addEventListener('change', function (e) {
+            let quirkName = this.name;
+            let quirkValue = this.checked;
+
+            switch (quirkName) {
+                case "quirkshift":
+                    chip8.cpu.quirkshift = quirkValue;
+                    break;
+                case "quirkmemoryLeaveIUnchanged":
+                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue;
+                    chip8.cpu.quirkmemoryIncrementByX = quirkValue ? false : chip8.cpu.quirkmemoryIncrementByX;
+                    break;
+                case "quirkmemoryIncrementByX":
+                    chip8.cpu.quirkmemoryIncrementByX = quirkValue;
+                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue ? false : chip8.cpu.quirkmemoryLeaveIUnchanged;
+                    break;
+                case "quirkjump":
+                    chip8.cpu.quirkjump = quirkValue;
+                    break;
+                case "quirkwrap":
+                    chip8.cpu.quirkwrap = quirkValue;
+                    break;
+                case "quirklogic":
+                    chip8.cpu.quirklogic = quirkValue;
+                    break;
+            }
+            updateQuirksUI();
+        });
+    }
+
+    updateQuirksUI();
     loadRomsList();
 }
