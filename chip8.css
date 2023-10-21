@@ -2,6 +2,19 @@
     --scrollbar-width: 5px;
     --scrollbar-color: rgba(0, 0, 0, .5);
     --scrollbar-bg-color: rgba(0, 0, 0, 0.100);
+
+    --max-width: min(70rem, 100%);
+    --min-width: min(30rem, 100%);
+
+    --text: rgb(19, 1, 8);
+    --text-light: rgb(255, 255, 255);
+    --background: rgb(253, 250, 255);
+    --primary: rgb(153, 1, 254);
+    --secondary: rgb(224, 179, 255);
+    --accent: rgb(137, 1, 228);
+
+    --gradient-bg: linear-gradient(135deg, var(--primary) 0%, var(--accent) 11%, var(--secondary) 100%);
+    /* background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%); */
 }
 
 
@@ -14,18 +27,84 @@
 html {
     display: flex;
     justify-content: center;
-    align-items: center;
-    background: rgb(11, 6, 105);
-    background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%);
+    height: 100%;
+
+    background: var(--gradient-bg);
 }
+
 
 body {
     margin: 0;
     padding: 0;
-    background: #FFFFFF;
+
+    height: 100%;
+    width: calc(var(--max-width) * 1.5);
+
+    display: flex;
+    justify-content: center;
+
     font-family: 'Josefin Sans', sans-serif;
-    width: min(70rem, 100%);
-    min-height: 100%;
+
+}
+
+main {
+    display: flex;
+
+    width: 100%;
+
+    margin: 0.5rem;
+    border-radius: 1rem;
+
+    background: var(--background);
+}
+
+.layout-column {
+    margin-block: 2rem;
+    padding-inline: 1rem;
+    max-width: 100%;
+    min-width: var(--min-width);
+
+    overflow-y: auto;
+}
+
+.layout-column:first-child {
+    border-right: 1px solid var(--secondary);
+}
+
+/* If sceen size is smaller than ((2 * min-width) + extra) */
+@media (max-width: 95rem) {
+    body {
+        width: var(--max-width);
+    }
+
+    main {
+        display: block;
+
+        margin: 0;
+        border-radius: 0;
+
+        /* For Scrollbar */
+        max-height: 100%;
+        overflow: auto;
+    }
+
+    .layout-column {
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .window.window-active {
+        backdrop-filter: none !important;
+    }
+
+    #load-rom-window {
+        padding: 0;
+    }
+
+    #load-rom-window>div {
+        border-radius: 0;
+    }
 }
 
 /* For keyboard */
@@ -44,12 +123,12 @@ noscript {
     justify-content: center;
     align-items: center;
 
-    background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%);
-    color: #FFFFFF;
+    background: var(--gradient-bg);
+    color: var(--text-light);
     font-size: x-large;
     font-weight: bolder;
     text-align: center;
-    z-index: 20;
+    z-index: 100;
 }
 
 .hidden {
@@ -116,29 +195,43 @@ noscript {
 
 /* Tables */
 
+.table-container {
+    max-height: 40rem;
+    min-height: 1rem;
+
+    margin: 0.5rem;
+    margin-top: 0;
+    margin-left: 0;
+
+    /* resize: both; */
+    overflow: auto;
+}
+
 .hex-table {
-    font-family: 'Courier New', Courier, monospace;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    font-family: 'Courier Prime', monospace;
+    text-transform: uppercase;
+
+    border-right: 1px solid var(--secondary);
+    border-bottom: 1px solid var(--secondary);
     border-collapse: separate;
     border-spacing: 0;
 }
 
 .hex-table thead tr th {
-    border-top: 1px solid #ccc;
+    border-top: 1px solid var(--secondary);
     position: sticky;
     top: 0;
     z-index: 1;
 }
 
 .hex-table tbody tr td:first-child {
-    border-left: 1px solid #ccc;
+    border-left: 1px solid var(--secondary);
     position: sticky;
     left: 0;
 }
 
 .hex-table thead th:first-child {
-    border-left: 1px solid #ccc;
+    border-left: 1px solid var(--secondary);
     position: sticky;
     left: 0;
     top: 0;
@@ -150,13 +243,15 @@ noscript {
     padding: 0.5rem;
     margin: 0;
     text-align: center;
-    font-weight: bold;
 }
 
 .hex-table th,
 .hex-table td:first-child {
-    background-color: #f2f2f2;
+    background-color: var(--secondary);
+    color: var(--text);
+
     user-select: none;
+    font-weight: normal;
 }
 
 .hex-table td:not(:first-child) {
@@ -168,8 +263,9 @@ noscript {
 /* Pointer Highlights */
 
 td[stack-pointer] {
-    color: white;
-    background-color: rgb(54, 153, 199);
+    color: var(--text-light);
+    background-color: var(--accent);
+
     font-weight: 100;
     position: relative;
 }
@@ -188,38 +284,90 @@ td[stack-pointer] {
 } */
 
 td[program-counter] {
-    color: white;
-    background-color: rgb(54, 153, 199);
+    color: var(--text-light);
+    background-color: var(--accent);
     font-weight: 100;
 }
 
 
 /* General Purpose CSS */
-.hex-edit {
-    font-family: 'Courier New', Courier, monospace;
-    text-transform: uppercase;
-}
 
-.fit-content {
-    width: fit-content;
-    height: fit-content;
-}
+.window-item {
+    max-width: calc(100% - 1rem);
+    /* min-width: min(100%, min-content); */
 
-.file-drop-zone.drop-zone-active {
-    outline: 2px dashed #16c783;
+    max-height: calc(100% - 1rem);
+    /* min-height: min(100%, min-content); */
+
+    margin: 0.5rem;
 }
 
 .window {
-    max-width: calc(100% - 1rem);
-    min-width: min(100%, min-content);
+    position: fixed;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 30;
 
-    max-height: 30rem;
-    min-height: 1rem;
+    padding: 1rem;
 
-    margin: 0.5rem;
-    /* resize: both; */
-    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.1);
+
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
+
+.window>div {
+    position: relative;
+    padding: 1rem;
+
+    background-color: var(--background);
+    border-radius: 1rem;
+    border: 1px solid var(--background);
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+
+    transform: translateY(40vh);
+    transition: transform 0.25s ease;
+}
+
+.window.window-active {
+    pointer-events: all;
+    backdrop-filter: blur(5px);
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.window.window-active>div {
+    transform: translateY(0);
+}
+
+.close-btn {
+    position: absolute;
+    padding: 0.5rem;
+    border: none;
+    background: var(--background);
+    color: var(--text);
+    border-radius: 100%;
+    top: 1rem;
+    right: 1rem;
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.close-btn:hover {
+    background: var(--accent);
+    color: var(--text-light);
+}
+
+.close-btn:active {
+    background: var(--primary);
+}
+
 
 /* Control Bar */
 
@@ -227,6 +375,13 @@ td[program-counter] {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+
+    background-color: var(--primary);
+    color: var(--text-light);
+
+    border-radius: 1rem;
+    padding: 0.2rem;
+    margin-bottom: 0.2rem;
 }
 
 .control-bar div {
@@ -234,9 +389,9 @@ td[program-counter] {
 }
 
 .control-bar #controls {
-    border-radius: 5px;
-    border: 1px solid #16c783;
-    margin: 0.25rem;
+    border-top-left-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+
     overflow: hidden;
 }
 
@@ -253,12 +408,19 @@ td[program-counter] {
 
 .control-bar button {
     margin: 0;
-    padding: 1px;
+    padding: 0.1rem;
+    padding-block: 0.2rem;
     padding-inline: 10px;
-    border: 1px solid #16c783;
-    background-color: #3ab672;
+
+    border: none;
+    background: rgba(0,0,0,0);
+
     cursor: pointer;
     user-select: none;
+}
+
+.control-bar button:hover {
+    box-shadow: inset 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
 }
 
 
@@ -266,25 +428,36 @@ td[program-counter] {
     max-width: 100%;
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-evenly;
     /* overflow: auto; */
 }
 
 #settings-container {
-    max-width: 100%;
-    padding-left: 0.25rem;
     display: flex;
     flex-wrap: wrap;
 }
 
 #settings-container>button {
-    margin: 0.25rem;
+    margin-right: 0.5rem;
     padding: 0.5rem;
-    border: 1px solid #16c783;
+    background-color: var(--secondary);
+    border: 1px solid var(--accent);
+    border-radius: 5px;
+}
+
+#settings-container>button:hover {
+    background-color: var(--accent);
+    color: var(--text-light);
+}
+
+#settings-container>button:active {
+    background-color: var(--primary);
+    color: var(--text-light);
 }
 
 /* Screen */
 
-#emulator-window {
+#emulator-container {
     width: 100%;
 }
 
@@ -317,115 +490,137 @@ td[program-counter] {
 }
 
 #keyboard {
-    border-collapse: collapse;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+
+    background: var(--secondary);
+    border-top: 1px solid var(--background);
+    padding: 2px;
     margin: 0;
     width: 100%;
     height: 100%;
     user-select: none;
-    /* aspect-ratio: 3/2;
-    border-top-left-radius: 2rem;
-    border-top-right-radius: 2rem; */
-    overflow: hidden;
-    /* border: 1px solid rgb(79, 219, 142); */
 }
 
-#keyboard tr {
-    width: 100%;
-    height: calc(100%/4);
-}
-
-#keyboard td {
-    padding: 0;
-    box-sizing: content-box;
-}
-
-#keyboard button {
+#keyboard > button {
     /* cursor: pointer; */
-    border: none;
     width: 100%;
     height: 100%;
-    background-color: #16c783;
-    border: 1px solid rgb(79, 219, 142);
+    background-color: var(--accent);
+    border: 1px solid var(--secondary);
+    border-radius: 5px;
     /* text-align: center; */
     /* padding-block: auto; */
     color: #ffffff;
 }
 
-#keyboard button:hover {
-    background-color: rgb(79, 219, 142);
+/* #keyboard > button:hover {
+    background: var(--primary);
+} */
+
+#keyboard > button:active {
+    background: var(--primary);
 }
 
-#keyboard button:active {
-    background-color: #56e7a6;
-}
 
 /* Rom List */
-#load-rom-window {
-    position: fixed;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 20;
-}
 
-#load-rom-window > div > h1 {
+
+#load-rom-window>div>div>h1 {
     text-align: center;
 }
 
-#hide-rom-list-btn {
-    position: absolute;
-    border: none;
-    background: #FFFFFF;
-    color: #abacab;
-    border-radius: 100%;
-    top: 1rem;
-    right: 1rem;
+#load-rom-window>div {
+    padding: 0;
+    height: 100%;
+    min-width: var(--min-width);
+    max-width: var(--max-width);
+
+    overflow: hidden;
 }
 
-#hide-rom-list-btn::after:hover {
-    background: #1dac1d;
-    color: #FFFFFF;
-}
+#load-rom-window>div>div {
+    padding: 2rem;
+    padding-inline: 0;
+    /* position: relative; */
 
-#load-rom-window > div {
-    position: relative;
-    padding: 1rem;
-    max-width: min(70rem, 100%);
+    width: 100%;
     max-height: 100%;
-    background-color: #FFFFFF;
+
     overflow: auto;
 }
 
 #rom-list {
+    padding-top: 2rem;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
 }
 
+/* Rom Card */
 .rom-card {
     width: 15rem;
     margin: 0.5rem;
     padding: 0.5rem;
+    background-color: var(--background);
+    color: var(--text);
     border: 1px solid #dfdede;
     border-radius: 0.5rem;
     box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+
+    /* hover transition */
+    transition: box-shadow 0.25s ease;
 }
 
+.rom-card a {
+    color: var(--accent);
+}
+
+/* Card hover effect */
+.rom-card:hover {
+    box-shadow: 0 0.4rem 0.8rem 0 rgba(39, 41, 44, 0.3);
+}
+
+.rom-card:active {
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Rom Image */
 .rom-card img {
     width: 100%;
     max-height: 100%;
 }
 
+/* Rom Title */
 .rom-card-title {
     margin-top: 0.5rem;
     font-size: 1.25rem;
 }
 
+/* Author name and event name in card */
 .rom-card-author-event {
     font-size: 0.75rem;
     text-wrap: pretty;
+}
+
+
+/* Upload Rom */
+
+#upload-rom-window>div {
+    max-width: var(--max-width);
+    max-height: 100%;
+    width: 50rem;
+    aspect-ratio: 2/1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    user-select: none;
+}
+
+#upload-rom-window>div>span {
+    font-size: 5rem;
 }

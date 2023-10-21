@@ -86,13 +86,6 @@ class Chip8Emulator {
         this.#oneSecTimer = 0;
 
         this.createHardware();
-        document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
-    }
-
-    handleVisibilityChange() {
-        if (document.hidden) {
-            this.pause();
-        }
     }
 
     createHardware() {
@@ -274,7 +267,7 @@ class Chip8Emulator {
         displayTable(timersTable, [this.delayTimer, this.soundTimer], this.#timersDisplayOptions);
 
         this.memory.display(memoryTable, 16, "Memory");
-        this.stack.display(stackTable, 16, "Stack");
+        this.stack.display(stackTable, 16, "Stack", ['Value']);
         this.registers.display(registersTable, 16, "Registers", ['Value'], ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'VA', 'VB', 'VC', 'VD', 'VE', 'VF']);
 
     }
@@ -324,13 +317,21 @@ class Chip8Emulator {
 
 // Controls
 
+function resume() {
+    playPauseBtn.textContent = 'pause';
+    chip8.resume();
+}
+
+function pause() {
+    playPauseBtn.textContent = 'play_arrow';
+    chip8.pause();
+}
+
 function playPause() {
     if (chip8.paused) {
-        playPauseBtn.textContent = 'pause';
-        chip8.resume();
+        resume();
     } else {
-        playPauseBtn.textContent = 'play_arrow';
-        chip8.pause();
+        pause();
     }
 }
 
@@ -352,11 +353,23 @@ function stepFrame() {
     }
 }
 
+// Pause/Resume based on page visibility
+
+function handleVisibilityChange() {
+    if (document.hidden) {
+        pause();
+    }
+    // resume();
+}
+
+document.addEventListener("visibilitychange", handleVisibilityChange);
+
 
 // Load Rom List
 
 let romList = document.getElementById("rom-list");
 let loadRomWindow = document.getElementById("load-rom-window");
+let uploadRomWindow = document.getElementById("upload-rom-window");
 let romsJSON;
 
 function runRomByName(name) {
@@ -368,9 +381,9 @@ function runRomByName(name) {
 
     chip8.cpu.resetQuirks();
     chip8.cpu.quirkshift = romsJSON[name]["options"]["shiftQuirks"] ? romsJSON[name]["options"]["shiftQuirks"] : chip8.cpu.quirkshift;
-    chip8.cpu.loadStoreQuirks = romsJSON[name]["options"]["loadStoreQuirks"] ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.loadStoreQuirks;
+    chip8.cpu.quirkmemoryLeaveIUnchanged = romsJSON[name]["options"]["loadStoreQuirks"] ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.quirkmemoryLeaveIUnchanged;
     chip8.cpu.quirkjump = romsJSON[name]["options"]["jumpQuirks"] ? romsJSON[name]["options"]["jumpQuirks"] : chip8.cpu.quirkjump;
-    chip8.cpu.quirkwrap = romsJSON[name]["options"]["clipQuirks"] ? romsJSON[name]["options"]["clipQuirks"] : chip8.cpu.quirkwrap;
+    chip8.cpu.quirkwrap = romsJSON[name]["options"]["clipQuirks"] ? !(romsJSON[name]["options"]["clipQuirks"]) : chip8.cpu.quirkwrap;
     chip8.cpu.quirklogic = romsJSON[name]["options"]["logicQuirks"] ? romsJSON[name]["options"]["logicQuirks"] : chip8.cpu.quirklogic;
 
     loadFileU8(romsrc, (rom) => {
@@ -408,7 +421,6 @@ function loadRomsList() {
     loadJson("./chip8Archive/authors.json", (authors) => {
         loadJson("./chip8Archive/programs.json", (roms) => {
             romsJSON = roms;
-            var card;
             for (const key in roms) {
                 if (roms.hasOwnProperty(key)) {
                     if (roms[key].platform != "chip8") {
@@ -423,7 +435,6 @@ function loadRomsList() {
 
                     romList.innerHTML += romCard(
                         key,                                                // rom name
-                        // `./chip8Archive/roms/${key}.ch8`,                   // rom url
                         `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
                         romAuthors,                                         // authors
                         roms[key].desc,                                     // description
@@ -440,13 +451,33 @@ function loadRomsList() {
     });
 }
 
+
+// Show Hide Windows
+
+function showWindow(windowElement) {
+    windowElement.classList.add("window-active");
+}
+
+function hideWindow(windowElement) {
+    windowElement.classList.remove("window-active");
+}
+
 function showLoadRomWindow() {
-    loadRomWindow.classList.remove("hidden");
+    showWindow(loadRomWindow);
 }
 
 function hideLoadRomWindow() {
-    loadRomWindow.classList.add("hidden");
+    hideWindow(loadRomWindow);
 }
+
+function showUploadRomWindow() {
+    showWindow(uploadRomWindow);
+}
+
+function hideUploadRomWindow() {
+    hideWindow(uploadRomWindow);
+}
+
 
 loadRomWindow.addEventListener("click", hideLoadRomWindow);
 loadRomWindow.firstChild.addEventListener("click", (e) => {
@@ -454,10 +485,12 @@ loadRomWindow.firstChild.addEventListener("click", (e) => {
     e.stopPropagation();
 });
 
+uploadRomWindow.addEventListener("click", hideUploadRomWindow);
+
+
 // Drag and drop rom
 
 var dragLeaveTimeout;
-var fileDropZone = document.querySelector(".file-drop-zone");
 
 document.querySelector("body").addEventListener("dragenter", dragEnterHandler);
 document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
@@ -466,7 +499,7 @@ document.querySelector("body").addEventListener("dragover", dragOverHandler);
 
 function dropHandler(ev) {
     function onLoad(e2) {
-        fileDropZone.classList.remove("drop-zone-active");
+        uploadRomWindow.classList.remove("window-active");
         var rom = new Uint8Array(e2.target.result);
         runRom(rom);
     }
@@ -500,14 +533,14 @@ function dropHandler(ev) {
 }
 
 function dropCancelHandler(ev) {
-    fileDropZone.classList.remove("drop-zone-active");
+    uploadRomWindow.classList.remove("window-active");
 }
 
 function dragEnterHandler(ev) {
     ev.preventDefault();
     ev.stopPropagation();
 
-    fileDropZone.classList.add("drop-zone-active");
+    uploadRomWindow.classList.add("window-active");
 }
 
 function dragOverHandler(ev) {
@@ -526,8 +559,8 @@ function dragLeaveHandler(ev) {
 
     if (!dragLeaveTimeout) {
         dragLeaveTimeout = setTimeout(() => {
-            fileDropZone.classList.remove("drop-zone-active");
-        }, 50)
+            uploadRomWindow.classList.remove("window-active");
+        }, 500)
     }
 }
 
@@ -568,7 +601,7 @@ window.onload = function () {
             chip8.pressKey(this.attributes.key.value);
         });
         virtualKeys[btnIdx].addEventListener('touchstart', function (e) {
-            e.preventDefault();
+            // e.preventDefault();
             console.log("Pressed: " + this.attributes.key.value);
             chip8.pressKey(this.attributes.key.value);
         });
@@ -578,7 +611,7 @@ window.onload = function () {
             chip8.releaseKey(this.attributes.key.value);
         })
         virtualKeys[btnIdx].addEventListener('touchend', function (e) {
-            e.preventDefault();
+            // e.preventDefault();
             console.log("Released: " + this.attributes.key.value);
             chip8.releaseKey(this.attributes.key.value);
         })

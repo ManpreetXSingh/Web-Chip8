@@ -12,6 +12,8 @@
 
     <link rel="stylesheet" href="chip8.css">
 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime">
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,90 +21,106 @@
 </head>
 
 <body>
-    <div id="emulator-window" class="window fit-content file-drop-zone" ondrop="dropHandler(event);">
-
-        <div class="control-bar">
-            <div id="controls">
-                <!-- ↻↺↦↳⇒⇥⇢⇻▶▷ -->
-                <button id="replay" class="material-icons-round md-light md-24" title="Replay" onclick="replay()">replay</button>
-                <button id="play-pause" class="material-icons-round md-light md-24" title="Play/Pause" onclick="playPause()">play_arrow</button>
-                <button id="step" class="material-icons-round md-light md-24" title="Step Instruction" onclick="step()">skip_next</button>
-                <button id="step-frame" class="material-icons-round md-light md-24" title="Step Frame" onclick="stepFrame()">keyboard_tab</button>
-            </div>
-            <div id="info">
-                <div title="Frames Per Second">FPS: <div id="fps">00.0</div>
+    <main>
+        <div class="layout-column">
+            <div id="emulator-container" class="window-item">
+                <div class="control-bar">
+                    <div id="controls">
+                        <!-- ↻↺↦↳⇒⇥⇢⇻▶▷ -->
+                        <button id="replay" class="material-icons-round md-light md-24" title="Replay"
+                            onclick="replay()">replay</button>
+                        <button id="play-pause" class="material-icons-round md-light md-24" title="Play/Pause"
+                            onclick="playPause()">play_arrow</button>
+                        <button id="step" class="material-icons-round md-light md-24" title="Step Instruction"
+                            onclick="step()">skip_next</button>
+                        <button id="step-frame" class="material-icons-round md-light md-24" title="Step Frame"
+                            onclick="stepFrame()">keyboard_tab</button>
+                    </div>
+                    <div id="info">
+                        <div title="Frames Per Second">FPS: <div id="fps">00.0</div>
+                        </div>
+                        <div title="Instructions Per Second">IPS: <div id="ips">000.0</div>
+                        </div>
+                    </div>
                 </div>
-                <div title="Instructions Per Second">IPS: <div id="ips">000.0</div>
+
+                <div id="screen-container">
+                    <canvas id="screen" width="320" height="160" style="border:1px solid #000000;"></canvas>
                 </div>
+
+                <div id="keyboard-container" hidden>
+                    <div id="keyboard">
+                        <button tabindex="-1" key="1">1</button>
+                        <button tabindex="-1" key="2">2</button>
+                        <button tabindex="-1" key="3">3</button>
+                        <button tabindex="-1" key="c">C</button>
+
+                        <button tabindex="-1" key="4">4</button>
+                        <button tabindex="-1" key="5">5</button>
+                        <button tabindex="-1" key="6">6</button>
+                        <button tabindex="-1" key="d">D</button>
+
+                        <button tabindex="-1" key="7">7</button>
+                        <button tabindex="-1" key="8">8</button>
+                        <button tabindex="-1" key="9">9</button>
+                        <button tabindex="-1" key="e">E</button>
+
+                        <button tabindex="-1" key="a">A</button>
+                        <button tabindex="-1" key="0">0</button>
+                        <button tabindex="-1" key="b">B</button>
+                        <button tabindex="-1" key="f">F</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="settings-container" class="window-item">
+                <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
+                <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
+                <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
             </div>
         </div>
 
-        <div id="screen-container">
-            <canvas id="screen" width="320" height="160" style="border:1px solid #000000;"></canvas>
-        </div>
+        <div class="layout-column">
+            <div id="debug-items-container" class="window-item">
+                <div class="table-container">
+                    <table id="pointers-table" class="hex-edit hex-table"></table>
+                </div>
 
-        <div id="keyboard-container" hidden>
-            <table id="keyboard">
-                <tr>
-                    <td> <button key="1">1</button> </td>
-                    <td> <button key="2">2</button> </td>
-                    <td> <button key="3">3</button> </td>
-                    <td> <button key="c">C</button> </td>
-                </tr>
-                <tr>
-                    <td> <button key="4">4</button> </td>
-                    <td> <button key="5">5</button> </td>
-                    <td> <button key="6">6</button> </td>
-                    <td> <button key="d">D</button> </td>
-                </tr>
-                <tr>
-                    <td> <button key="7">7</button> </td>
-                    <td> <button key="8">8</button> </td>
-                    <td> <button key="9">9</button> </td>
-                    <td> <button key="e">E</button> </td>
-                </tr>
-                <tr>
-                    <td> <button key="a">A</button> </td>
-                    <td> <button key="0">0</button> </td>
-                    <td> <button key="b">B</button> </td>
-                    <td> <button key="f">F</button> </td>
-                </tr>
-            </table>
-        </div>
+                <div class="table-container">
+                    <table id="timers-table" class="hex-edit hex-table"></table>
+                </div>
+                <div class="table-container">
+                    <table id="registers-table" class="hex-edit hex-table"></table>
+                </div>
+                <div class="table-container">
+                    <table id="stack-table" class="hex-edit hex-table"></table>
+                </div>
 
-    </div>
+                <div class="table-container">
+                    <table id="memory-table" class="hex-edit hex-table"></table>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    <div id="settings-container">
-        <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
-        <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
-    </div>
-
-
-    <div id="debug-items-container">
-        <div id="pointers-window" class="window">
-            <table id="pointers-table" class="hex-edit hex-table"></table>
-        </div>
-    
-        <div id="timers-window" class="window">
-            <table id="timers-table" class="hex-edit hex-table"></table>
-        </div>
-        <div id="registers-window" class="window">
-            <table id="registers-table" class="hex-edit hex-table"></table>
-        </div>
-        <div id="stack-window" class="window">
-            <table id="stack-table" class="hex-edit hex-table"></table>
-        </div>
-    
-        <div id="memory-window" class="window">
-            <table id="memory-table" class="hex-edit hex-table"></table>
-        </div>
-    </div>
-
-    <div id="load-rom-window" class="hidden">
+    <div id="load-rom-window" class="window">
         <div>
-            <button id="hide-rom-list-btn" class="material-icons-round md-light md-24" title="Close" onclick="hideLoadRomWindow()">close</button>
-            <h1>Load ROM</h1>
-            <div id="rom-list"></div>
+            <div>
+                <button class="material-icons-round md-24 close-btn" title="Close"
+                    onclick="hideLoadRomWindow()">close</button>
+                <h1>Load ROM</h1>
+                <div id="rom-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="upload-rom-window" class="window" ondrop="dropHandler(event);">
+        <div>
+            <span class="material-icons-round md-dark">
+                upload_file
+            </span>
+            <p>Drop your file here</p>
         </div>
     </div>
 
