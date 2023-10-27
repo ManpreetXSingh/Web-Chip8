@@ -107,8 +107,8 @@ class Chip8CPU {
      * @param {{Object.<string, number[]>}} font 
      */
     loadFont(font) {
-        var fontHeight = font[0].length;
-        var i = 0;
+        let fontHeight = font[0].length;
+        let i = 0;
 
         // Insert built in font in memory 0x050–0x09F
         for (const key in font) {
@@ -169,7 +169,7 @@ class Chip8CPU {
         let instruction = this._fetch();
         this.programCounter += 2;
 
-        var executed = this._execute(this._decode(instruction));
+        let executed = this._execute(this._decode(instruction));
         if (!executed) {
             console.warn(`Unknown instruction ${instruction}`);
         }
@@ -198,8 +198,9 @@ class Chip8CPU {
      * @param {Instruction} instruction 
      */
     _execute(instruction) {
-        var Vx = this.registers.get(instruction.x);
-        var Vy = this.registers.get(instruction.y);
+        let Vx = this.registers.get(instruction.x);
+        let Vy = this.registers.get(instruction.y);
+        let i_increment = (this.quirkmemoryLeaveIUnchanged ? 0 : this.quirkmemoryIncrementByX ? (instruction.x) : (instruction.x + 1)) & 0xFFF;
         switch (instruction.type) {
             case 0x0:
                 switch (instruction.nnn) {
@@ -361,17 +362,17 @@ class Chip8CPU {
                 //     return true;
                 // }
                 // this.waitForVBlank = false;
-                var screenX = Vx % this.screen.renderWidth;     // Both Vx and renderWidth are positive, so no need to use pymodulo
-                var screenY = Vy % this.screen.renderHeight;    // Both Vy and renderHeight are also positive
-                var spriteHeight = instruction.n;
-                var spriteWidth = 8;
-                var yCondition = (this.quirkwrap) ? ((y) => (y < spriteHeight)) : ((y) => (y < spriteHeight && y + screenY < this.screen.renderHeight));
-                var xCondition = (this.quirkwrap) ? ((x) => (x < spriteWidth )) : ((x) => (x < spriteWidth  && x + screenX < this.screen.renderWidth ));
+                let screenX = Vx % this.screen.renderWidth;     // Both Vx and renderWidth are positive, so no need to use pymodulo
+                let screenY = Vy % this.screen.renderHeight;    // Both Vy and renderHeight are also positive
+                let spriteHeight = instruction.n;
+                let spriteWidth = 8;
+                let yCondition = (this.quirkwrap) ? ((y) => (y < spriteHeight)) : ((y) => (y < spriteHeight && y + screenY < this.screen.renderHeight));
+                let xCondition = (this.quirkwrap) ? ((x) => (x < spriteWidth )) : ((x) => (x < spriteWidth  && x + screenX < this.screen.renderWidth ));
                 this.registers.set(0xF, 0);
 
-                for (var y = 0; yCondition(y); y++) {
-                    var pixel_row = this.memory.get(this.indexRegister + y);
-                    for (var x = 0; xCondition(x); x++) {
+                for (let y = 0; yCondition(y); y++) {
+                    let pixel_row = this.memory.get(this.indexRegister + y);
+                    for (let x = 0; xCondition(x); x++) {
                         this.registers.set(0xF, this.screen.setPixel((x + screenX), (y + screenY), (pixel_row >> 7) & 0b1) || this.registers.get(0xF));
                         pixel_row <<= 1;
                     }
@@ -448,7 +449,6 @@ class Chip8CPU {
                         }
 
                         // Original CHIP-8 incremented index register by X+1
-                        var i_increment = (this.quirkmemoryLeaveIUnchanged ? 0 : this.quirkmemoryIncrementByX ? (instruction.x) : (instruction.x + 1)) & 0xFFF;
                         this.indexRegister += i_increment;
                         return true;
 
@@ -459,7 +459,6 @@ class Chip8CPU {
                         }
 
                         // Original CHIP-8 incremented index register by X+1
-                        var i_increment = (this.quirkmemoryLeaveIUnchanged ? 0 : this.quirkmemoryIncrementByX ? (instruction.x) : (instruction.x + 1)) & 0xFFF;
                         this.indexRegister += i_increment;
                         return true;
                 }

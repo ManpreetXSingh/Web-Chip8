@@ -31,14 +31,14 @@ class Chip8Input {
 
     #addEventListners() {
         window.addEventListener("keydown", (e) => {
-            var key = this.KEYMAP[e.key];
+            let key = this.KEYMAP[e.key];
             if (key == null) { return; }
 
             this.pressKey(key);
         })
 
         window.addEventListener("keyup", (e) => {
-            var key = this.KEYMAP[e.key];
+            let key = this.KEYMAP[e.key];
             if (key == null) { return; }
 
             this.releaseKey(key);

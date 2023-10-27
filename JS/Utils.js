@@ -71,8 +71,8 @@ function displayTable(table, array, displayTableOptions) {
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
-    var row;
-    var cell;
+    let row;
+    let cell;
 
 
     // Table Header
@@ -134,7 +134,7 @@ function updataTable(table, array, changes, displayTableOptions) {
     const mem_amt = array.length;
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    var tableColIdxOffset = hasVHeader ? 1 : 0;
+    let tableColIdxOffset = hasVHeader ? 1 : 0;
 
     if (changes[0] === -1) {
         for (let i = 0; i < mem_amt; i += numCols) {
@@ -145,9 +145,9 @@ function updataTable(table, array, changes, displayTableOptions) {
         return;
     }
 
-    var update_idx = 0;
-    var row_idx = 0;
-    var col_idx = 0;
+    let update_idx = 0;
+    let row_idx = 0;
+    let col_idx = 0;
     for (let i = 0; i < changes.length; i++) {
         update_idx = changes[i];
         row_idx = Math.floor(update_idx / numCols);
@@ -161,7 +161,7 @@ function addTableClasses(table, tableClassNames, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    var tableColIdxOffset = hasVHeader ? 1 : 0;
+    let tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableClassNames) {
         row_idx = Math.floor(idx / numCols);
@@ -174,7 +174,7 @@ function removeTableClasses(table, tableClassNames, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    var tableColIdxOffset = hasVHeader ? 1 : 0;
+    let tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableClassNames) {
         row_idx = Math.floor(idx / numCols);
@@ -187,7 +187,7 @@ function addTableAttributes(table, tableAttributes, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    var tableColIdxOffset = hasVHeader ? 1 : 0;
+    let tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableAttributes) {
         row_idx = Math.floor(idx / numCols);
@@ -202,7 +202,7 @@ function removeTableAttributes(table, tableAttributes, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    var tableColIdxOffset = hasVHeader ? 1 : 0;
+    let tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableAttributes) {
         row_idx = Math.floor(idx / numCols);

@@ -409,6 +409,48 @@ input[type="checkbox"]:hover {
     /* box-shadow: inset 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2); */
 }
 
+input[type="range"] {
+    accent-color: var(--primary);
+    width: 100%
+}
+
+input[type="color"] {
+
+    border: none;
+    background: none;
+    outline: none;
+}
+::-webkit-color-swatch-wrapper {
+    background: none;
+    padding: 0;
+    overflow: hidden;
+}
+::-webkit-color-swatch {
+    border-radius: 1rem;
+}
+
+
+/* input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    accent-color: var(--primary);
+    appearance: textfield;
+    width: 10rem;
+    height: 1.2rem;
+    margin-left: 0.25rem;
+    text-align: center;
+}
+
+input[type="number"]:focus {
+    border-radius: 4px;
+    border: 2px solid var(--primary);
+    outline: none;
+} */
+
 
 /* Control Bar */
 
@@ -475,7 +517,7 @@ input[type="checkbox"]:hover {
 
 #settings-container {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     flex-direction: column;
 }
 
@@ -510,8 +552,9 @@ input[type="checkbox"]:hover {
 
 #screen-container {
     max-height: 100%;
-    max-width: 100%;
+    /* max-width: 100%; */
     padding: 0.5rem;
+    border-radius: 0.5rem;
     background-color: black;
     overflow: auto;
     display: flex;
@@ -574,41 +617,42 @@ input[type="checkbox"]:hover {
 /* Rom List */
 
 
-#load-rom-window>div>div>h1 {
+#load-rom-window h1 {
     text-align: center;
+    padding-top: 3rem;
+    padding-bottom: 1rem;
+    font-weight: 1000;
+    box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+
+    position: sticky;
+    z-index: 1;
 }
 
 #load-rom-window>div {
     padding: 0;
+
     height: 100%;
-    min-width: var(--min-width);
-    max-width: var(--max-width);
+    min-width: var(--max-width);
 
     overflow: hidden;
 }
 
-#load-rom-window>div>div {
-    padding: 2rem;
-    padding-inline: 0;
-    /* position: relative; */
-
-    width: 100%;
-    max-height: 100%;
-
-    overflow: auto;
-}
-
 #rom-list {
-    padding-top: 2rem;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    padding-bottom: 2rem;
+    padding-inline: 2rem;
+    padding-top: 1rem;
+
+    height: calc(100% - 7rem);
+    overflow: auto;
+
+    display: grid;
+    grid-auto-flow: dense;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
 }
 
 /* Rom Card */
 .rom-card {
-    width: 15rem;
-    margin: 0.5rem;
     padding: 0.5rem;
     background-color: var(--background);
     color: var(--text);

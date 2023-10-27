@@ -81,6 +81,37 @@
                     <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
                 </div>
                 <div>
+                    <h2>Settings</h2>
+                    <div id="settings-inputs">
+                        <label title="Screen Scale">
+                            Screen Scale
+                            <input type="range" name="screen-scale" id="screen-scale" min="1" max="15" value="2"
+                                step="1">
+                        </label>
+
+                        <label title="Frames Per Second">
+                            Target FPS
+                            <input type="range" name="target-fps" id="target-fps" min="1" max="60" value="60" step="1">
+                        </label>
+
+                        <label title="Instructions Per Frame">
+                            Target IPF
+                            <input type="range" name="target-ipf" id="target-ipf" min="1" max="1000" value="10"
+                                step="1">
+                        </label>
+
+                        <label title="Background Color">
+                            Background Color
+                            <input type="color" name="bg-color" id="bg-color">
+                        </label>
+
+                        <label title="Fill Color">
+                            Fill Color
+                            <input type="color" name="fg-color" id="fg-color">
+                        </label>
+                    </div>
+                </div>
+                <div>
                     <h2>Quirks</h2>
                     <div id="quirk-checkboxes">
                         <label title="Shift Quirk">
@@ -145,12 +176,10 @@
 
     <div id="load-rom-window" class="window">
         <div>
-            <div>
-                <button class="material-icons-round md-24 close-btn" title="Close"
-                    onclick="hideLoadRomWindow()">close</button>
-                <h1>Load ROM</h1>
-                <div id="rom-list"></div>
-            </div>
+            <button class="material-icons-round md-24 close-btn" title="Close"
+                onclick="hideLoadRomWindow()">close</button>
+            <h1>Load ROM</h1>
+            <div id="rom-list"></div>
         </div>
     </div>
 

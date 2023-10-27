@@ -25,7 +25,7 @@ function loadJson(file_path, on_load) {
         return;
     }
 
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.onload = function () {
         if (!request.response) {
             console.log("Error loading JSON");
@@ -44,13 +44,13 @@ function loadFileU8(file_path, on_load) {
         return;
     }
 
-    var request = new XMLHttpRequest();
+    let request = new XMLHttpRequest();
     request.onload = function () {
         if (!request.response) {
             console.log("Error loading rom");
             return;
         }
-        var rom = new Uint8Array(request.response);
+        let rom = new Uint8Array(request.response);
         on_load(rom);
     }
     request.open('GET', file_path, true);
@@ -89,12 +89,12 @@ class Chip8Emulator {
     }
 
     createHardware() {
-        var speaker = new Chip8Speaker();
-        var screen = new Chip8Screen(document.getElementById("screen"), 5);
-        var input = new Chip8Input();
-        var memory = new Chip8Array(4096, 8);
-        var stack = new Chip8Array(16, 16);
-        var registers = new Chip8Array(16, 8);
+        let speaker = new Chip8Speaker();
+        let screen = new Chip8Screen(document.getElementById("screen"), 5);
+        let input = new Chip8Input();
+        let memory = new Chip8Array(4096, 8);
+        let stack = new Chip8Array(16, 16);
+        let registers = new Chip8Array(16, 8);
 
         this.cpu = new Chip8CPU(screen, input, speaker, C8FONT, memory, stack, registers);
     }
@@ -147,14 +147,6 @@ class Chip8Emulator {
         return this.#processId == null;
     }
 
-    pressKey(key) {
-        this.input.pressKey(key);
-    }
-
-    releaseKey(key) {
-        this.input.releaseKey(key);
-    }
-
     loadRom(rom) {
         if (rom.length > this.memory.length - 0x200) {
             console.error(`Rom is too large. ${rom.length} > ${this.memory.length - 0x200}`);
@@ -166,9 +158,18 @@ class Chip8Emulator {
         return true;
     }
 
+    pressKey(key) {
+        this.input.pressKey(key);
+    }
+
+    releaseKey(key) {
+        this.input.releaseKey(key);
+    }
+
     pause() {
         if (this.#processId) {
-            cancelAnimationFrame(this.#processId);
+            clearTimeout(this.#processId);
+            // cancelAnimationFrame(this.#processId);
             this.speaker.stop();
             this.#processId = null;
         }
@@ -181,7 +182,8 @@ class Chip8Emulator {
             this.#oneSecTimer = 0;
             this.#time_previous = performance.now();
 
-            this.#processId = requestAnimationFrame(this.process.bind(this));
+            this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
+            //requestAnimationFrame(this.process.bind(this));
         }
     }
 
@@ -233,13 +235,15 @@ class Chip8Emulator {
     }
 
     process(time) {
-        if (time - this.#time_previous > this.targetFrameInterval) {
-            this.#oneSecTimer += time - this.#time_previous;
-            this.stepFrame();
-            this.#time_previous = time;
-        }
+        // if (time - this.#time_previous > this.targetFrameInterval) {
+        this.#oneSecTimer += time - this.#time_previous;
+        this.stepFrame();
+        this.#time_previous = time;
+        // }
+        // console.log("Frame")
 
-        this.#processId = requestAnimationFrame(this.process.bind(this));
+        this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
+        // requestAnimationFrame(this.process.bind(this));
     }
 
     displayDebugInfo() {
@@ -275,13 +279,19 @@ class Chip8Emulator {
     updateDebugInfo() {
         if (this.#oneSecTimer >= 1000) {
             // Display real FPS and IPS
-            var fps = this.FPSCounter * 1000 / this.#oneSecTimer;
+            let fps = this.FPSCounter * 1000 / this.#oneSecTimer;
             fpsDisplay.textContent = fps.toFixed(1);
             ipsDisplay.textContent = (fps * this.instructionsPerFrame).toFixed(1);
             this.#oneSecTimer = 0;
             this.FPSCounter = 0;
 
             // Adjust Target Fps
+            if (fps - 5 > this.targetFps) {
+                this.#adjustedTargetFPS -= 5;
+            }
+            if (fps + 5 < this.targetFps) {
+                this.#adjustedTargetFPS += 5;
+            }
             if (Math.abs(fps - this.targetFps) > 1) {
                 this.#adjustedTargetFPS = this.#adjustedTargetFPS + (Number(fps < this.targetFps) - Number(fps > this.targetFps));
                 this.targetFrameInterval = 1000 / this.#adjustedTargetFPS;
@@ -378,6 +388,7 @@ function runRomByName(name) {
     chip8.screen.fillColor = romsJSON[name]["options"]["fillColor"] ? romsJSON[name]["options"]["fillColor"] : "#FFFFFF";
     chip8.screen.backgroundColor = romsJSON[name]["options"]["backgroundColor"] ? romsJSON[name]["options"]["backgroundColor"] : "#000000";
     chip8.instructionsPerFrame = romsJSON[name]["options"]["tickrate"];
+    updateSettingsUI();
 
     chip8.cpu.resetQuirks();
     chip8.cpu.quirkmemoryLeaveIUnchanged = ('loadStoreQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.quirkmemoryLeaveIUnchanged;
@@ -395,7 +406,7 @@ function runRomByName(name) {
 }
 
 function romCard(name, imgsrc, romAuthors, description, event) {
-    var authorLinks = "";
+    let authorLinks = "";
     for (const author in romAuthors) {
         if (romAuthors.hasOwnProperty(author)) {
             if (romAuthors[author].url) {
@@ -429,9 +440,9 @@ function loadRomsList() {
                         continue;
                     }
 
-                    var romAuthors = {};
+                    let romAuthors = {};
                     for (const i in roms[key].authors) {
-                        var author = (roms[key].authors[i] != "your name here") ? roms[key].authors[i] : "Unknown";
+                        let author = (roms[key].authors[i] != "your name here") ? roms[key].authors[i] : "Unknown";
                         romAuthors[author] = authors[roms[key].authors[i]];
                     }
 
@@ -492,7 +503,7 @@ uploadRomWindow.addEventListener("click", hideUploadRomWindow);
 
 // Drag and drop rom
 
-var dragLeaveTimeout;
+let dragLeaveTimeout;
 
 document.querySelector("body").addEventListener("dragenter", dragEnterHandler);
 document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
@@ -502,7 +513,7 @@ document.querySelector("body").addEventListener("dragover", dragOverHandler);
 function dropHandler(ev) {
     function onLoad(e2) {
         uploadRomWindow.classList.remove("window-active");
-        var rom = new Uint8Array(e2.target.result);
+        let rom = new Uint8Array(e2.target.result);
         runRom(rom);
     }
 
@@ -512,14 +523,14 @@ function dropHandler(ev) {
 
     if (ev.dataTransfer.items) {
         for (const fileIdx in ev.dataTransfer.items) {
-            var item = ev.dataTransfer.items[fileIdx];
+            let item = ev.dataTransfer.items[fileIdx];
 
             if (!(item.kind === "file")) {
                 continue;
             }
 
             const file = item.getAsFile();
-            var reader = new FileReader();
+            let reader = new FileReader();
 
             reader.onload = onLoad;
             reader.readAsArrayBuffer(file);
@@ -527,7 +538,7 @@ function dropHandler(ev) {
         }
     } else {
         const file = ev.dataTransfer.files[0]
-        var reader = new FileReader();
+        let reader = new FileReader();
 
         reader.onload = onLoad;
         reader.readAsArrayBuffer(file);
@@ -569,7 +580,6 @@ function dragLeaveHandler(ev) {
 
 // Quirks
 let quirkCheckboxes = document.getElementById("quirk-checkboxes").querySelectorAll('input[type="checkbox"]');
-// .querySelectorAll('input[type="checkbox"][name^="quirk"]');
 
 function updateQuirksUI() {
     for (let i = 0; i < quirkCheckboxes.length; i++) {
@@ -600,6 +610,33 @@ function updateQuirksUI() {
     }
 }
 
+let settingsInputs = document.getElementById("settings-inputs").querySelectorAll('input');
+
+function updateSettingsUI() {
+    for (let i = 0; i < settingsInputs.length; i++) {
+        let settingName = settingsInputs[i].name;
+        let settingValue;
+
+        switch (settingName) {
+            case "screen-scale":
+                settingValue = chip8.screen.resScale;
+                break;
+            case "target-fps":
+                settingValue = chip8.targetFps;
+                break;
+            case "target-ipf":
+                settingValue = chip8.instructionsPerFrame;
+                break;
+            case "bg-color":
+                settingValue = chip8.screen.backgroundColor;
+                break;
+            case "fg-color":
+                settingValue = chip8.screen.fillColor;
+                break;
+        }
+        settingsInputs[i].value = settingValue;
+    }
+}
 
 // Main
 
@@ -685,6 +722,36 @@ window.onload = function () {
         });
     }
 
+    for (let setting of settingsInputs) {
+        setting.addEventListener('input', function (e) {
+            let settingName = this.name;
+            let settingValue = this.value;
+
+            switch (settingName) {
+                case "screen-scale":
+                    chip8.screen.updateResScale(settingValue);
+                    chip8.screen.forceRefresh();
+                    break;
+                case "target-fps":
+                    chip8.targetFps = settingValue;
+                    break;
+                case "target-ipf":
+                    chip8.instructionsPerFrame = settingValue;
+                    break;
+                case "bg-color":
+                    chip8.screen.backgroundColor = settingValue;
+                    chip8.screen.forceRefresh();
+                    break;
+                case "fg-color":
+                    chip8.screen.fillColor = settingValue;
+                    chip8.screen.forceRefresh();
+                    break;
+            }
+            updateSettingsUI();
+        });
+    }
+
+    updateSettingsUI();
     updateQuirksUI();
     loadRomsList();
 }
