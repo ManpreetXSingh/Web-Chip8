@@ -501,7 +501,7 @@ loadRomWindow.firstChild.addEventListener("click", (e) => {
 uploadRomWindow.addEventListener("click", hideUploadRomWindow);
 
 
-// Drag and drop rom
+// Drag and drop rom file
 
 let dragLeaveTimeout;
 
@@ -664,28 +664,36 @@ window.onload = function () {
     chip8.displayDebugInfo();
 
     // Virtual Keyboard Events
-
+    let keyboardContainer = document.getElementById("keyboard-container");
     let virtualKeyboard = document.getElementById("keyboard");
     let virtualKeys = virtualKeyboard.querySelectorAll('button');
+    let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
+    let main = document.querySelector("main");
+
+    showHideKeyboardButton.addEventListener('click', () => {
+        if (!keyboardContainer.classList.contains("keyboard-active")) {
+            keyboardContainer.classList.add("keyboard-active");
+            main.classList.add("keyboard-active");
+            showHideKeyboardButton.textContent = "Hide Keyboard";
+        } else {
+            keyboardContainer.classList.remove("keyboard-active");
+            main.classList.remove("keyboard-active");
+            showHideKeyboardButton.textContent = "Show Keyboard";
+        }
+    });
 
     for (let btnIdx = 0; virtualKeys[btnIdx]; btnIdx++) {
         virtualKeys[btnIdx].addEventListener('mousedown', function (e) {
-            console.log("Pressed: " + this.attributes.key.value);
             chip8.pressKey(this.attributes.key.value);
         });
         virtualKeys[btnIdx].addEventListener('touchstart', function (e) {
-            // e.preventDefault();
-            console.log("Pressed: " + this.attributes.key.value);
             chip8.pressKey(this.attributes.key.value);
         });
 
         virtualKeys[btnIdx].addEventListener('mouseup', function (e) {
-            console.log("Released: " + this.attributes.key.value);
             chip8.releaseKey(this.attributes.key.value);
         })
         virtualKeys[btnIdx].addEventListener('touchend', function (e) {
-            // e.preventDefault();
-            console.log("Released: " + this.attributes.key.value);
             chip8.releaseKey(this.attributes.key.value);
         })
     }

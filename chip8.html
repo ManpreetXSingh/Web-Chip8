@@ -13,10 +13,10 @@
     <link rel="manifest" href="./icons/manifest.webmanifest">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="chip8.css">
+    <link rel="stylesheet" href="chip8.css" defer>
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap">
 
     <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -27,6 +27,10 @@
 
 <body>
     <main>
+        <div class="layout-row">
+            <img src="./icons/C8_Icon_192.png" alt="C8">
+            <h1>Chip 8 Emulator</h1>
+        </div>
         <div class="layout-column">
             <div id="emulator-container" class="window-item">
                 <div class="control-bar">
@@ -52,31 +56,6 @@
                 <div id="screen-container">
                     <canvas id="screen" width="320" height="160" style="border:1px solid #000000;"></canvas>
                 </div>
-
-                <div id="keyboard-container" hidden>
-                    <div id="keyboard">
-                        <button tabindex="-1" key="1">1</button>
-                        <button tabindex="-1" key="2">2</button>
-                        <button tabindex="-1" key="3">3</button>
-                        <button tabindex="-1" key="c">C</button>
-
-                        <button tabindex="-1" key="4">4</button>
-                        <button tabindex="-1" key="5">5</button>
-                        <button tabindex="-1" key="6">6</button>
-                        <button tabindex="-1" key="d">D</button>
-
-                        <button tabindex="-1" key="7">7</button>
-                        <button tabindex="-1" key="8">8</button>
-                        <button tabindex="-1" key="9">9</button>
-                        <button tabindex="-1" key="e">E</button>
-
-                        <button tabindex="-1" key="a">A</button>
-                        <button tabindex="-1" key="0">0</button>
-                        <button tabindex="-1" key="b">B</button>
-                        <button tabindex="-1" key="f">F</button>
-                    </div>
-                </div>
-
             </div>
 
             <div id="settings-container" class="window-item">
@@ -84,6 +63,7 @@
                 <div>
                     <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
                     <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
+                    <button id="show-hide-keyboard-btn">Show Keyboard</button>
                 </div>
                 <div>
                     <h2>Settings</h2>
@@ -178,6 +158,31 @@
             </div>
         </div>
     </main>
+
+    <div id="keyboard-container" class="">
+        <div class="dragger"></div>
+        <div id="keyboard">
+            <button tabindex="-1" key="1">1</button>
+            <button tabindex="-1" key="2">2</button>
+            <button tabindex="-1" key="3">3</button>
+            <button tabindex="-1" key="c">C</button>
+
+            <button tabindex="-1" key="4">4</button>
+            <button tabindex="-1" key="5">5</button>
+            <button tabindex="-1" key="6">6</button>
+            <button tabindex="-1" key="d">D</button>
+
+            <button tabindex="-1" key="7">7</button>
+            <button tabindex="-1" key="8">8</button>
+            <button tabindex="-1" key="9">9</button>
+            <button tabindex="-1" key="e">E</button>
+
+            <button tabindex="-1" key="a">A</button>
+            <button tabindex="-1" key="0">0</button>
+            <button tabindex="-1" key="b">B</button>
+            <button tabindex="-1" key="f">F</button>
+        </div>
+    </div>
 
     <div id="load-rom-window" class="window">
         <div>
