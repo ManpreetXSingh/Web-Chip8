@@ -683,16 +683,20 @@ window.onload = function () {
     });
 
     for (let btnIdx = 0; virtualKeys[btnIdx]; btnIdx++) {
+        // Mouse Events
         virtualKeys[btnIdx].addEventListener('mousedown', function (e) {
-            chip8.pressKey(this.attributes.key.value);
+            var key = this.attributes.key.value;
+            chip8.pressKey(key);
+
+            document.addEventListener('mouseup', function (e) {
+                chip8.releaseKey(key);
+            }, { once: true });
         });
+
+        // Touch Events
         virtualKeys[btnIdx].addEventListener('touchstart', function (e) {
             chip8.pressKey(this.attributes.key.value);
         });
-
-        virtualKeys[btnIdx].addEventListener('mouseup', function (e) {
-            chip8.releaseKey(this.attributes.key.value);
-        })
         virtualKeys[btnIdx].addEventListener('touchend', function (e) {
             chip8.releaseKey(this.attributes.key.value);
         })
