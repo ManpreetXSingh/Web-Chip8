@@ -42,18 +42,19 @@ body {
 
     display: flex;
     justify-content: center;
+    align-items: center;
 
     font-family: 'Josefin Sans', sans-serif;
 
 }
 
 main {
-    /* display: flex; */
     display: grid;
     grid-template-columns: auto auto;
     grid-template-rows: auto auto;
 
     width: 100%;
+    height: min(calc(100% - 1rem), 65rem);
 
     margin: 0.5rem;
     padding-block: 2rem;
@@ -119,6 +120,7 @@ main {
         border-radius: 0;
 
         /* For Scrollbar */
+        height: auto;
         max-height: 100%;
         overflow: auto;
     }
@@ -778,12 +780,16 @@ input[type="number"]:focus {
 
 /* Rom Title */
 .rom-card-title {
+    padding-inline: 0.5rem;
+    padding-bottom: 0.25rem;
     margin-top: 0.5rem;
     font-size: 1.25rem;
 }
 
 /* Author name and event name in card */
 .rom-card-author-event {
+    padding-inline: 0.5rem;
+    padding-bottom: 0.25rem;
     font-size: 0.75rem;
     text-wrap: pretty;
 }
