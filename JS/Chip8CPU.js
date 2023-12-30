@@ -49,13 +49,13 @@ class Chip8CPU {
         // Memory and Registers //
 
         // Allocate 4 kilobytes of memory
-        this.memory = memory;   //new Chip8Array(memAmt);
+        this.memory = memory;
 
         // Stack for 16 bit addresses
-        this.stack = stack      //new Chip8Array(stackAmt, 16);
+        this.stack = stack;
 
         // 16 8 bit general purpose registers
-        this.registers = registers; //new Uint8Array(16);
+        this.registers = registers;
 
         // 16 bit index register
         this.indexRegister = 0;
@@ -178,6 +178,18 @@ class Chip8CPU {
     }
 
     /**
+     * Set a register then update the carry into the VF register
+     * @param {Number} register
+     * @param {Number} value
+     * @param {Boolean} carry
+     * @returns {void}
+     */
+    _set_carry(register, value, carry) {
+        this.registers.set(register, value & 0xFF);
+        this.registers.set(0xF, carry ? 1 : 0);
+    }
+
+    /**
      * Fetch the next instruction from memory
      * @returns {Number}
      */
@@ -210,7 +222,11 @@ class Chip8CPU {
                         return true;
                     // 00EE
                     case 0x0EE:
-                        this.stackPointer = pyModulo((this.stackPointer - 1), 16);
+                        this.stackPointer = (this.stackPointer - 1);
+                        if (this.stackPointer < 0) {
+                            this.stackPointer = 0;
+                            console.warn("Stack underflow");
+                        }
                         this.programCounter = this.stack.get(this.stackPointer);
                         return true;
                 }
@@ -224,7 +240,11 @@ class Chip8CPU {
             // 2NNN
             case 0x2:
                 this.stack.set(this.stackPointer, this.programCounter);
-                this.stackPointer = pyModulo((this.stackPointer + 1), 16);
+                this.stackPointer = (this.stackPointer + 1);
+                if (this.stackPointer > 0xF) {
+                    this.stackPointer = 0xF;
+                    console.warn("Stack overflow");
+                }
                 this.programCounter = instruction.nnn;
                 return true;
 
@@ -256,7 +276,7 @@ class Chip8CPU {
 
             // 7XKK
             case 0x7:
-                this.registers.set(instruction.x, this.registers.get(instruction.x) + instruction.kk);
+                this.registers.set(instruction.x, Vx + instruction.kk);
                 return true;
 
             case 0x8:
@@ -268,7 +288,7 @@ class Chip8CPU {
 
                     // 8XY1
                     case 0x1:
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) | Vy);
+                        this.registers.set(instruction.x, Vx | Vy);
                         if (this.quirklogic) {
                             this.registers.set(0xF, 0);
                         }
@@ -276,7 +296,7 @@ class Chip8CPU {
 
                     // 8XY2
                     case 0x2:
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) & Vy);
+                        this.registers.set(instruction.x, Vx & Vy);
                         if (this.quirklogic) {
                             this.registers.set(0xF, 0);
                         }
@@ -284,7 +304,7 @@ class Chip8CPU {
 
                     // 8XY3
                     case 0x3:
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) ^ Vy);
+                        this.registers.set(instruction.x, Vx ^ Vy);
                         if (this.quirklogic) {
                             this.registers.set(0xF, 0);
                         }
@@ -292,38 +312,38 @@ class Chip8CPU {
 
                     // 8XY4
                     case 0x4:
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) + Vy);
-                        this.registers.set(0xF, (Vx + Vy > 0xFF));
+                        var result = Vx + Vy;
+                        this._set_carry(instruction.x, result, result > 0xFF);
                         return true;
 
                     // 8XY5
                     case 0x5:
-                        this.registers.set(instruction.x, Vx - Vy);
-                        this.registers.set(0xF, (Vx > Vy));
+                        var result = Vx - Vy;
+                        this._set_carry(instruction.x, result, Vx >= Vy);
                         return true;
 
                     // 8XY6
                     case 0x6:
                         if (!this.quirkshift) {
-                            this.registers.set(instruction.x, this.registers.get(instruction.y));
+                            this.registers.set(instruction.x, Vy);
                         }
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) >> 1);
-                        this.registers.set(0xF, Vy & 0x1);
+                        var result = Vx >> 1;
+                        this._set_carry(instruction.x, result, Vy & 0x1);
                         return true;
 
                     // 8XY7
                     case 0x7:
-                        this.registers.set(instruction.x, Vy - Vx);
-                        this.registers.set(0xF, (Vy > Vx));
+                        var result = Vy - Vx;
+                        this._set_carry(instruction.x, result, Vy >= Vx);
                         return true;
 
                     // 8XYE
                     case 0xE:
                         if (!this.quirkshift) {
-                            this.registers.set(instruction.x, this.registers.get(instruction.y));
+                            this.registers.set(instruction.x, Vy);
                         }
-                        this.registers.set(instruction.x, this.registers.get(instruction.x) << 1);
-                        this.registers.set(0xF, (Vy >> 7) & 0x1);
+                        var result = Vx << 1;
+                        this._set_carry(instruction.x, result, (Vy >> 7) & 0x1);
                         return true;
                 }
                 break;
@@ -343,7 +363,7 @@ class Chip8CPU {
             // BNNN
             case 0xB:
                 if (this.quirkjump) {
-                    this.programCounter = instruction.nnn + this.registers.get(instruction.x);
+                    this.programCounter = instruction.nnn + Vx;
                 } else {
                     this.programCounter = instruction.nnn + this.registers.get(0);
                 }
@@ -426,8 +446,9 @@ class Chip8CPU {
 
                     // FX1E
                     case 0x1E:
-                        this.registers.set(0xF, (this.indexRegister + Vx > 0xFFF));
-                        this.indexRegister += Vx;
+                        // this.registers.set(0xF, (this.indexRegister + Vx) > 0xFFF);
+                        // this.indexRegister += Vx;
+                        this.indexRegister = (this.indexRegister + Vx) & 0xFFF;
                         return true;
 
                     // FX29

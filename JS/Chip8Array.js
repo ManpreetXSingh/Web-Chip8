@@ -49,6 +49,9 @@ class Chip8Array {
      * @param {Array} mem A typed or untyped array of values to set.
      */
     setArray(addr, mem) {
+        if (addr + mem.length > this.#arr.length || addr < 0) {
+            throw new Error("Address out of bounds");
+        }
         this.#arr.set(mem, addr);
         this.#updates.concat(Array.from({ length: mem.length }, (v, i) => addr + i));
     }
@@ -60,6 +63,9 @@ class Chip8Array {
      * @returns {void}
      */
     set(addr, mem) {
+        if (addr >= this.#arr.length || addr < 0) {
+            throw new Error("Address out of bounds");
+        }
         this.#arr[addr] = mem;
         this.#updates.push(addr);
     }
@@ -70,6 +76,9 @@ class Chip8Array {
      * @returns {Number}
      */
     get(addr) {
+        if (addr >= this.#arr.length || addr < 0) {
+            throw new Error("Address out of bounds");
+        }
         return this.#arr[addr];
     }
 

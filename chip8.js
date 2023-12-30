@@ -154,6 +154,7 @@ class Chip8Emulator {
         }
         this.#loadedRom = rom;
         this.cpu.loadRom(rom);
+        this.speaker.initialize();
 
         return true;
     }

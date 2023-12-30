@@ -3,32 +3,27 @@ AudioContext = window.AudioContext || window.webkitAudioContext;
 
 class Chip8Speaker {
     constructor() {
-        this.audioContext = new AudioContext();
+        this.audioContext = null;
         this.freq = 655;
         this.wave_type = "sine";
         this.oscillator = null;
+    }
+
+    // Function to create audiocontext only on user interaction
+    initialize() {
+        if (this.audioContext) {
+            return;
+        }
+        this.audioContext = new AudioContext();
         this.gain = this.audioContext.createGain();
         this.gain.connect(this.audioContext.destination);
         this.setVolume(0.025);
-        // document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
     }
 
-    // /**
-    //  * Turn the speaker on or off depending on whether the page is visible.
-    //  * @returns {void}
-    //  */
-    // handleVisibilityChange() {
-    //     if (!this.oscillator) {
-    //         return;
-    //     }
-    //     if (document.hidden) {
-    //         this.stop();
-    //     } else {
-    //         this.start();
-    //     }
-    // }
-
     setVolume(volume) {
+        if (!this.audioContext) {
+            return;
+        }
         // this.gain.gain.value = volume;
         this.gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
     }
