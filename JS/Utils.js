@@ -1,3 +1,4 @@
+"use strict";
 
 /**
  * Similar to the % (modulo) operator in python.\

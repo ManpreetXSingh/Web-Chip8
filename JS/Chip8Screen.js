@@ -1,3 +1,4 @@
+"use strict";
 
 class Chip8Screen {
     #canvas;

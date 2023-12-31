@@ -1,3 +1,4 @@
+"use strict";
 
 AudioContext = window.AudioContext || window.webkitAudioContext;
 

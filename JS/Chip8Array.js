@@ -1,3 +1,5 @@
+"use strict";
+
 class Chip8Array {
     #arr;
     #bitness;
