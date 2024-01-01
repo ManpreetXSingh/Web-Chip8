@@ -20,7 +20,13 @@ function getBitness(num) {
     return Math.ceil(Math.log2(num));
 }
 
+const generateId = (() => {
+    let id = 0;
+    return () => id++;
+})();
+
 class DisplayTableOptions {
+    #id;
     constructor() {
         this.numCols = 16;
         this.bitness = 8;
@@ -29,17 +35,21 @@ class DisplayTableOptions {
         this.tableName = null;
         this.vNames = null;
         this.hNames = null
+        this.#id = generateId();
+    }
+
+    get id() {
+        return this.#id;
     }
 
     get hasVHeader() {
-        return (this.vAddressVisible || this.vNames != null);
+        return (this.vAddressVisible || (this.vNames !== null));
     }
 
     get hasHheader() {
-        return (this.hAddressVisible || this.hNames != null);
+        return (this.hAddressVisible || (this.hNames !== null));
     }
 }
-
 
 /**
  * Display an array of numbers as a table in hexadecimal format.
@@ -55,9 +65,7 @@ function displayTable(table, array, displayTableOptions) {
         displayTableOptions.hAddressVisible = false;
     }
 
-    table.innerHTML = "";
-    const thead = document.createElement("thead");
-    const tbody = document.createElement("tbody");
+    let tableHtml = "";
 
     const bitness = displayTableOptions.bitness;
     const numCols = displayTableOptions.numCols;
@@ -66,53 +74,39 @@ function displayTable(table, array, displayTableOptions) {
     const VAddrBitness = getBitness(mem_amt) + 1;
     const HAddrBitness = getBitness(numCols) + 1;
 
-    thead.innerHTML = "";
-    tbody.innerHTML = "";
-
-    let row;
-    let cell;
-
     // Table Header
     if (displayTableOptions.hasHheader) {
-        const head_row = document.createElement("tr");
+        tableHtml += "<thead><tr>";
         if (displayTableOptions.hasVHeader) {
-            cell = document.createElement("th");
-            cell.textContent = displayTableOptions.tableName || (displayTableOptions.vAddressVisible ? "Address" : "Name");
-            head_row.appendChild(cell);
+            tableHtml += `<th>${displayTableOptions.tableName || (displayTableOptions.vAddressVisible ? "Address" : "Name")}</th>`;
         }
 
         // Memory Offset in header row
         for (let i = 0; i < numCols; i++) {
-            cell = document.createElement("th");
-            cell.textContent = displayTableOptions.hAddressVisible ? toHex(i, Math.ceil(HAddrBitness / 4)) : displayTableOptions.hNames[i];
-            head_row.appendChild(cell);
+            tableHtml += `<th>${displayTableOptions.hAddressVisible ? toHex(i, Math.ceil(HAddrBitness / 4)) : displayTableOptions.hNames[i]}</th>`
         }
-        thead.appendChild(head_row);
+        tableHtml += "</tr></thead>";
     }
+
     // Table Body
+    tableHtml += "<tbody>";
     for (let i = 0; i < mem_amt; i += numCols) {
-        row = document.createElement("tr");
+        tableHtml += "<tr>";
 
         // Memory Address in first column
         if (displayTableOptions.hasVHeader) {
-            cell = document.createElement("td");
-            cell.textContent = displayTableOptions.vAddressVisible ? toHex(i, Math.ceil(VAddrBitness / 4)) : displayTableOptions.vNames[i];
-            row.appendChild(cell);
+            tableHtml += `<td>${displayTableOptions.vAddressVisible ? toHex(i, Math.ceil(VAddrBitness / 4)) : displayTableOptions.vNames[i]}</td>`;
         }
 
         // Memory Data
         for (let j = 0; j < numCols; j++) {
-            cell = document.createElement("td");
-            cell.textContent = (i + j < mem_amt) ? toHex(array[i + j], bitness / 4) : "";
-            row.appendChild(cell);
+            tableHtml += `<td>${(i + j < mem_amt) ? toHex(array[i + j], bitness / 4) : ""}</td>`
         }
-        tbody.appendChild(row);
+        tableHtml += "</tr>";
     }
-
-    table.appendChild(thead);
-    table.appendChild(tbody);
+    tableHtml += "</tbody>";
+    table.innerHTML = tableHtml;
 }
-
 
 /**
  * Update the changes in the array to an existing table.
@@ -125,31 +119,23 @@ function updateTable(table, array, changes, displayTableOptions) {
     if (changes.length === 0) {
         return;
     }
-
-    const tbody = table.querySelector("tbody");
-    const mem_amt = array.length;
-    const bitness = displayTableOptions.bitness;
-    const hasVHeader = displayTableOptions.hasVHeader;
-    const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    const tableColIdxOffset = hasVHeader ? 1 : 0;
-
-    if (changes[0] === -1) {
-        for (let i = 0; i < Math.ceil(mem_amt / numCols); i++) {
-            for (let j = 0; j < numCols; j++) {
-                tbody.children[i].children[j + tableColIdxOffset].textContent = (i * numCols + j < mem_amt) ? toHex(array[i * numCols + j], bitness / 4) : "";
-            }
-        }
+    if (changes[0] === -1 || changes.length > 100) {
+        displayTable(table, array, displayTableOptions);
         return;
     }
 
-    let update_idx = 0;
-    let row_idx = 0;
-    let col_idx = 0;
+    const tbody = table.querySelector("tbody");
+    const bitness = displayTableOptions.bitness;
+    const hasVHeader = displayTableOptions.hasVHeader;
+    const numCols = tbody.children[0].children.length - 1 * hasVHeader;
+    const tableColOffset = hasVHeader ? 1 : 0;
+
+    let arrayIdx = 0, rowIdx = 0, colIdx = 0;
     for (let i = 0; i < changes.length; i++) {
-        update_idx = changes[i];
-        row_idx = Math.floor(update_idx / numCols);
-        col_idx = update_idx % numCols;
-        tbody.children[row_idx].children[col_idx + tableColIdxOffset].textContent = toHex(array[update_idx], bitness / 4);
+        arrayIdx = changes[i];
+        rowIdx = Math.floor(arrayIdx / numCols);
+        colIdx = arrayIdx % numCols;
+        tbody.children[rowIdx].children[colIdx + tableColOffset].textContent = toHex(array[arrayIdx], bitness / 4);
     }
 }
 
