@@ -17,31 +17,16 @@ class Instruction {
 }
 
 
-class Chip8CPU {
+class Chip8Cpu {
     /**
      * 
-     * @param {Chip8Screen} screen 
-     * @param {Chip8Input} input 
-     * @param {Chip8Speaker} speaker 
+     * @param {HTMLCanvasElement} screen 
      * @param {Object.<string, number[]>} font 
-     * @param {Chip8Array} memory 
-     * @param {Chip8Array} stack 
-     * @param {Chip8Array} registers 
      */
-    constructor(screen, input, speaker, font, memory, stack, registers) {
-        if (memory.length != 4096 && memory.bitness != 8) {
-            throw new Error("Memory length must be 4096 and bitness must be 8");
-        }
-        if (stack.length != 16 && stack.bitness != 16) {
-            throw new Error("Stack length must be 16 and bitness must be 16");
-        }
-        if (registers.length != 16 && registers.bitness != 8) {
-            throw new Error("Registers length must be 16");
-        }
-
-        this.screen = screen;
-        this.input = input;
-        this.speaker = speaker;
+    constructor(screen, font) {
+        this.screen = new Chip8Screen(screen, 5);
+        this.input = new Chip8Input();
+        this.speaker = new Chip8Speaker();
         this._font = font;
 
         // Font Location in memory
@@ -50,13 +35,13 @@ class Chip8CPU {
         // Memory and Registers //
 
         // Allocate 4 kilobytes of memory
-        this.memory = memory;
+        this.memory = new Chip8Array(4096, 8);
 
         // Stack for 16 bit addresses
-        this.stack = stack;
+        this.stack = new Chip8Array(16, 16);
 
         // 16 8 bit general purpose registers
-        this.registers = registers;
+        this.registers = new Chip8Array(16, 8);
 
         // 16 bit index register
         this.indexRegister = 0;
@@ -90,6 +75,9 @@ class Chip8CPU {
 
         // If the screem was just updated
         this.VBlank = false;
+
+        // Terminates the execution until reset
+        this.interrupted = false;
 
         // Quirks //
         this.resetQuirks();
@@ -131,6 +119,7 @@ class Chip8CPU {
         this.soundTimer = 0;
         this.waitForInput = false;
         this.waitForVBlank = true;
+        this.interrupted = false;
         this.loadFont(this._font);
     }
 
@@ -159,7 +148,7 @@ class Chip8CPU {
      * @returns {void}
      */
     processNext() {
-        if (this.waitForInput) {
+        if (this.interrupted || this.waitForInput) {
             return;
         }
         // if (this.waitForVBlank) {
@@ -172,6 +161,7 @@ class Chip8CPU {
 
         let executed = this._execute(this._decode(instruction));
         if (!executed) {
+            this.interrupted = true;
             console.warn(`Unknown instruction ${instruction}`);
         }
         this.input.update();

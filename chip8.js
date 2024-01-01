@@ -1,14 +1,134 @@
 "use strict";
 
-let stackTable = document.getElementById("stack-table");
-let memoryTable = document.getElementById("memory-table");
-let registersTable = document.getElementById("registers-table");
-let pointersTable = document.getElementById("pointers-table");
-let timersTable = document.getElementById("timers-table");
-let fpsDisplay = document.getElementById("fps");
-let ipsDisplay = document.getElementById("ips");
-
 let chip8 = new Chip8Emulator();
+
+
+var InfoRenderer = (() => {
+    let stackTable = document.getElementById("stack-table");
+    let memoryTable = document.getElementById("memory-table");
+    let registersTable = document.getElementById("registers-table");
+    let pointersTable = document.getElementById("pointers-table");
+    let timersTable = document.getElementById("timers-table");
+    let fpsDisplay = document.getElementById("fps");
+    let ipsDisplay = document.getElementById("ips");
+
+    let prevStackPointer;
+    let prevProgramCounter;
+
+    let pointersDisplayOptions;
+    let timersDisplayOptions;
+    let memoryDisplayOptions;
+    let stackDisplayOptions;
+    let registersDisplayOptions;
+
+    function displayInfo(emulator) {
+        prevStackPointer = emulator.stackPointer;
+        prevProgramCounter = emulator.programCounter;
+
+        pointersDisplayOptions = new DisplayTableOptions();
+        pointersDisplayOptions.tableName = "Pointers";
+        pointersDisplayOptions.vNames = ['PC', 'I', 'SP'];
+        pointersDisplayOptions.hNames = ['Value'];
+        pointersDisplayOptions.numCols = 1;
+        pointersDisplayOptions.bitness = 16;
+        displayTable(pointersTable, [emulator.programCounter, emulator.indexRegister, emulator.stackPointer], pointersDisplayOptions);
+
+        timersDisplayOptions = new DisplayTableOptions();
+        timersDisplayOptions.tableName = "Timers";
+        timersDisplayOptions.vNames = ['DT', 'ST'];
+        timersDisplayOptions.hNames = ['Value'];
+        timersDisplayOptions.numCols = 1;
+        timersDisplayOptions.bitness = 16;
+        displayTable(timersTable, [emulator.delayTimer, emulator.soundTimer], timersDisplayOptions);
+
+        memoryDisplayOptions = new DisplayTableOptions();
+        memoryDisplayOptions.tableName = "Memory";
+        memoryDisplayOptions.numCols = 16;
+        memoryDisplayOptions.bitness = emulator.memory.bitness;
+        displayTable(memoryTable, emulator.memory.underlyingArray, memoryDisplayOptions);
+
+        stackDisplayOptions = new DisplayTableOptions();
+        stackDisplayOptions.tableName = "Stack";
+        stackDisplayOptions.numCols = 16;
+        stackDisplayOptions.bitness = emulator.stack.bitness;
+        stackDisplayOptions.vNames = ['Value'];
+        displayTable(stackTable, emulator.stack.underlyingArray, stackDisplayOptions);
+
+        registersDisplayOptions = new DisplayTableOptions();
+        registersDisplayOptions.tableName = "Registers";
+        registersDisplayOptions.numCols = 16;
+        registersDisplayOptions.bitness = emulator.registers.bitness;
+        registersDisplayOptions.vNames = ['Value'];
+        registersDisplayOptions.hNames = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'VA', 'VB', 'VC', 'VD', 'VE', 'VF'];
+        displayTable(registersTable, emulator.registers.underlyingArray, registersDisplayOptions);
+    }
+
+    function updateInfo(emulator) {
+        fpsDisplay.textContent = emulator.fps.toFixed(1);
+        ipsDisplay.textContent = emulator.ips.toFixed(1);
+
+        // Display Tables
+        updateTable(pointersTable, [emulator.programCounter, emulator.indexRegister, emulator.stackPointer], [-1], pointersDisplayOptions);
+        updateTable(timersTable, [emulator.delayTimer, emulator.soundTimer], [-1], timersDisplayOptions);
+        updateTable(memoryTable, emulator.memory.underlyingArray, emulator.memory.updates, memoryDisplayOptions);
+        updateTable(stackTable, emulator.stack.underlyingArray, emulator.stack.updates, stackDisplayOptions);
+        updateTable(registersTable, emulator.registers.underlyingArray, emulator.registers.updates, registersDisplayOptions);
+
+        // Display Stack Pointer Highlight
+        removeTableAttributes(
+            stackTable,
+            { [prevStackPointer]: ['stack-pointer', 'title'] },
+            stackDisplayOptions
+        );
+        addTableAttributes(
+            stackTable,
+            { [emulator.stackPointer]: { 'stack-pointer': null, "title": `Stack Pointer: {${emulator.stackPointer}}` } },
+            stackDisplayOptions
+        );
+        prevStackPointer = emulator.stackPointer;
+
+        // Display Program Counter Highlight
+        removeTableAttributes(
+            memoryTable,
+            {
+                [prevProgramCounter]: ['program-counter', "title"],
+                [prevProgramCounter + 1]: ['program-counter', "title"]
+            },
+            memoryDisplayOptions
+        );
+        addTableAttributes(
+            memoryTable,
+            {
+                [emulator.programCounter]: { 'program-counter': null, "title": `Program Counter: {${emulator.programCounter}}` },
+                [emulator.programCounter + 1]: { 'program-counter': null, "title": `Program Counter: {${emulator.programCounter}}` }
+            },
+            memoryDisplayOptions
+        );
+        prevProgramCounter = emulator.programCounter;
+    }
+
+    return {
+        displayInfo: displayInfo,
+        updateInfo: updateInfo
+    }
+})();
+
+// chip8.display = InfoRenderer.displayInfo.bind(chip8);
+InfoRenderer.displayInfo(chip8);
+chip8.updateDisplay = InfoRenderer.updateInfo.bind(null, chip8);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Load JSON
@@ -75,7 +195,7 @@ function playPause() {
 function replay() {
     playPauseBtn.textContent = 'play_arrow';
     chip8.killProcess();
-    chip8.displayDebugInfo();
+    chip8.updateDisplay();
 }
 
 function step() {
@@ -379,8 +499,6 @@ function runRom(rom) {
 }
 
 window.onload = function () {
-    chip8.displayDebugInfo();
-
     // Virtual Keyboard Events
     let keyboardContainer = document.getElementById("keyboard-container");
     let virtualKeyboard = document.getElementById("keyboard");

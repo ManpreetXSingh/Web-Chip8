@@ -24,26 +24,8 @@ class Chip8Input {
         this.#keysReleased = [];
         this.keysPressed = new Array(0xF).fill(false);
 
-        // Function to call when a key is pressed. Initialized when waiting for input
+        // Function to call when a key is pressed. (Initialize when waiting for input)
         this.onKeyPressed = null;
-
-        this.#addEventListners();
-    }
-
-    #addEventListners() {
-        window.addEventListener("keydown", (e) => {
-            let key = this.KEYMAP[e.key];
-            if (key == null) { return; }
-
-            this.pressKey(key);
-        })
-
-        window.addEventListener("keyup", (e) => {
-            let key = this.KEYMAP[e.key];
-            if (key == null) { return; }
-
-            this.releaseKey(key);
-        })
     }
 
     pressKey(key) {
@@ -60,10 +42,6 @@ class Chip8Input {
     }
 
     update() {
-        // let key;
-        // while(key = this.#keysReleased.pop()){
-        //     this.keysPressed[key] = false;
-        // }
         for (const keyIdx in this.#keysReleased) {
             this.keysPressed[this.#keysReleased[keyIdx]] = false;
         }

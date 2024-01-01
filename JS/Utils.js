@@ -1,5 +1,6 @@
 "use strict";
 
+
 /**
  * Similar to the % (modulo) operator in python.\
  * It returns the remainder from the division of the first argument by the second. A zero right argument returns NaN.\
@@ -47,23 +48,19 @@ class DisplayTableOptions {
  * @param {DisplayTableOptions} displayTableOptions 
  */
 function displayTable(table, array, displayTableOptions) {
-    bitness = displayTableOptions.bitness;
-    numCols = displayTableOptions.numCols;
-
     if (displayTableOptions.vNames != null) {
-        if (displayTableOptions.vAddressVisible) {
-            throw new Error("vAddressVisible must be false when itemNames is set.");
-        }
+        displayTableOptions.vAddressVisible = false;
     }
     if (displayTableOptions.hNames != null) {
-        if (displayTableOptions.hAddressVisible) {
-            throw new Error("hAddressVisible must be false when itemNames is set.");
-        }
+        displayTableOptions.hAddressVisible = false;
     }
 
     table.innerHTML = "";
     const thead = document.createElement("thead");
     const tbody = document.createElement("tbody");
+
+    const bitness = displayTableOptions.bitness;
+    const numCols = displayTableOptions.numCols;
 
     const mem_amt = array.length;
     const VAddrBitness = getBitness(mem_amt) + 1;
@@ -74,7 +71,6 @@ function displayTable(table, array, displayTableOptions) {
 
     let row;
     let cell;
-
 
     // Table Header
     if (displayTableOptions.hasHheader) {
@@ -125,22 +121,22 @@ function displayTable(table, array, displayTableOptions) {
  * @param {Array} changes 
  * @param {DisplayTableOptions} displayTableOptions
  */
-function updataTable(table, array, changes, displayTableOptions) {
-    bitness = displayTableOptions.bitness;
-    if (changes.length < 1) {
+function updateTable(table, array, changes, displayTableOptions) {
+    if (changes.length === 0) {
         return;
     }
 
     const tbody = table.querySelector("tbody");
     const mem_amt = array.length;
+    const bitness = displayTableOptions.bitness;
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    let tableColIdxOffset = hasVHeader ? 1 : 0;
+    const tableColIdxOffset = hasVHeader ? 1 : 0;
 
     if (changes[0] === -1) {
-        for (let i = 0; i < mem_amt; i += numCols) {
+        for (let i = 0; i < Math.ceil(mem_amt / numCols); i++) {
             for (let j = 0; j < numCols; j++) {
-                tbody.children[i].children[j + tableColIdxOffset].textContent = (i + j < mem_amt) ? toHex(array[i + j], bitness / 4) : "";
+                tbody.children[i].children[j + tableColIdxOffset].textContent = (i * numCols + j < mem_amt) ? toHex(array[i * numCols + j], bitness / 4) : "";
             }
         }
         return;
@@ -162,7 +158,7 @@ function addTableClasses(table, tableClassNames, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    let tableColIdxOffset = hasVHeader ? 1 : 0;
+    const tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableClassNames) {
         row_idx = Math.floor(idx / numCols);
@@ -171,11 +167,12 @@ function addTableClasses(table, tableClassNames, displayTableOptions) {
     }
 }
 
+
 function removeTableClasses(table, tableClassNames, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    let tableColIdxOffset = hasVHeader ? 1 : 0;
+    const tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableClassNames) {
         row_idx = Math.floor(idx / numCols);
@@ -184,30 +181,32 @@ function removeTableClasses(table, tableClassNames, displayTableOptions) {
     }
 }
 
+
 function addTableAttributes(table, tableAttributes, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    let tableColIdxOffset = hasVHeader ? 1 : 0;
+    const tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableAttributes) {
-        row_idx = Math.floor(idx / numCols);
-        col_idx = idx % numCols;
+        let row_idx = Math.floor(idx / numCols);
+        let col_idx = idx % numCols;
         for (const attribute in tableAttributes[idx]) {
             tbody.children[row_idx].children[col_idx + tableColIdxOffset].setAttribute(attribute, tableAttributes[idx][attribute]);
         }
     }
 }
 
+
 function removeTableAttributes(table, tableAttributes, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
-    let tableColIdxOffset = hasVHeader ? 1 : 0;
+    const tableColIdxOffset = hasVHeader ? 1 : 0;
 
     for (const idx in tableAttributes) {
-        row_idx = Math.floor(idx / numCols);
-        col_idx = idx % numCols;
+        let row_idx = Math.floor(idx / numCols);
+        let col_idx = idx % numCols;
         for (const attrIdx in tableAttributes[idx]) {
             tbody.children[row_idx].children[col_idx + tableColIdxOffset].removeAttribute(tableAttributes[idx][attrIdx]);
         }

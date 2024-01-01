@@ -1,43 +1,58 @@
 "use strict";
 
+const C8FONT = {
+    "0": [0xF0, 0x90, 0x90, 0x90, 0xF0],
+    "1": [0x20, 0x60, 0x20, 0x20, 0x70],
+    "2": [0xF0, 0x10, 0xF0, 0x80, 0xF0],
+    "3": [0xF0, 0x10, 0xF0, 0x10, 0xF0],
+    "4": [0x90, 0x90, 0xF0, 0x10, 0x10],
+    "5": [0xF0, 0x80, 0xF0, 0x10, 0xF0],
+    "6": [0xF0, 0x80, 0xF0, 0x90, 0xF0],
+    "7": [0xF0, 0x10, 0x20, 0x40, 0x40],
+    "8": [0xF0, 0x90, 0xF0, 0x90, 0xF0],
+    "9": [0xF0, 0x90, 0xF0, 0x10, 0xF0],
+    "A": [0xF0, 0x90, 0xF0, 0x90, 0x90],
+    "B": [0xE0, 0x90, 0xE0, 0x90, 0xE0],
+    "C": [0xF0, 0x80, 0x80, 0x80, 0xF0],
+    "D": [0xE0, 0x90, 0x90, 0x90, 0xE0],
+    "E": [0xF0, 0x80, 0xF0, 0x80, 0xF0],
+    "F": [0xF0, 0x80, 0x80, 0xF0, 0x80]
+};
+
 class Chip8Emulator {
     #processId;
-    #time_previous;
+    #timePrevious;
     #loadedRom;
     #instructionIdx;
     #oneSecTimer;
-    #adjustedTargetFPS;
-    #pointersDisplayOptions;
-    #timersDisplayOptions;
+    #adjustedTargetFps;
 
-    #prevStackPointer;
-    #prevProgramCounter;
-
-    constructor(fps = 60, ipf = 7) {
+    constructor(fps = 60, ipf = 7, font = C8FONT) {
+        // Target fps to achieve
         this.targetFps = fps;
-        this.#adjustedTargetFPS = fps + 3;
-        this.targetFrameInterval = 1000 / this.#adjustedTargetFPS;
-        this.FPSCounter = 0;
+
+        // Adjusted target fps (indirectly adjusting frame interval to achieve target fps)
+        this.#adjustedTargetFps = fps + 3;
+        this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
+
+        // Frames rendered within one second
+        this.FpsCounter = 0;
+
+        // Instructions per frame
         this.instructionsPerFrame = ipf;
 
+        // Real fps and ips(instructions per second)
+        this.fps = 0;
+        this.ips = 0;
+
         this.#processId = null;
-        this.#time_previous = 0;
+        this.#timePrevious = 0;
         this.#loadedRom = null;
         this.#instructionIdx = 0;
         this.#oneSecTimer = 0;
 
-        this.createHardware();
-    }
-
-    createHardware() {
-        let speaker = new Chip8Speaker();
-        let screen = new Chip8Screen(document.getElementById("screen"), 5);
-        let input = new Chip8Input();
-        let memory = new Chip8Array(4096, 8);
-        let stack = new Chip8Array(16, 16);
-        let registers = new Chip8Array(16, 8);
-
-        this.cpu = new Chip8CPU(screen, input, speaker, C8FONT, memory, stack, registers);
+        this.updateDisplay = () => { };
+        this.cpu = new Chip8Cpu(document.getElementById("screen"), font);
     }
 
     get speaker() {
@@ -111,7 +126,6 @@ class Chip8Emulator {
     pause() {
         if (this.#processId) {
             clearTimeout(this.#processId);
-            // cancelAnimationFrame(this.#processId);
             this.speaker.stop();
             this.#processId = null;
         }
@@ -119,13 +133,16 @@ class Chip8Emulator {
 
     resume() {
         if (this.#processId == null) {
-            this.displayDebugInfo();
+            if (this.cpu.interrupted) {
+                this.killProcess();
+            }
+
+            this._updateDisplay();
 
             this.#oneSecTimer = 0;
-            this.#time_previous = performance.now();
+            this.#timePrevious = window.performance.now();
 
             this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
-            //requestAnimationFrame(this.process.bind(this));
         }
     }
 
@@ -134,6 +151,7 @@ class Chip8Emulator {
         this.cpu.resetCPU();
         this.#instructionIdx = 0;
         this.#oneSecTimer = 0;
+
         if (this.#loadedRom != null) {
             this.cpu.loadRom(this.#loadedRom);
         }
@@ -144,19 +162,30 @@ class Chip8Emulator {
     }
 
     step() {
+        if (this.cpu.interrupted) {
+            return;
+        }
+
         if (this.#instructionIdx == this.instructionsPerFrame) {
             this.#instructionIdx = 0;
-            this.stepFrame();
+            this.stepFrame(autoAdjustFps = false);
         } else {
             this.#instructionIdx++;
             this.cpu.processNext();
+
+            if (this.#oneSecTimer >= 1000) {
+                this.ips = 0;
+                this.#oneSecTimer = 0;
+            }
+            this.ips += this.#instructionIdx;
+
             this.cpu.updateScreen();
-            this.updateDebugInfo();
+            this._updateDisplay();
         }
     }
 
-    stepFrame() {
-        this.FPSCounter++;
+    stepFrame(autoAdjustFps = true) {
+        this.FpsCounter++;
         for (let i = this.#instructionIdx; i < this.instructionsPerFrame; i++) {
             this.#instructionIdx++;
             this.cpu.processNext();
@@ -165,104 +194,68 @@ class Chip8Emulator {
             // }
         }
         this.#instructionIdx = 0;
+
+        // Update Speaker
         if (this.cpu.soundTimer <= 0) {
             this.speaker.stop();
         } else {
             this.speaker.start();
         }
 
+        // Update and adjust FPS
+        if (this.#oneSecTimer >= 1000) {
+            this.calculateFps();
+            if (autoAdjustFps) {
+                this._adjustFrameInterval();
+            }
+        }
+
         this.cpu.updateScreen();
         this.cpu.updateTimers();
-        this.updateDebugInfo();
+        this._updateDisplay();
     }
 
     process(time) {
         // if (time - this.#time_previous > this.targetFrameInterval) {
-        this.#oneSecTimer += time - this.#time_previous;
+        this.#oneSecTimer += time - this.#timePrevious;
         this.stepFrame();
-        this.#time_previous = time;
+        this.#timePrevious = time;
         // }
         // console.log("Frame")
 
-        this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
-        // requestAnimationFrame(this.process.bind(this));
-    }
-
-    displayDebugInfo() {
-        this.#prevStackPointer = this.stackPointer;
-        this.#prevProgramCounter = this.programCounter;
-
-        this.#pointersDisplayOptions = new DisplayTableOptions();
-        this.#pointersDisplayOptions.tableName = "Pointers";
-        this.#pointersDisplayOptions.vNames = ['PC', 'I', 'SP'];
-        this.#pointersDisplayOptions.hNames = ['Value'];
-        this.#pointersDisplayOptions.numCols = 1;
-        this.#pointersDisplayOptions.bitness = 16;
-        this.#pointersDisplayOptions.hAddressVisible = false;
-        this.#pointersDisplayOptions.vAddressVisible = false;
-        displayTable(pointersTable, [this.programCounter, this.indexRegister, this.stackPointer], this.#pointersDisplayOptions);
-
-        this.#timersDisplayOptions = new DisplayTableOptions();
-        this.#timersDisplayOptions.tableName = "Timers";
-        this.#timersDisplayOptions.vNames = ['DT', 'ST'];
-        this.#timersDisplayOptions.hNames = ['Value'];
-        this.#timersDisplayOptions.numCols = 1;
-        this.#timersDisplayOptions.bitness = 16;
-        this.#timersDisplayOptions.hAddressVisible = false;
-        this.#timersDisplayOptions.vAddressVisible = false;
-        displayTable(timersTable, [this.delayTimer, this.soundTimer], this.#timersDisplayOptions);
-
-        this.memory.display(memoryTable, 16, "Memory");
-        this.stack.display(stackTable, 16, "Stack", ['Value']);
-        this.registers.display(registersTable, 16, "Registers", ['Value'], ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'VA', 'VB', 'VC', 'VD', 'VE', 'VF']);
-
-    }
-
-    updateDebugInfo() {
-        if (this.#oneSecTimer >= 1000) {
-            // Display real FPS and IPS
-            let fps = this.FPSCounter * 1000 / this.#oneSecTimer;
-            fpsDisplay.textContent = fps.toFixed(1);
-            ipsDisplay.textContent = (fps * this.instructionsPerFrame).toFixed(1);
-            this.#oneSecTimer = 0;
-            this.FPSCounter = 0;
-
-            // Adjust Target Fps
-            if (fps - 5 > this.targetFps) {
-                this.#adjustedTargetFPS -= 5;
-            }
-            if (fps + 5 < this.targetFps) {
-                this.#adjustedTargetFPS += 5;
-            }
-            if (Math.abs(fps - this.targetFps) > 1) {
-                this.#adjustedTargetFPS = this.#adjustedTargetFPS + (Number(fps < this.targetFps) - Number(fps > this.targetFps));
-                this.targetFrameInterval = 1000 / this.#adjustedTargetFPS;
-                console.log(`Target Fps Updated: ${this.#adjustedTargetFPS}`);
-            }
+        if (this.cpu.interrupted) {
+            this.pause();
+            return;
         }
-
-        updataTable(pointersTable, [this.programCounter, this.indexRegister, this.stackPointer], [0, 1, 2], this.#pointersDisplayOptions);
-        updataTable(timersTable, [this.delayTimer, this.soundTimer], [0, 1], this.#timersDisplayOptions);
-
-        // Display Tables
-        this.memory.updateDisplay(memoryTable);
-        this.stack.updateDisplay(stackTable);
-        this.registers.updateDisplay(registersTable);
-
-        // Display Stack Pointer Highlight
-        this.stack.removeDisplayAttributes(stackTable, { [this.#prevStackPointer]: ['stack-pointer', 'title'] });
-        this.stack.addDisplayAttributes(stackTable, { [this.stackPointer]: { 'stack-pointer': null, "title": `Stack Pointer: {${this.stackPointer}}` } });
-        this.#prevStackPointer = this.stackPointer;
-
-        // Display Program Counter Highlight
-        this.memory.removeDisplayAttributes(memoryTable, {
-            [this.#prevProgramCounter]: ['program-counter', "title"],
-            [this.#prevProgramCounter + 1]: ['program-counter', "title"]
-        });
-        this.memory.addDisplayAttributes(memoryTable, {
-            [this.programCounter]: { 'program-counter': null, "title": `Program Counter: {${this.programCounter}}` },
-            [this.programCounter + 1]: { 'program-counter': null, "title": `Program Counter: {${this.programCounter}}` }
-        });
-        this.#prevProgramCounter = this.programCounter;
+        this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
     }
+
+    calculateFps() {
+        this.fps = this.FpsCounter * 1000 / this.#oneSecTimer;
+        this.ips = this.fps * this.instructionsPerFrame;
+        this.#oneSecTimer = 0;
+        this.FpsCounter = 0;
+    }
+
+    _updateDisplay() {
+        this.updateDisplay();
+        this.memory.clearUpdates();
+        this.stack.clearUpdates();
+        this.registers.clearUpdates();
+    }
+
+    _adjustFrameInterval() {
+        if (this.targetFps < this.fps - 5) {
+            this.#adjustedTargetFps += this.targetFps - this.fps;
+        }
+        if (this.targetFps > this.fps + 5) {
+            this.#adjustedTargetFps += this.targetFps - this.fps;
+        }
+        if (Math.abs(this.fps - this.targetFps) > 1) {
+            this.#adjustedTargetFps = this.#adjustedTargetFps + (Number(this.fps < this.targetFps) - Number(this.fps > this.targetFps));
+            this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
+            console.log(`Target Fps Updated: ${this.#adjustedTargetFps}`);
+        }
+    }
+
 }
