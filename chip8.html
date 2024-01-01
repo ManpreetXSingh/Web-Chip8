@@ -1,223 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#9901fe" />
+        <title>Chip-8 Emulator</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#9901fe">
-    <title>Chip-8 Emulator</title>
+        <!-- Favicon -->
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="./icons/C8_Icon_180.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="./icons/C8_Icon_32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="./icons/C8_Icon_16.png"
+        />
+        <link rel="manifest" href="./icons/manifest.webmanifest" />
 
-    <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="./icons/C8_Icon_180.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./icons/C8_Icon_32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="./icons/C8_Icon_16.png">
-    <link rel="manifest" href="./icons/manifest.webmanifest">
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="chip8.css" defer />
 
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="chip8.css" defer>
+        <!-- Fonts -->
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"
+        />
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap">
+        <!-- Icons -->
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+            rel="stylesheet"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap"
+            rel="stylesheet"
+        />
+    </head>
 
-    <!-- Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <main>
-        <div class="layout-row">
-            <img src="./icons/C8_Icon_192.png" alt="C8">
-            <h1>Chip 8 Emulator</h1>
-        </div>
-        <div class="layout-column">
-            <div id="emulator-container" class="window-item">
-                <div class="control-bar">
-                    <div id="controls">
-                        <!-- ↻↺↦↳⇒⇥⇢⇻▶▷ -->
-                        <button id="replay" class="material-icons-round md-light md-24" title="Replay"
-                            onclick="replay()">replay</button>
-                        <button id="play-pause" class="material-icons-round md-light md-24" title="Play/Pause"
-                            onclick="playPause()">play_arrow</button>
-                        <button id="step" class="material-icons-round md-light md-24" title="Step Instruction"
-                            onclick="step()">skip_next</button>
-                        <button id="step-frame" class="material-icons-round md-light md-24" title="Step Frame"
-                            onclick="stepFrame()">keyboard_tab</button>
-                    </div>
-                    <div id="info">
-                        <div title="Frames Per Second">FPS: <div id="fps">00.0</div>
+    <body>
+        <main>
+            <div class="layout-row">
+                <img src="./icons/C8_Icon_192.png" alt="C8" />
+                <h1>Chip 8 Emulator</h1>
+            </div>
+            <div class="layout-column">
+                <div id="emulator-container" class="window-item">
+                    <div class="control-bar">
+                        <div id="controls">
+                            <!-- ↻↺↦↳⇒⇥⇢⇻▶▷ -->
+                            <button
+                                id="replay"
+                                class="material-icons-round md-light md-24"
+                                title="Replay"
+                                onclick="replay()"
+                            >
+                                replay
+                            </button>
+                            <button
+                                id="play-pause"
+                                class="material-icons-round md-light md-24"
+                                title="Play/Pause"
+                                onclick="playPause()"
+                            >
+                                play_arrow
+                            </button>
+                            <button
+                                id="step"
+                                class="material-icons-round md-light md-24"
+                                title="Step Instruction"
+                                onclick="step()"
+                            >
+                                skip_next
+                            </button>
+                            <button
+                                id="step-frame"
+                                class="material-icons-round md-light md-24"
+                                title="Step Frame"
+                                onclick="stepFrame()"
+                            >
+                                keyboard_tab
+                            </button>
                         </div>
-                        <div title="Instructions Per Second">IPS: <div id="ips">000.0</div>
+                        <div id="info">
+                            <div title="Frames Per Second">
+                                FPS:
+                                <div id="fps">00.0</div>
+                            </div>
+                            <div title="Instructions Per Second">
+                                IPS:
+                                <div id="ips">000.0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="screen-container">
+                        <canvas
+                            id="screen"
+                            width="320"
+                            height="160"
+                            style="border: 1px solid #000000"
+                        ></canvas>
+                    </div>
+                </div>
+
+                <div id="settings-container" class="window-item">
+                    <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
+                    <div>
+                        <button id="load-rom-btn" onclick="showLoadRomWindow()">
+                            Load ROM
+                        </button>
+                        <button
+                            id="upload-rom-btn"
+                            onclick="showUploadRomWindow()"
+                        >
+                            Upload ROM
+                        </button>
+                        <button id="show-hide-keyboard-btn">
+                            Show Keyboard
+                        </button>
+                    </div>
+                    <div>
+                        <h2>Settings</h2>
+                        <div id="settings-inputs">
+                            <label title="Screen Scale">
+                                Screen Scale
+                                <input
+                                    type="range"
+                                    name="screen-scale"
+                                    id="screen-scale"
+                                    min="1"
+                                    max="15"
+                                    value="2"
+                                    step="1"
+                                />
+                            </label>
+
+                            <label title="Frames Per Second">
+                                Target FPS
+                                <input
+                                    type="range"
+                                    name="target-fps"
+                                    id="target-fps"
+                                    min="1"
+                                    max="60"
+                                    value="60"
+                                    step="1"
+                                />
+                            </label>
+
+                            <label title="Instructions Per Frame">
+                                Target IPF
+                                <input
+                                    type="range"
+                                    name="target-ipf"
+                                    id="target-ipf"
+                                    min="1"
+                                    max="1000"
+                                    value="10"
+                                    step="1"
+                                />
+                            </label>
+
+                            <label title="Background Color">
+                                Background Color
+                                <input
+                                    type="color"
+                                    name="bg-color"
+                                    id="bg-color"
+                                />
+                            </label>
+
+                            <label title="Fill Color">
+                                Fill Color
+                                <input
+                                    type="color"
+                                    name="fg-color"
+                                    id="fg-color"
+                                />
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h2>Quirks</h2>
+                        <div id="quirk-checkboxes">
+                            <label title="Shift Quirk">
+                                <input
+                                    type="checkbox"
+                                    name="quirkshift"
+                                    id="quirkshift"
+                                />
+                                <code>&lt;&lt;=</code> and
+                                <code>&gt;&gt;=</code> modify <var>Vx</var> in
+                                place and leave <var>Vy</var> unchanged
+                            </label>
+
+                            <label title="Memory Quirk Leave I Unchanged">
+                                <input
+                                    type="checkbox"
+                                    name="quirkmemoryLeaveIUnchanged"
+                                    id="quirkmemoryLeaveIUnchanged"
+                                />
+                                Load and Store operations leave
+                                <var>I</var> unchanged
+                            </label>
+
+                            <label title="Memory Quirk Increment I By X">
+                                <input
+                                    type="checkbox"
+                                    name="quirkmemoryIncrementByX"
+                                    id="quirkmemoryIncrementByX"
+                                />
+                                Load and Store operations Increment
+                                <var>I</var> by <var>X</var>
+                            </label>
+
+                            <label title="Jump Quirk">
+                                <input
+                                    type="checkbox"
+                                    name="quirkjump"
+                                    id="quirkjump"
+                                />
+                                Jump to
+                                <code><var>address</var> + <var>Vx</var></code>
+                                instead of
+                                <code><var>address</var> + <var>V0</var></code>
+                            </label>
+
+                            <label title="Wrap Quirk">
+                                <input
+                                    type="checkbox"
+                                    name="quirkwrap"
+                                    id="quirkwrap"
+                                />
+                                Sprite wrap
+                            </label>
+
+                            <label title="Logic Quirk">
+                                <input
+                                    type="checkbox"
+                                    name="quirklogic"
+                                    id="quirklogic"
+                                />
+                                Reset <var>Vf</var> after
+                                <code><var>Vx</var> |= <var>Vy</var></code
+                                >,
+                                <code><var>Vx</var> &= <var>Vy</var></code> and
+                                <code><var>Vx</var> ^= <var>Vy</var></code>
+                            </label>
                         </div>
                     </div>
                 </div>
-
-                <div id="screen-container">
-                    <canvas id="screen" width="320" height="160" style="border:1px solid #000000;"></canvas>
-                </div>
             </div>
 
-            <div id="settings-container" class="window-item">
-                <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
-                <div>
-                    <button id="load-rom-btn" onclick="showLoadRomWindow()">Load ROM</button>
-                    <button id="upload-rom-btn" onclick="showUploadRomWindow()">Upload ROM</button>
-                    <button id="show-hide-keyboard-btn">Show Keyboard</button>
-                </div>
-                <div>
-                    <h2>Settings</h2>
-                    <div id="settings-inputs">
-                        <label title="Screen Scale">
-                            Screen Scale
-                            <input type="range" name="screen-scale" id="screen-scale" min="1" max="15" value="2"
-                                step="1">
-                        </label>
-
-                        <label title="Frames Per Second">
-                            Target FPS
-                            <input type="range" name="target-fps" id="target-fps" min="1" max="60" value="60" step="1">
-                        </label>
-
-                        <label title="Instructions Per Frame">
-                            Target IPF
-                            <input type="range" name="target-ipf" id="target-ipf" min="1" max="1000" value="10"
-                                step="1">
-                        </label>
-
-                        <label title="Background Color">
-                            Background Color
-                            <input type="color" name="bg-color" id="bg-color">
-                        </label>
-
-                        <label title="Fill Color">
-                            Fill Color
-                            <input type="color" name="fg-color" id="fg-color">
-                        </label>
+            <div class="layout-column">
+                <div id="debug-items-container" class="window-item">
+                    <div class="table-container">
+                        <table
+                            id="pointers-table"
+                            class="hex-edit hex-table"
+                        ></table>
                     </div>
-                </div>
-                <div>
-                    <h2>Quirks</h2>
-                    <div id="quirk-checkboxes">
-                        <label title="Shift Quirk">
-                            <input type="checkbox" name="quirkshift" id="quirkshift">
-                            <code>&lt;&lt;=</code> and <code>&gt;&gt;=</code> modify <var>Vx</var> in place and leave
-                            <var>Vy</var> unchanged
-                        </label>
 
-                        <label title="Memory Quirk Leave I Unchanged">
-                            <input type="checkbox" name="quirkmemoryLeaveIUnchanged" id="quirkmemoryLeaveIUnchanged">
-                            Load and Store operations leave <var>I</var> unchanged
-                        </label>
+                    <div class="table-container">
+                        <table
+                            id="timers-table"
+                            class="hex-edit hex-table"
+                        ></table>
+                    </div>
+                    <div class="table-container">
+                        <table
+                            id="registers-table"
+                            class="hex-edit hex-table"
+                        ></table>
+                    </div>
+                    <div class="table-container">
+                        <table
+                            id="stack-table"
+                            class="hex-edit hex-table"
+                        ></table>
+                    </div>
 
-                        <label title="Memory Quirk Increment I By X">
-                            <input type="checkbox" name="quirkmemoryIncrementByX" id="quirkmemoryIncrementByX">
-                            Load and Store operations Increment <var>I</var> by <var>X</var>
-                        </label>
-
-                        <label title="Jump Quirk">
-                            <input type="checkbox" name="quirkjump" id="quirkjump">
-                            Jump to <code><var>address</var> + <var>Vx</var></code> instead of
-                            <code><var>address</var> + <var>V0</var></code>
-                        </label>
-
-                        <label title="Wrap Quirk">
-                            <input type="checkbox" name="quirkwrap" id="quirkwrap">
-                            Sprite wrap
-                        </label>
-
-                        <label title="Logic Quirk">
-                            <input type="checkbox" name="quirklogic" id="quirklogic">
-                            Reset <var>Vf</var> after <code><var>Vx</var> |= <var>Vy</var></code>,
-                            <code><var>Vx</var> &= <var>Vy</var></code> and <code><var>Vx</var> ^= <var>Vy</var></code>
-                        </label>
+                    <div class="table-container">
+                        <table
+                            id="memory-table"
+                            class="hex-edit hex-table"
+                        ></table>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <div class="layout-column">
-            <div id="debug-items-container" class="window-item">
-                <div class="table-container">
-                    <table id="pointers-table" class="hex-edit hex-table"></table>
-                </div>
+        <div id="keyboard-container" class="">
+            <div class="dragger"></div>
+            <div id="keyboard">
+                <button tabindex="-1" key="1">1</button>
+                <button tabindex="-1" key="2">2</button>
+                <button tabindex="-1" key="3">3</button>
+                <button tabindex="-1" key="c">C</button>
 
-                <div class="table-container">
-                    <table id="timers-table" class="hex-edit hex-table"></table>
-                </div>
-                <div class="table-container">
-                    <table id="registers-table" class="hex-edit hex-table"></table>
-                </div>
-                <div class="table-container">
-                    <table id="stack-table" class="hex-edit hex-table"></table>
-                </div>
+                <button tabindex="-1" key="4">4</button>
+                <button tabindex="-1" key="5">5</button>
+                <button tabindex="-1" key="6">6</button>
+                <button tabindex="-1" key="d">D</button>
 
-                <div class="table-container">
-                    <table id="memory-table" class="hex-edit hex-table"></table>
-                </div>
+                <button tabindex="-1" key="7">7</button>
+                <button tabindex="-1" key="8">8</button>
+                <button tabindex="-1" key="9">9</button>
+                <button tabindex="-1" key="e">E</button>
+
+                <button tabindex="-1" key="a">A</button>
+                <button tabindex="-1" key="0">0</button>
+                <button tabindex="-1" key="b">B</button>
+                <button tabindex="-1" key="f">F</button>
             </div>
         </div>
-    </main>
 
-    <div id="keyboard-container" class="">
-        <div class="dragger"></div>
-        <div id="keyboard">
-            <button tabindex="-1" key="1">1</button>
-            <button tabindex="-1" key="2">2</button>
-            <button tabindex="-1" key="3">3</button>
-            <button tabindex="-1" key="c">C</button>
-
-            <button tabindex="-1" key="4">4</button>
-            <button tabindex="-1" key="5">5</button>
-            <button tabindex="-1" key="6">6</button>
-            <button tabindex="-1" key="d">D</button>
-
-            <button tabindex="-1" key="7">7</button>
-            <button tabindex="-1" key="8">8</button>
-            <button tabindex="-1" key="9">9</button>
-            <button tabindex="-1" key="e">E</button>
-
-            <button tabindex="-1" key="a">A</button>
-            <button tabindex="-1" key="0">0</button>
-            <button tabindex="-1" key="b">B</button>
-            <button tabindex="-1" key="f">F</button>
+        <div id="load-rom-window" class="window">
+            <div>
+                <button
+                    class="material-icons-round md-24 close-btn"
+                    title="Close"
+                    onclick="hideLoadRomWindow()"
+                >
+                    close
+                </button>
+                <h1>Load ROM</h1>
+                <div id="rom-list"></div>
+            </div>
         </div>
-    </div>
 
-    <div id="load-rom-window" class="window">
-        <div>
-            <button class="material-icons-round md-24 close-btn" title="Close"
-                onclick="hideLoadRomWindow()">close</button>
-            <h1>Load ROM</h1>
-            <div id="rom-list"></div>
+        <div id="upload-rom-window" class="window" ondrop="dropHandler(event);">
+            <div>
+                <span class="material-icons-round md-dark"> upload_file </span>
+                <p>Drop your file here</p>
+            </div>
         </div>
-    </div>
 
-    <div id="upload-rom-window" class="window" ondrop="dropHandler(event);">
-        <div>
-            <span class="material-icons-round md-dark">
-                upload_file
-            </span>
-            <p>Drop your file here</p>
-        </div>
-    </div>
+        <noscript>
+            <div>
+                <h1>JavaScript is Disabled</h1>
+                <p>
+                    JavaScript is disabled in your browser. Please enable it to
+                    access this website.
+                </p>
+            </div>
+        </noscript>
+    </body>
 
-    <noscript>
-        <div>
-            <h1>JavaScript is Disabled</h1>
-            <p>JavaScript is disabled in your browser. Please enable it to access this website.</p>
-        </div>
-    </noscript>
-</body>
-
-<script src="./JS/Utils.js"></script>
-<script src="./JS/Chip8Input.js"></script>
-<script src="./JS/Chip8Screen.js"></script>
-<script src="./JS/Chip8Speaker.js"></script>
-<script src="./JS/Chip8Array.js"></script>
-<script src="./JS/Chip8CPU.js"></script>
-<script src="./Emulator.js"></script>
-<script src="./chip8.js"></script>
-
+    <script src="./JS/Utils.js"></script>
+    <script src="./JS/Chip8Input.js"></script>
+    <script src="./JS/Chip8Screen.js"></script>
+    <script src="./JS/Chip8Speaker.js"></script>
+    <script src="./JS/Chip8Array.js"></script>
+    <script src="./JS/Chip8CPU.js"></script>
+    <script src="./Emulator.js"></script>
+    <script src="./chip8.js"></script>
 </html>

@@ -20,7 +20,9 @@ class Chip8Screen {
         this.#updated = true;
 
         // Buffer for rendering on the screen
-        this.#screenBuffer = new Uint8Array(this.renderWidth * this.renderHeight);
+        this.#screenBuffer = new Uint8Array(
+            this.renderWidth * this.renderHeight
+        );
 
         this.updateResScale(resolutionScale);
     }
@@ -80,7 +82,12 @@ class Chip8Screen {
                 } else {
                     this.#ctx.fillStyle = this.#backgroundColor;
                 }
-                this.#ctx.fillRect(x * cellWidth, y * cellHeight, cellWidth, cellHeight);
+                this.#ctx.fillRect(
+                    x * cellWidth,
+                    y * cellHeight,
+                    cellWidth,
+                    cellHeight
+                );
             }
         }
     }
@@ -92,6 +99,6 @@ class Chip8Screen {
         y = pyModulo(y, this.renderHeight);
 
         this.#screenBuffer[y * this.renderWidth + x] ^= color;
-        return !this.#screenBuffer[y * this.renderWidth + x] && color;    // return true on overflow, ie. pixel was set and color was set
+        return !this.#screenBuffer[y * this.renderWidth + x] && color; // return true on overflow, ie. pixel was set and color was set
     }
 }

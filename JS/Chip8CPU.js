@@ -6,22 +6,20 @@ class Instruction {
     }
 
     set(instruction) {
-        this.type = (instruction >> 12) & 0x000F;
-        this.x = (instruction >> 8) & 0x000F;
-        this.y = (instruction >> 4) & 0x000F;
-        this.n = instruction & 0x000F;
-        this.kk = instruction & 0x00FF;
-        this.nnn = instruction & 0x0FFF;
+        this.type = (instruction >> 12) & 0x000f;
+        this.x = (instruction >> 8) & 0x000f;
+        this.y = (instruction >> 4) & 0x000f;
+        this.n = instruction & 0x000f;
+        this.kk = instruction & 0x00ff;
+        this.nnn = instruction & 0x0fff;
     }
-
 }
-
 
 class Chip8Cpu {
     /**
-     * 
-     * @param {HTMLCanvasElement} screen 
-     * @param {Object.<string, number[]>} font 
+     *
+     * @param {HTMLCanvasElement} screen
+     * @param {Object.<string, number[]>} font
      */
     constructor(screen, font) {
         this.screen = new Chip8Screen(screen, 5);
@@ -85,7 +83,7 @@ class Chip8Cpu {
 
     /**
      * Load a rom into memory
-     * @param {Uint8Array} rom 
+     * @param {Uint8Array} rom
      */
     loadRom(rom) {
         this.memory.setArray(0x200, rom);
@@ -93,7 +91,7 @@ class Chip8Cpu {
 
     /**
      * Load a font into memory
-     * @param {{Object.<string, number[]>}} font 
+     * @param {{Object.<string, number[]>}} font
      */
     loadFont(font) {
         let fontHeight = font[0].length;
@@ -124,12 +122,12 @@ class Chip8Cpu {
     }
 
     resetQuirks() {
-        this.quirkshift = false;                    // Shift Vy into Vx
-        this.quirkmemoryLeaveIUnchanged = false;    // Leave I unchanged (in save/load instructions)
-        this.quirkmemoryIncrementByX = false;       // Increment I by X (in save/load instructions)
-        this.quirkwrap = false;                     // sprite wrap
-        this.quirkjump = false;                     // jump to <address+vx> instead of <address+v0>
-        this.quirklogic = true;                     // reset vf to 0
+        this.quirkshift = false; // Shift Vy into Vx
+        this.quirkmemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
+        this.quirkmemoryIncrementByX = false; // Increment I by X (in save/load instructions)
+        this.quirkwrap = false; // sprite wrap
+        this.quirkjump = false; // jump to <address+vx> instead of <address+v0>
+        this.quirklogic = true; // reset vf to 0
     }
 
     updateTimers() {
@@ -176,8 +174,8 @@ class Chip8Cpu {
      * @returns {void}
      */
     _set_carry(register, value, carry) {
-        this.registers.set(register, value & 0xFF);
-        this.registers.set(0xF, carry ? 1 : 0);
+        this.registers.set(register, value & 0xff);
+        this.registers.set(0xf, carry ? 1 : 0);
     }
 
     /**
@@ -185,12 +183,15 @@ class Chip8Cpu {
      * @returns {Number}
      */
     _fetch() {
-        return this.memory.get(this.programCounter) << 8 | this.memory.get(this.programCounter + 1);
+        return (
+            (this.memory.get(this.programCounter) << 8) |
+            this.memory.get(this.programCounter + 1)
+        );
     }
 
     /**
      * Decode an instruction and return an Instruction object
-     * @param {Instruction} instruction 
+     * @param {Instruction} instruction
      */
     _decode(instruction) {
         return new Instruction(instruction);
@@ -198,22 +199,27 @@ class Chip8Cpu {
 
     /**
      * Execute an instruction
-     * @param {Instruction} instruction 
+     * @param {Instruction} instruction
      */
     _execute(instruction) {
         let Vx = this.registers.get(instruction.x);
         let Vy = this.registers.get(instruction.y);
-        let i_increment = (this.quirkmemoryLeaveIUnchanged ? 0 : this.quirkmemoryIncrementByX ? (instruction.x) : (instruction.x + 1)) & 0xFFF;
+        let i_increment =
+            (this.quirkmemoryLeaveIUnchanged
+                ? 0
+                : this.quirkmemoryIncrementByX
+                ? instruction.x
+                : instruction.x + 1) & 0xfff;
         switch (instruction.type) {
             case 0x0:
                 switch (instruction.nnn) {
                     // 00E0
-                    case 0x0E0:
+                    case 0x0e0:
                         this.screen.clear();
                         return true;
                     // 00EE
-                    case 0x0EE:
-                        this.stackPointer = (this.stackPointer - 1);
+                    case 0x0ee:
+                        this.stackPointer = this.stackPointer - 1;
                         if (this.stackPointer < 0) {
                             this.stackPointer = 0;
                             console.warn("Stack underflow");
@@ -231,9 +237,9 @@ class Chip8Cpu {
             // 2NNN
             case 0x2:
                 this.stack.set(this.stackPointer, this.programCounter);
-                this.stackPointer = (this.stackPointer + 1);
-                if (this.stackPointer > 0xF) {
-                    this.stackPointer = 0xF;
+                this.stackPointer = this.stackPointer + 1;
+                if (this.stackPointer > 0xf) {
+                    this.stackPointer = 0xf;
                     console.warn("Stack overflow");
                 }
                 this.programCounter = instruction.nnn;
@@ -281,7 +287,7 @@ class Chip8Cpu {
                     case 0x1:
                         this.registers.set(instruction.x, Vx | Vy);
                         if (this.quirklogic) {
-                            this.registers.set(0xF, 0);
+                            this.registers.set(0xf, 0);
                         }
                         return true;
 
@@ -289,7 +295,7 @@ class Chip8Cpu {
                     case 0x2:
                         this.registers.set(instruction.x, Vx & Vy);
                         if (this.quirklogic) {
-                            this.registers.set(0xF, 0);
+                            this.registers.set(0xf, 0);
                         }
                         return true;
 
@@ -297,14 +303,14 @@ class Chip8Cpu {
                     case 0x3:
                         this.registers.set(instruction.x, Vx ^ Vy);
                         if (this.quirklogic) {
-                            this.registers.set(0xF, 0);
+                            this.registers.set(0xf, 0);
                         }
                         return true;
 
                     // 8XY4
                     case 0x4:
                         var result = Vx + Vy;
-                        this._set_carry(instruction.x, result, result > 0xFF);
+                        this._set_carry(instruction.x, result, result > 0xff);
                         return true;
 
                     // 8XY5
@@ -329,7 +335,7 @@ class Chip8Cpu {
                         return true;
 
                     // 8XYE
-                    case 0xE:
+                    case 0xe:
                         if (!this.quirkshift) {
                             this.registers.set(instruction.x, Vy);
                         }
@@ -347,61 +353,80 @@ class Chip8Cpu {
                 return true;
 
             // ANNN
-            case 0xA:
+            case 0xa:
                 this.indexRegister = instruction.nnn;
                 return true;
 
             // BNNN
-            case 0xB:
+            case 0xb:
                 if (this.quirkjump) {
                     this.programCounter = instruction.nnn + Vx;
                 } else {
-                    this.programCounter = instruction.nnn + this.registers.get(0);
+                    this.programCounter =
+                        instruction.nnn + this.registers.get(0);
                 }
                 return true;
 
             // CXKK
-            case 0xC:
-                this.registers.set(instruction.x, Math.floor(Math.random() * 0xFF) & instruction.kk);
+            case 0xc:
+                this.registers.set(
+                    instruction.x,
+                    Math.floor(Math.random() * 0xff) & instruction.kk
+                );
                 return true;
 
             // DXYN
-            case 0xD:
+            case 0xd:
                 // if (!this.VBlank) {
                 //     this.waitForVBlank = true;
                 //     this.programCounter -= 2;
                 //     return true;
                 // }
                 // this.waitForVBlank = false;
-                let screenX = Vx % this.screen.renderWidth;     // Both Vx and renderWidth are positive, so no need to use pymodulo
-                let screenY = Vy % this.screen.renderHeight;    // Both Vy and renderHeight are also positive
+                let screenX = Vx % this.screen.renderWidth; // Both Vx and renderWidth are positive, so no need to use pymodulo
+                let screenY = Vy % this.screen.renderHeight; // Both Vy and renderHeight are also positive
                 let spriteHeight = instruction.n;
                 let spriteWidth = 8;
-                let yCondition = (this.quirkwrap) ? ((y) => (y < spriteHeight)) : ((y) => (y < spriteHeight && y + screenY < this.screen.renderHeight));
-                let xCondition = (this.quirkwrap) ? ((x) => (x < spriteWidth )) : ((x) => (x < spriteWidth  && x + screenX < this.screen.renderWidth ));
-                this.registers.set(0xF, 0);
+                let yCondition = this.quirkwrap
+                    ? (y) => y < spriteHeight
+                    : (y) =>
+                          y < spriteHeight &&
+                          y + screenY < this.screen.renderHeight;
+                let xCondition = this.quirkwrap
+                    ? (x) => x < spriteWidth
+                    : (x) =>
+                          x < spriteWidth &&
+                          x + screenX < this.screen.renderWidth;
+                this.registers.set(0xf, 0);
 
                 for (let y = 0; yCondition(y); y++) {
                     let pixel_row = this.memory.get(this.indexRegister + y);
                     for (let x = 0; xCondition(x); x++) {
-                        this.registers.set(0xF, this.screen.setPixel((x + screenX), (y + screenY), (pixel_row >> 7) & 0b1) || this.registers.get(0xF));
+                        this.registers.set(
+                            0xf,
+                            this.screen.setPixel(
+                                x + screenX,
+                                y + screenY,
+                                (pixel_row >> 7) & 0b1
+                            ) || this.registers.get(0xf)
+                        );
                         pixel_row <<= 1;
                     }
                 }
 
                 return true;
 
-            case 0xE:
+            case 0xe:
                 switch (instruction.kk) {
                     // EX9E
-                    case 0x9E:
+                    case 0x9e:
                         if (this.input.isKeyPressed(Vx)) {
                             this.programCounter += 2;
                         }
                         return true;
 
                     // EXA1
-                    case 0xA1:
+                    case 0xa1:
                         if (!this.input.isKeyPressed(Vx)) {
                             this.programCounter += 2;
                         }
@@ -409,7 +434,7 @@ class Chip8Cpu {
                 }
                 break;
 
-            case 0xF:
+            case 0xf:
                 switch (instruction.kk) {
                     // FX07
                     case 0x07:
@@ -417,7 +442,7 @@ class Chip8Cpu {
                         return true;
 
                     // FX0A
-                    case 0x0A:
+                    case 0x0a:
                         this.waitForInput = true;
                         this.input.onKeyPressed = (key) => {
                             this.registers.set(instruction.x, key);
@@ -436,10 +461,10 @@ class Chip8Cpu {
                         return true;
 
                     // FX1E
-                    case 0x1E:
+                    case 0x1e:
                         // this.registers.set(0xF, (this.indexRegister + Vx) > 0xFFF);
                         // this.indexRegister += Vx;
-                        this.indexRegister = (this.indexRegister + Vx) & 0xFFF;
+                        this.indexRegister = (this.indexRegister + Vx) & 0xfff;
                         return true;
 
                     // FX29
@@ -449,15 +474,27 @@ class Chip8Cpu {
 
                     // FX33
                     case 0x33:
-                        this.memory.set((this.indexRegister + 0) & 0xFFF, (Vx % 1000) / 100);
-                        this.memory.set((this.indexRegister + 1) & 0xFFF, (Vx % 100) / 10);
-                        this.memory.set((this.indexRegister + 2) & 0xFFF, (Vx % 10) / 1);
+                        this.memory.set(
+                            (this.indexRegister + 0) & 0xfff,
+                            (Vx % 1000) / 100
+                        );
+                        this.memory.set(
+                            (this.indexRegister + 1) & 0xfff,
+                            (Vx % 100) / 10
+                        );
+                        this.memory.set(
+                            (this.indexRegister + 2) & 0xfff,
+                            (Vx % 10) / 1
+                        );
                         return true;
 
                     // FX55
                     case 0x55:
                         for (let i = 0; i <= instruction.x; i++) {
-                            this.memory.set((this.indexRegister + i) & 0xFFF, this.registers.get(i));
+                            this.memory.set(
+                                (this.indexRegister + i) & 0xfff,
+                                this.registers.get(i)
+                            );
                         }
 
                         // Original CHIP-8 incremented index register by X+1
@@ -467,7 +504,12 @@ class Chip8Cpu {
                     // FX65
                     case 0x65:
                         for (let i = 0; i <= instruction.x; i++) {
-                            this.registers.set(i, this.memory.get((this.indexRegister + i) & 0xFFF));
+                            this.registers.set(
+                                i,
+                                this.memory.get(
+                                    (this.indexRegister + i) & 0xfff
+                                )
+                            );
                         }
 
                         // Original CHIP-8 incremented index register by X+1

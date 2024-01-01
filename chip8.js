@@ -2,7 +2,6 @@
 
 let chip8 = new Chip8Emulator();
 
-
 var InfoRenderer = (() => {
     let stackTable = document.getElementById("stack-table");
     let memoryTable = document.getElementById("memory-table");
@@ -27,80 +26,161 @@ var InfoRenderer = (() => {
 
         pointersDisplayOptions = new DisplayTableOptions();
         pointersDisplayOptions.tableName = "Pointers";
-        pointersDisplayOptions.vNames = ['PC', 'I', 'SP'];
-        pointersDisplayOptions.hNames = ['Value'];
+        pointersDisplayOptions.vNames = ["PC", "I", "SP"];
+        pointersDisplayOptions.hNames = ["Value"];
         pointersDisplayOptions.numCols = 1;
         pointersDisplayOptions.bitness = 16;
-        displayTable(pointersTable, [emulator.programCounter, emulator.indexRegister, emulator.stackPointer], pointersDisplayOptions);
+        displayTable(
+            pointersTable,
+            [
+                emulator.programCounter,
+                emulator.indexRegister,
+                emulator.stackPointer,
+            ],
+            pointersDisplayOptions
+        );
 
         timersDisplayOptions = new DisplayTableOptions();
         timersDisplayOptions.tableName = "Timers";
-        timersDisplayOptions.vNames = ['DT', 'ST'];
-        timersDisplayOptions.hNames = ['Value'];
+        timersDisplayOptions.vNames = ["DT", "ST"];
+        timersDisplayOptions.hNames = ["Value"];
         timersDisplayOptions.numCols = 1;
         timersDisplayOptions.bitness = 16;
-        displayTable(timersTable, [emulator.delayTimer, emulator.soundTimer], timersDisplayOptions);
+        displayTable(
+            timersTable,
+            [emulator.delayTimer, emulator.soundTimer],
+            timersDisplayOptions
+        );
 
         memoryDisplayOptions = new DisplayTableOptions();
         memoryDisplayOptions.tableName = "Memory";
         memoryDisplayOptions.numCols = 16;
         memoryDisplayOptions.bitness = emulator.memory.bitness;
-        displayTable(memoryTable, emulator.memory.underlyingArray, memoryDisplayOptions);
+        displayTable(
+            memoryTable,
+            emulator.memory.underlyingArray,
+            memoryDisplayOptions
+        );
 
         stackDisplayOptions = new DisplayTableOptions();
         stackDisplayOptions.tableName = "Stack";
         stackDisplayOptions.numCols = 16;
         stackDisplayOptions.bitness = emulator.stack.bitness;
-        stackDisplayOptions.vNames = ['Value'];
-        displayTable(stackTable, emulator.stack.underlyingArray, stackDisplayOptions);
+        stackDisplayOptions.vNames = ["Value"];
+        displayTable(
+            stackTable,
+            emulator.stack.underlyingArray,
+            stackDisplayOptions
+        );
 
         registersDisplayOptions = new DisplayTableOptions();
         registersDisplayOptions.tableName = "Registers";
         registersDisplayOptions.numCols = 16;
         registersDisplayOptions.bitness = emulator.registers.bitness;
-        registersDisplayOptions.vNames = ['Value'];
-        registersDisplayOptions.hNames = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'VA', 'VB', 'VC', 'VD', 'VE', 'VF'];
-        displayTable(registersTable, emulator.registers.underlyingArray, registersDisplayOptions);
+        registersDisplayOptions.vNames = ["Value"];
+        registersDisplayOptions.hNames = [
+            "V0",
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8",
+            "V9",
+            "VA",
+            "VB",
+            "VC",
+            "VD",
+            "VE",
+            "VF",
+        ];
+        displayTable(
+            registersTable,
+            emulator.registers.underlyingArray,
+            registersDisplayOptions
+        );
     }
 
     function updateInfo(emulator) {
         fpsDisplay.textContent = emulator.fps.toFixed(1);
         ipsDisplay.textContent = emulator.ips.toFixed(1);
 
-        // Display Tables
-        updateTable(pointersTable, [emulator.programCounter, emulator.indexRegister, emulator.stackPointer], [-1], pointersDisplayOptions);
-        updateTable(timersTable, [emulator.delayTimer, emulator.soundTimer], [-1], timersDisplayOptions);
-        updateTable(memoryTable, emulator.memory.underlyingArray, emulator.memory.updates, memoryDisplayOptions);
-        updateTable(stackTable, emulator.stack.underlyingArray, emulator.stack.updates, stackDisplayOptions);
-        updateTable(registersTable, emulator.registers.underlyingArray, emulator.registers.updates, registersDisplayOptions);
+        // Display tables
+        updateTable(
+            pointersTable,
+            [
+                emulator.programCounter,
+                emulator.indexRegister,
+                emulator.stackPointer,
+            ],
+            [-1],
+            pointersDisplayOptions
+        );
+        updateTable(
+            timersTable,
+            [emulator.delayTimer, emulator.soundTimer],
+            [-1],
+            timersDisplayOptions
+        );
+        updateTable(
+            memoryTable,
+            emulator.memory.underlyingArray,
+            emulator.memory.updates,
+            memoryDisplayOptions
+        );
+        updateTable(
+            stackTable,
+            emulator.stack.underlyingArray,
+            emulator.stack.updates,
+            stackDisplayOptions
+        );
+        updateTable(
+            registersTable,
+            emulator.registers.underlyingArray,
+            emulator.registers.updates,
+            registersDisplayOptions
+        );
 
-        // Display Stack Pointer Highlight
+        // Display stack pointer highlight
         removeTableAttributes(
             stackTable,
-            { [prevStackPointer]: ['stack-pointer', 'title'] },
+            { [prevStackPointer]: ["stack-pointer", "title"] },
             stackDisplayOptions
         );
         addTableAttributes(
             stackTable,
-            { [emulator.stackPointer]: { 'stack-pointer': null, "title": `Stack Pointer: {${emulator.stackPointer}}` } },
+            {
+                [emulator.stackPointer]: {
+                    "stack-pointer": null,
+                    title: `Stack Pointer: {${emulator.stackPointer}}`,
+                },
+            },
             stackDisplayOptions
         );
         prevStackPointer = emulator.stackPointer;
 
-        // Display Program Counter Highlight
+        // Display program counter highlight
         removeTableAttributes(
             memoryTable,
             {
-                [prevProgramCounter]: ['program-counter', "title"],
-                [prevProgramCounter + 1]: ['program-counter', "title"]
+                [prevProgramCounter]: ["program-counter", "title"],
+                [prevProgramCounter + 1]: ["program-counter", "title"],
             },
             memoryDisplayOptions
         );
         addTableAttributes(
             memoryTable,
             {
-                [emulator.programCounter]: { 'program-counter': null, "title": `Program Counter: {${emulator.programCounter}}` },
-                [emulator.programCounter + 1]: { 'program-counter': null, "title": `Program Counter: {${emulator.programCounter}}` }
+                [emulator.programCounter]: {
+                    "program-counter": null,
+                    title: `Program Counter: {${emulator.programCounter}}`,
+                },
+                [emulator.programCounter + 1]: {
+                    "program-counter": null,
+                    title: `Program Counter: {${emulator.programCounter}}`,
+                },
             },
             memoryDisplayOptions
         );
@@ -109,27 +189,12 @@ var InfoRenderer = (() => {
 
     return {
         displayInfo: displayInfo,
-        updateInfo: updateInfo
-    }
+        updateInfo: updateInfo,
+    };
 })();
 
-// chip8.display = InfoRenderer.displayInfo.bind(chip8);
 InfoRenderer.displayInfo(chip8);
 chip8.updateDisplay = InfoRenderer.updateInfo.bind(null, chip8);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Load JSON
 function loadJson(file_path, on_load) {
@@ -144,9 +209,9 @@ function loadJson(file_path, on_load) {
             return;
         }
         on_load(JSON.parse(request.response));
-    }
-    request.open('GET', file_path, true);
-    request.responseType = 'text';
+    };
+    request.open("GET", file_path, true);
+    request.responseType = "text";
     request.send();
 }
 
@@ -164,23 +229,21 @@ function loadFileU8(file_path, on_load) {
         }
         let rom = new Uint8Array(request.response);
         on_load(rom);
-    }
-    request.open('GET', file_path, true);
-    request.responseType = 'arraybuffer';
+    };
+    request.open("GET", file_path, true);
+    request.responseType = "arraybuffer";
     request.send();
 }
-
-
 
 // Controls
 
 function resume() {
-    playPauseBtn.textContent = 'pause';
+    playPauseBtn.textContent = "pause";
     chip8.resume();
 }
 
 function pause() {
-    playPauseBtn.textContent = 'play_arrow';
+    playPauseBtn.textContent = "play_arrow";
     chip8.pause();
 }
 
@@ -193,7 +256,7 @@ function playPause() {
 }
 
 function replay() {
-    playPauseBtn.textContent = 'play_arrow';
+    playPauseBtn.textContent = "play_arrow";
     chip8.killProcess();
     chip8.updateDisplay();
 }
@@ -211,7 +274,6 @@ function stepFrame() {
 }
 
 // Pause/Resume based on page visibility
-
 function handleVisibilityChange() {
     if (document.hidden) {
         pause();
@@ -220,7 +282,6 @@ function handleVisibilityChange() {
 }
 
 document.addEventListener("visibilitychange", handleVisibilityChange);
-
 
 // Load Rom List
 
@@ -232,18 +293,39 @@ let romsJSON;
 function runRomByName(name) {
     let romsrc = `./chip8Archive/roms/${name}.ch8`;
 
-    chip8.screen.fillColor = romsJSON[name]["options"]["fillColor"] ? romsJSON[name]["options"]["fillColor"] : "#FFFFFF";
-    chip8.screen.backgroundColor = romsJSON[name]["options"]["backgroundColor"] ? romsJSON[name]["options"]["backgroundColor"] : "#000000";
+    chip8.screen.fillColor = romsJSON[name]["options"]["fillColor"]
+        ? romsJSON[name]["options"]["fillColor"]
+        : "#FFFFFF";
+    chip8.screen.backgroundColor = romsJSON[name]["options"]["backgroundColor"]
+        ? romsJSON[name]["options"]["backgroundColor"]
+        : "#000000";
     chip8.instructionsPerFrame = romsJSON[name]["options"]["tickrate"];
     updateSettingsUI();
 
     chip8.cpu.resetQuirks();
-    chip8.cpu.quirkmemoryLeaveIUnchanged = ('loadStoreQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["loadStoreQuirks"] : chip8.cpu.quirkmemoryLeaveIUnchanged;
-    chip8.cpu.quirkmemoryIncrementByX = chip8.cpu.quirkmemoryLeaveIUnchanged ? false : chip8.cpu.quirkmemoryIncrementByX;
-    chip8.cpu.quirkshift = ('shiftQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["shiftQuirks"] : chip8.cpu.quirkshift;
-    chip8.cpu.quirkjump = ('jumpQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["jumpQuirks"] : chip8.cpu.quirkjump;
-    chip8.cpu.quirkwrap = ('clipQuirks' in romsJSON[name]["options"]) ? !(romsJSON[name]["options"]["clipQuirks"]) : chip8.cpu.quirkwrap;
-    chip8.cpu.quirklogic = ('logicQuirks' in romsJSON[name]["options"]) ? romsJSON[name]["options"]["logicQuirks"] : chip8.cpu.quirklogic;
+    chip8.cpu.quirkmemoryLeaveIUnchanged =
+        "loadStoreQuirks" in romsJSON[name]["options"]
+            ? romsJSON[name]["options"]["loadStoreQuirks"]
+            : chip8.cpu.quirkmemoryLeaveIUnchanged;
+    chip8.cpu.quirkmemoryIncrementByX = chip8.cpu.quirkmemoryLeaveIUnchanged
+        ? false
+        : chip8.cpu.quirkmemoryIncrementByX;
+    chip8.cpu.quirkshift =
+        "shiftQuirks" in romsJSON[name]["options"]
+            ? romsJSON[name]["options"]["shiftQuirks"]
+            : chip8.cpu.quirkshift;
+    chip8.cpu.quirkjump =
+        "jumpQuirks" in romsJSON[name]["options"]
+            ? romsJSON[name]["options"]["jumpQuirks"]
+            : chip8.cpu.quirkjump;
+    chip8.cpu.quirkwrap =
+        "clipQuirks" in romsJSON[name]["options"]
+            ? !romsJSON[name]["options"]["clipQuirks"]
+            : chip8.cpu.quirkwrap;
+    chip8.cpu.quirklogic =
+        "logicQuirks" in romsJSON[name]["options"]
+            ? romsJSON[name]["options"]["logicQuirks"]
+            : chip8.cpu.quirklogic;
     updateQuirksUI();
 
     loadFileU8(romsrc, (rom) => {
@@ -264,16 +346,14 @@ function romCard(name, imgsrc, romAuthors, description, event) {
         }
     }
 
-    return (
-        `<div class="rom-card" title="${description}" onclick="runRomByName('${name}')">
+    return `<div class="rom-card" title="${description}" onclick="runRomByName('${name}')">
             <img src="${imgsrc}" alt="${name}">
             <div class="rom-card-title">${name}</div>
             <div class="rom-card-author-event">
                 ${authorLinks}
-                ${((event) ? ` • ${event}` : "")}
+                ${event ? ` • ${event}` : ""}
             </div>
-        </div>`
-    )
+        </div>`;
 }
 
 // Load a list of roms from a json file
@@ -289,28 +369,30 @@ function loadRomsList() {
 
                     let romAuthors = {};
                     for (const i in roms[key].authors) {
-                        let author = (roms[key].authors[i] != "your name here") ? roms[key].authors[i] : "Unknown";
+                        let author =
+                            roms[key].authors[i] != "your name here"
+                                ? roms[key].authors[i]
+                                : "Unknown";
                         romAuthors[author] = authors[roms[key].authors[i]];
                     }
 
                     romList.innerHTML += romCard(
-                        key,                                                // rom name
+                        key, // rom name
                         `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
-                        romAuthors,                                         // authors
-                        roms[key].desc,                                     // description
-                        roms[key].event                                     // event
+                        romAuthors, // authors
+                        roms[key].desc, // description
+                        roms[key].event // event
                     );
                 }
             }
             romList.querySelectorAll("a").forEach((a) => {
                 a.onclick = (e) => {
                     e.stopPropagation();
-                }
-            })
+                };
+            });
         });
     });
 }
-
 
 // Show Hide Windows
 
@@ -338,7 +420,6 @@ function hideUploadRomWindow() {
     hideWindow(uploadRomWindow);
 }
 
-
 loadRomWindow.addEventListener("click", hideLoadRomWindow);
 loadRomWindow.firstChild.addEventListener("click", (e) => {
     e.preventDefault();
@@ -346,7 +427,6 @@ loadRomWindow.firstChild.addEventListener("click", (e) => {
 });
 
 uploadRomWindow.addEventListener("click", hideUploadRomWindow);
-
 
 // Drag and drop rom file
 
@@ -384,7 +464,7 @@ function dropHandler(ev) {
             return;
         }
     } else {
-        const file = ev.dataTransfer.files[0]
+        const file = ev.dataTransfer.files[0];
         let reader = new FileReader();
 
         reader.onload = onLoad;
@@ -420,13 +500,15 @@ function dragLeaveHandler(ev) {
     if (!dragLeaveTimeout) {
         dragLeaveTimeout = setTimeout(() => {
             uploadRomWindow.classList.remove("window-active");
-        }, 500)
+        }, 500);
     }
 }
 
-
 // Quirks
-let quirkCheckboxes = document.getElementById("quirk-checkboxes").querySelectorAll('input[type="checkbox"]');
+
+let quirkCheckboxes = document
+    .getElementById("quirk-checkboxes")
+    .querySelectorAll('input[type="checkbox"]');
 
 function updateQuirksUI() {
     for (let i = 0; i < quirkCheckboxes.length; i++) {
@@ -457,7 +539,9 @@ function updateQuirksUI() {
     }
 }
 
-let settingsInputs = document.getElementById("settings-inputs").querySelectorAll('input');
+let settingsInputs = document
+    .getElementById("settings-inputs")
+    .querySelectorAll("input");
 
 function updateSettingsUI() {
     for (let i = 0; i < settingsInputs.length; i++) {
@@ -490,7 +574,7 @@ function updateSettingsUI() {
 let playPauseBtn = document.getElementById("play-pause");
 
 function runRom(rom) {
-    playPauseBtn.textContent = 'pause';
+    playPauseBtn.textContent = "pause";
     chip8.killProcess();
     if (!chip8.loadRom(rom)) {
         return;
@@ -499,14 +583,16 @@ function runRom(rom) {
 }
 
 window.onload = function () {
-    // Virtual Keyboard Events
+    // Virtual keyboard events
     let keyboardContainer = document.getElementById("keyboard-container");
     let virtualKeyboard = document.getElementById("keyboard");
-    let virtualKeys = virtualKeyboard.querySelectorAll('button');
-    let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
+    let virtualKeys = virtualKeyboard.querySelectorAll("button");
+    let showHideKeyboardButton = document.getElementById(
+        "show-hide-keyboard-btn"
+    );
     let main = document.querySelector("main");
 
-    showHideKeyboardButton.addEventListener('click', () => {
+    showHideKeyboardButton.addEventListener("click", () => {
         if (!keyboardContainer.classList.contains("keyboard-active")) {
             keyboardContainer.classList.add("keyboard-active");
             main.classList.add("keyboard-active");
@@ -519,28 +605,32 @@ window.onload = function () {
     });
 
     for (let btnIdx = 0; virtualKeys[btnIdx]; btnIdx++) {
-        // Mouse Events
-        virtualKeys[btnIdx].addEventListener('mousedown', function (e) {
+        // Mouse events
+        virtualKeys[btnIdx].addEventListener("mousedown", function (e) {
             var key = this.attributes.key.value;
             chip8.pressKey(key);
 
-            document.addEventListener('mouseup', function (e) {
-                chip8.releaseKey(key);
-            }, { once: true });
+            document.addEventListener(
+                "mouseup",
+                function (e) {
+                    chip8.releaseKey(key);
+                },
+                { once: true }
+            );
         });
 
         // Touch Events
-        virtualKeys[btnIdx].addEventListener('touchstart', function (e) {
+        virtualKeys[btnIdx].addEventListener("touchstart", function (e) {
             chip8.pressKey(this.attributes.key.value);
         });
-        virtualKeys[btnIdx].addEventListener('touchend', function (e) {
+        virtualKeys[btnIdx].addEventListener("touchend", function (e) {
             chip8.releaseKey(this.attributes.key.value);
-        })
+        });
     }
 
-    // Quirk Checkbox Events
+    // Quirk checkbox events
     for (let checkbox of quirkCheckboxes) {
-        checkbox.addEventListener('change', function (e) {
+        checkbox.addEventListener("change", function (e) {
             let quirkName = this.name;
             let quirkValue = this.checked;
 
@@ -550,11 +640,15 @@ window.onload = function () {
                     break;
                 case "quirkmemoryLeaveIUnchanged":
                     chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue;
-                    chip8.cpu.quirkmemoryIncrementByX = quirkValue ? false : chip8.cpu.quirkmemoryIncrementByX;
+                    chip8.cpu.quirkmemoryIncrementByX = quirkValue
+                        ? false
+                        : chip8.cpu.quirkmemoryIncrementByX;
                     break;
                 case "quirkmemoryIncrementByX":
                     chip8.cpu.quirkmemoryIncrementByX = quirkValue;
-                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue ? false : chip8.cpu.quirkmemoryLeaveIUnchanged;
+                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue
+                        ? false
+                        : chip8.cpu.quirkmemoryLeaveIUnchanged;
                     break;
                 case "quirkjump":
                     chip8.cpu.quirkjump = quirkValue;
@@ -571,7 +665,7 @@ window.onload = function () {
     }
 
     for (let setting of settingsInputs) {
-        setting.addEventListener('input', function (e) {
+        setting.addEventListener("input", function (e) {
             let settingName = this.name;
             let settingValue = this.value;
 
@@ -602,4 +696,4 @@ window.onload = function () {
     updateSettingsUI();
     updateQuirksUI();
     loadRomsList();
-}
+};

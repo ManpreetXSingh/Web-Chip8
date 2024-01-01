@@ -1,7 +1,7 @@
 :root {
     --scrollbar-width: 5px;
-    --scrollbar-color: rgba(0, 0, 0, .5);
-    --scrollbar-bg-color: rgba(0, 0, 0, 0.100);
+    --scrollbar-color: rgba(0, 0, 0, 0.5);
+    --scrollbar-bg-color: rgba(0, 0, 0, 0.1);
 
     --max-width: min(70rem, 100%);
     --min-width: min(33rem, 100%);
@@ -13,10 +13,14 @@
     --secondary: rgb(224, 179, 255);
     --accent: rgb(137, 1, 228);
 
-    --gradient-bg: linear-gradient(135deg, var(--primary) 0%, var(--accent) 11%, var(--secondary) 100%);
+    --gradient-bg: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--accent) 11%,
+        var(--secondary) 100%
+    );
     /* background: linear-gradient(135deg, rgba(11, 6, 105, 1) 0%, rgba(9, 9, 121, 1) 11%, rgba(0, 212, 255, 1) 100%); */
 }
-
 
 * {
     box-sizing: border-box;
@@ -32,7 +36,6 @@ html {
     background: var(--gradient-bg);
 }
 
-
 body {
     margin: 0;
     padding: 0;
@@ -44,8 +47,7 @@ body {
     justify-content: center;
     align-items: center;
 
-    font-family: 'Josefin Sans', sans-serif;
-
+    font-family: "Josefin Sans", sans-serif;
 }
 
 main {
@@ -137,7 +139,7 @@ main {
         padding-top: 0.5rem;
     }
 
-    .window>div {
+    .window > div {
         box-shadow: none !important;
     }
 
@@ -150,7 +152,7 @@ main {
         align-items: end;
     }
 
-    #load-rom-window>div {
+    #load-rom-window > div {
         max-height: 85%;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -214,7 +216,6 @@ noscript {
     background-color: var(--scrollbar-color);
 }
 
-
 /* Material Icons */
 
 /* Rules for sizing the icon. */
@@ -252,7 +253,6 @@ noscript {
     color: rgba(255, 255, 255, 0.3);
 }
 
-
 /* Tables */
 
 .table-container {
@@ -268,7 +268,7 @@ noscript {
 }
 
 .hex-table {
-    font-family: 'Courier Prime', monospace;
+    font-family: "Courier Prime", monospace;
     text-transform: uppercase;
 
     border-right: 1px solid var(--secondary);
@@ -319,7 +319,6 @@ noscript {
     cursor: default;
 }
 
-
 /* Pointer Highlights */
 
 td[stack-pointer] {
@@ -348,7 +347,6 @@ td[program-counter] {
     background-color: var(--accent);
     font-weight: 100;
 }
-
 
 /* General Purpose CSS */
 
@@ -385,7 +383,7 @@ td[program-counter] {
     transition: opacity 0.25s ease;
 }
 
-.window>div {
+.window > div {
     position: relative;
     padding: 1rem;
 
@@ -406,7 +404,7 @@ td[program-counter] {
     opacity: 1;
 }
 
-.window.window-active>div {
+.window.window-active > div {
     transform: translateY(0);
 }
 
@@ -433,7 +431,7 @@ td[program-counter] {
 }
 
 code {
-    font-family: 'Courier Prime', monospace;
+    font-family: "Courier Prime", monospace;
     font-size: 0.8rem;
     white-space: nowrap;
     /* background-color: color-mix(in srgb, var(--secondary) 50%, var(--background) 50%); */
@@ -443,7 +441,7 @@ code {
 }
 
 var {
-    font-family: 'Courier Prime', monospace;
+    font-family: "Courier Prime", monospace;
     font-size: 0.8rem;
     font-style: normal;
     color: color-mix(in srgb, var(--primary) 95%, black 5%);
@@ -474,11 +472,10 @@ input[type="checkbox"]:hover {
 
 input[type="range"] {
     accent-color: var(--primary);
-    width: 100%
+    width: 100%;
 }
 
 input[type="color"] {
-
     border: none;
     background: none;
     outline: none;
@@ -493,7 +490,6 @@ input[type="color"] {
 ::-webkit-color-swatch {
     border-radius: 1rem;
 }
-
 
 /* input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
@@ -515,7 +511,6 @@ input[type="number"]:focus {
     border: 2px solid var(--primary);
     outline: none;
 } */
-
 
 /* Control Bar */
 
@@ -570,7 +565,6 @@ input[type="number"]:focus {
 .control-bar button:hover {
     box-shadow: inset 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
 }
-
 
 #debug-items-container {
     max-width: 100%;
@@ -631,7 +625,6 @@ input[type="number"]:focus {
     max-width: 100%;
 }
 
-
 /* Keyboard */
 
 .dragger {
@@ -687,7 +680,7 @@ input[type="number"]:focus {
     user-select: none;
 }
 
-#keyboard>button {
+#keyboard > button {
     /* cursor: pointer; */
     width: 100%;
     height: 100%;
@@ -703,13 +696,11 @@ input[type="number"]:focus {
     background: var(--primary);
 } */
 
-#keyboard>button:active {
+#keyboard > button:active {
     background: var(--accent);
 }
 
-
 /* Rom List */
-
 
 #load-rom-window h1 {
     text-align: center;
@@ -723,7 +714,7 @@ input[type="number"]:focus {
     /* z-index: 21; */
 }
 
-#load-rom-window>div {
+#load-rom-window > div {
     padding: 0;
 
     height: 100%;
@@ -794,10 +785,9 @@ input[type="number"]:focus {
     text-wrap: pretty;
 }
 
-
 /* Upload Rom */
 
-#upload-rom-window>div {
+#upload-rom-window > div {
     max-width: var(--max-width);
     max-height: 100%;
     width: 50rem;
@@ -811,6 +801,6 @@ input[type="number"]:focus {
     user-select: none;
 }
 
-#upload-rom-window>div>span {
+#upload-rom-window > div > span {
     font-size: 5rem;
 }

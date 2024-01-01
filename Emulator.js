@@ -1,22 +1,22 @@
 "use strict";
 
 const C8FONT = {
-    "0": [0xF0, 0x90, 0x90, 0x90, 0xF0],
-    "1": [0x20, 0x60, 0x20, 0x20, 0x70],
-    "2": [0xF0, 0x10, 0xF0, 0x80, 0xF0],
-    "3": [0xF0, 0x10, 0xF0, 0x10, 0xF0],
-    "4": [0x90, 0x90, 0xF0, 0x10, 0x10],
-    "5": [0xF0, 0x80, 0xF0, 0x10, 0xF0],
-    "6": [0xF0, 0x80, 0xF0, 0x90, 0xF0],
-    "7": [0xF0, 0x10, 0x20, 0x40, 0x40],
-    "8": [0xF0, 0x90, 0xF0, 0x90, 0xF0],
-    "9": [0xF0, 0x90, 0xF0, 0x10, 0xF0],
-    "A": [0xF0, 0x90, 0xF0, 0x90, 0x90],
-    "B": [0xE0, 0x90, 0xE0, 0x90, 0xE0],
-    "C": [0xF0, 0x80, 0x80, 0x80, 0xF0],
-    "D": [0xE0, 0x90, 0x90, 0x90, 0xE0],
-    "E": [0xF0, 0x80, 0xF0, 0x80, 0xF0],
-    "F": [0xF0, 0x80, 0x80, 0xF0, 0x80]
+    0: [0xf0, 0x90, 0x90, 0x90, 0xf0],
+    1: [0x20, 0x60, 0x20, 0x20, 0x70],
+    2: [0xf0, 0x10, 0xf0, 0x80, 0xf0],
+    3: [0xf0, 0x10, 0xf0, 0x10, 0xf0],
+    4: [0x90, 0x90, 0xf0, 0x10, 0x10],
+    5: [0xf0, 0x80, 0xf0, 0x10, 0xf0],
+    6: [0xf0, 0x80, 0xf0, 0x90, 0xf0],
+    7: [0xf0, 0x10, 0x20, 0x40, 0x40],
+    8: [0xf0, 0x90, 0xf0, 0x90, 0xf0],
+    9: [0xf0, 0x90, 0xf0, 0x10, 0xf0],
+    A: [0xf0, 0x90, 0xf0, 0x90, 0x90],
+    B: [0xe0, 0x90, 0xe0, 0x90, 0xe0],
+    C: [0xf0, 0x80, 0x80, 0x80, 0xf0],
+    D: [0xe0, 0x90, 0x90, 0x90, 0xe0],
+    E: [0xf0, 0x80, 0xf0, 0x80, 0xf0],
+    F: [0xf0, 0x80, 0x80, 0xf0, 0x80],
 };
 
 class Chip8Emulator {
@@ -51,7 +51,7 @@ class Chip8Emulator {
         this.#instructionIdx = 0;
         this.#oneSecTimer = 0;
 
-        this.updateDisplay = () => { };
+        this.updateDisplay = () => {};
         this.cpu = new Chip8Cpu(document.getElementById("screen"), font);
     }
 
@@ -105,7 +105,11 @@ class Chip8Emulator {
 
     loadRom(rom) {
         if (rom.length > this.memory.length - 0x200) {
-            console.error(`Rom is too large. ${rom.length} > ${this.memory.length - 0x200}`);
+            console.error(
+                `Rom is too large. ${rom.length} > ${
+                    this.memory.length - 0x200
+                }`
+            );
             return false;
         }
         this.#loadedRom = rom;
@@ -142,7 +146,9 @@ class Chip8Emulator {
             this.#oneSecTimer = 0;
             this.#timePrevious = window.performance.now();
 
-            this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
+            this.#processId = setTimeout(() => {
+                this.process(window.performance.now());
+            }, this.targetFrameInterval);
         }
     }
 
@@ -168,7 +174,7 @@ class Chip8Emulator {
 
         if (this.#instructionIdx == this.instructionsPerFrame) {
             this.#instructionIdx = 0;
-            this.stepFrame(autoAdjustFps = false);
+            this.stepFrame((autoAdjustFps = false));
         } else {
             this.#instructionIdx++;
             this.cpu.processNext();
@@ -227,11 +233,13 @@ class Chip8Emulator {
             this.pause();
             return;
         }
-        this.#processId = setTimeout(() => { this.process(window.performance.now()) }, this.targetFrameInterval)
+        this.#processId = setTimeout(() => {
+            this.process(window.performance.now());
+        }, this.targetFrameInterval);
     }
 
     calculateFps() {
-        this.fps = this.FpsCounter * 1000 / this.#oneSecTimer;
+        this.fps = (this.FpsCounter * 1000) / this.#oneSecTimer;
         this.ips = this.fps * this.instructionsPerFrame;
         this.#oneSecTimer = 0;
         this.FpsCounter = 0;
@@ -252,10 +260,12 @@ class Chip8Emulator {
             this.#adjustedTargetFps += this.targetFps - this.fps;
         }
         if (Math.abs(this.fps - this.targetFps) > 1) {
-            this.#adjustedTargetFps = this.#adjustedTargetFps + (Number(this.fps < this.targetFps) - Number(this.fps > this.targetFps));
+            this.#adjustedTargetFps =
+                this.#adjustedTargetFps +
+                (Number(this.fps < this.targetFps) -
+                    Number(this.fps > this.targetFps));
             this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
             console.log(`Target Fps Updated: ${this.#adjustedTargetFps}`);
         }
     }
-
 }

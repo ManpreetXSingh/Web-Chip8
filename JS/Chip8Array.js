@@ -58,7 +58,9 @@ class Chip8Array {
             throw new Error("Address out of bounds");
         }
         this.#arr.set(mem, addr);
-        this.#updates.concat(Array.from({ length: mem.length }, (v, i) => addr + i));
+        this.#updates.concat(
+            Array.from({ length: mem.length }, (v, i) => addr + i)
+        );
     }
 
     /**

@@ -19,7 +19,6 @@ class Keyboard {
         this.onkeyup = null;
     }
 
-
     /**
      * Draws the keyboard
      * @param {HTMLElement} container - The parent element
@@ -46,7 +45,6 @@ class Keyboard {
         container.appendChild(table);
     }
 
-
     _pressKey(idx) {
         const key = this.keyNames[idx].toLowerCase();
         this.buttons[idx].classList.add("pressed");
@@ -56,7 +54,6 @@ class Keyboard {
         }
     }
 
-
     _releaseKey(idx) {
         const key = this.keyNames[idx].toLowerCase();
         this.buttons[idx].classList.remove("pressed");
@@ -65,7 +62,6 @@ class Keyboard {
             this.onkeyup(key);
         }
     }
-
 
     /**
      * Adds a button to the keyboard
@@ -83,25 +79,33 @@ class Keyboard {
         this.buttons.push(button);
 
         // Mouse Events
-        button.addEventListener('mousedown', () => {
+        button.addEventListener("mousedown", () => {
             this._pressKey(idx);
 
-            document.addEventListener('mouseup', () => {
-                this._releaseKey(idx);
-            }, { once: true });
+            document.addEventListener(
+                "mouseup",
+                () => {
+                    this._releaseKey(idx);
+                },
+                { once: true }
+            );
         });
 
         // Touch Events
-        button.addEventListener('touchstart', () => {
+        button.addEventListener("touchstart", () => {
             this._pressKey(idx);
 
-            document.addEventListener('touchend', () => {
-                this._releaseKey(idx);
-            }, { once: true });
+            document.addEventListener(
+                "touchend",
+                () => {
+                    this._releaseKey(idx);
+                },
+                { once: true }
+            );
         });
 
         // Keyboard Events
-        document.addEventListener('keydown', (event) => {
+        document.addEventListener("keydown", (event) => {
             const key = event.key;
             if (this.keyMap[keyName].includes(key)) {
                 this._pressKey(idx);
@@ -109,11 +113,11 @@ class Keyboard {
                 let keyUp = (event) => {
                     if (key === event.key) {
                         this._releaseKey(idx);
-                        document.removeEventListener('keyup', keyUp);
+                        document.removeEventListener("keyup", keyUp);
                     }
-                }
+                };
 
-                document.addEventListener('keyup', keyUp);
+                document.addEventListener("keyup", keyUp);
             }
         });
     }
