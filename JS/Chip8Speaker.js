@@ -1,6 +1,4 @@
-"use strict";
-
-AudioContext = window.AudioContext || window.webkitAudioContext;
+const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 class Chip8Speaker {
     constructor() {
@@ -49,3 +47,5 @@ class Chip8Speaker {
         this.oscillator = null;
     }
 }
+
+export default Chip8Speaker;

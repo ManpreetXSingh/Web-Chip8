@@ -1,5 +1,3 @@
-"use strict";
-
 class Chip8Input {
     #keysReleased;
     constructor() {
@@ -52,3 +50,5 @@ class Chip8Input {
         return this.keysPressed[key];
     }
 }
+
+export default Chip8Input;

@@ -1,5 +1,3 @@
-"use strict";
-
 class Keyboard {
     #nRows;
     #nCols;
@@ -122,3 +120,5 @@ class Keyboard {
         });
     }
 }
+
+export default Keyboard;

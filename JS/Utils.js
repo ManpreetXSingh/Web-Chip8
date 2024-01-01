@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Similar to the % (modulo) operator in python.\
  * It returns the remainder from the division of the first argument by the second. A zero right argument returns NaN.\
@@ -7,24 +5,24 @@
  * The absolute value of the result is strictly smaller than the absolute value of the second operand.
  * e.g., 3.14%0.7 equals 0.34 (since 3.14 equals 4*0.7 + 0.34.)\
  */
-function pyModulo(a, b) {
+export function pyModulo(a, b) {
     return ((a % b) + b) % b;
 }
 
-function toHex(number, digits = 2) {
+export function toHex(number, digits = 2) {
     return number.toString(16).padStart(digits, "0");
 }
 
-function getBitness(num) {
+export function getBitness(num) {
     return Math.ceil(Math.log2(num));
 }
 
-const generateId = (() => {
+export const generateId = (() => {
     let id = 0;
     return () => id++;
 })();
 
-class DisplayTableOptions {
+export class DisplayTableOptions {
     #id;
     constructor() {
         this.numCols = 16;
@@ -56,7 +54,7 @@ class DisplayTableOptions {
  * @param {Array} array
  * @param {DisplayTableOptions} displayTableOptions
  */
-function displayTable(table, array, displayTableOptions) {
+export function displayTable(table, array, displayTableOptions) {
     if (displayTableOptions.vNames != null) {
         displayTableOptions.vAddressVisible = false;
     }
@@ -127,7 +125,7 @@ function displayTable(table, array, displayTableOptions) {
  * @param {Array} changes
  * @param {DisplayTableOptions} displayTableOptions
  */
-function updateTable(table, array, changes, displayTableOptions) {
+export function updateTable(table, array, changes, displayTableOptions) {
     if (changes.length === 0) {
         return;
     }
@@ -154,7 +152,7 @@ function updateTable(table, array, changes, displayTableOptions) {
     }
 }
 
-function addTableClasses(table, tableClassNames, displayTableOptions) {
+export function addTableClasses(table, tableClassNames, displayTableOptions) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
@@ -169,7 +167,11 @@ function addTableClasses(table, tableClassNames, displayTableOptions) {
     }
 }
 
-function removeTableClasses(table, tableClassNames, displayTableOptions) {
+export function removeTableClasses(
+    table,
+    tableClassNames,
+    displayTableOptions
+) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
@@ -184,7 +186,11 @@ function removeTableClasses(table, tableClassNames, displayTableOptions) {
     }
 }
 
-function addTableAttributes(table, tableAttributes, displayTableOptions) {
+export function addTableAttributes(
+    table,
+    tableAttributes,
+    displayTableOptions
+) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;
@@ -201,7 +207,11 @@ function addTableAttributes(table, tableAttributes, displayTableOptions) {
     }
 }
 
-function removeTableAttributes(table, tableAttributes, displayTableOptions) {
+export function removeTableAttributes(
+    table,
+    tableAttributes,
+    displayTableOptions
+) {
     const tbody = table.querySelector("tbody");
     const hasVHeader = displayTableOptions.hasVHeader;
     const numCols = tbody.children[0].children.length - 1 * hasVHeader;

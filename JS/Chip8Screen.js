@@ -1,4 +1,4 @@
-"use strict";
+import { pyModulo } from "./Utils.js";
 
 class Chip8Screen {
     #canvas;
@@ -102,3 +102,5 @@ class Chip8Screen {
         return !this.#screenBuffer[y * this.renderWidth + x] && color; // return true on overflow, ie. pixel was set and color was set
     }
 }
+
+export default Chip8Screen;

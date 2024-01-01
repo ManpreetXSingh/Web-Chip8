@@ -46,6 +46,15 @@
             href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap"
             rel="stylesheet"
         />
+
+        <!-- <script src="./JS/Utils.js" type="module"></script>
+        <script src="./JS/Chip8Input.js" type="module"></script>
+        <script src="./JS/Chip8Screen.js" type="module"></script>
+        <script src="./JS/Chip8Speaker.js" type="module"></script>
+        <script src="./JS/Chip8Array.js" type="module"></script>
+        <script src="./JS/Chip8CPU.js" type="module"></script>
+        <script src="./Emulator.js" type="module"></script> -->
+        <script src="./chip8.js" type="module"></script>
     </head>
 
     <body>
@@ -60,34 +69,30 @@
                         <div id="controls">
                             <!-- ↻↺↦↳⇒⇥⇢⇻▶▷ -->
                             <button
-                                id="replay"
+                                id="replay-btn"
                                 class="material-icons-round md-light md-24"
                                 title="Replay"
-                                onclick="replay()"
                             >
                                 replay
                             </button>
                             <button
-                                id="play-pause"
+                                id="play-pause-btn"
                                 class="material-icons-round md-light md-24"
                                 title="Play/Pause"
-                                onclick="playPause()"
                             >
                                 play_arrow
                             </button>
                             <button
-                                id="step"
+                                id="step-btn"
                                 class="material-icons-round md-light md-24"
                                 title="Step Instruction"
-                                onclick="step()"
                             >
                                 skip_next
                             </button>
                             <button
-                                id="step-frame"
+                                id="step-frame-btn"
                                 class="material-icons-round md-light md-24"
                                 title="Step Frame"
-                                onclick="stepFrame()"
                             >
                                 keyboard_tab
                             </button>
@@ -117,12 +122,11 @@
                 <div id="settings-container" class="window-item">
                     <!-- <button id="reload-btn" onclick="window.location.reload()">Reload</button> -->
                     <div>
-                        <button id="load-rom-btn" onclick="showLoadRomWindow()">
+                        <button id="load-rom-btn">
                             Load ROM
                         </button>
                         <button
                             id="upload-rom-btn"
-                            onclick="showUploadRomWindow()"
                         >
                             Upload ROM
                         </button>
@@ -329,9 +333,9 @@
         <div id="load-rom-window" class="window">
             <div>
                 <button
+                    id="close-load-rom-window-btn"
                     class="material-icons-round md-24 close-btn"
                     title="Close"
-                    onclick="hideLoadRomWindow()"
                 >
                     close
                 </button>
@@ -357,13 +361,4 @@
             </div>
         </noscript>
     </body>
-
-    <script src="./JS/Utils.js"></script>
-    <script src="./JS/Chip8Input.js"></script>
-    <script src="./JS/Chip8Screen.js"></script>
-    <script src="./JS/Chip8Speaker.js"></script>
-    <script src="./JS/Chip8Array.js"></script>
-    <script src="./JS/Chip8CPU.js"></script>
-    <script src="./Emulator.js"></script>
-    <script src="./chip8.js"></script>
 </html>

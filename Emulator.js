@@ -1,4 +1,4 @@
-"use strict";
+import Chip8Cpu from "./JS/Chip8CPU.js";
 
 const C8FONT = {
     0: [0xf0, 0x90, 0x90, 0x90, 0xf0],
@@ -269,3 +269,5 @@ class Chip8Emulator {
         }
     }
 }
+
+export default Chip8Emulator;

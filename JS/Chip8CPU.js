@@ -1,4 +1,7 @@
-"use strict";
+import Chip8Array from "./Chip8Array.js";
+import Chip8Screen from "./Chip8Screen.js";
+import Chip8Input from "./Chip8Input.js";
+import Chip8Speaker from "./Chip8Speaker.js";
 
 class Instruction {
     constructor(instruction) {
@@ -521,3 +524,6 @@ class Chip8Cpu {
         return false;
     }
 }
+
+export default Chip8Cpu;
+export { Instruction };

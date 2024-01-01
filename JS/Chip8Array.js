@@ -1,5 +1,3 @@
-"use strict";
-
 class Chip8Array {
     #arr;
     #bitness;
@@ -89,3 +87,5 @@ class Chip8Array {
         return this.#arr[addr];
     }
 }
+
+export default Chip8Array;

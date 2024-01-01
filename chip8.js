@@ -1,4 +1,5 @@
-"use strict";
+import Chip8Emulator from "./emulator.js";
+import { DisplayTableOptions, displayTable, updateTable, addTableAttributes, removeTableAttributes } from "./JS/Utils.js";
 
 let chip8 = new Chip8Emulator();
 
@@ -237,6 +238,8 @@ function loadFileU8(file_path, on_load) {
 
 // Controls
 
+let playPauseBtn = document.getElementById("play-pause-btn");
+
 function resume() {
     playPauseBtn.textContent = "pause";
     chip8.resume();
@@ -281,7 +284,11 @@ function handleVisibilityChange() {
     // resume();
 }
 
+playPauseBtn.addEventListener("click", playPause);
 document.addEventListener("visibilitychange", handleVisibilityChange);
+document.getElementById("replay-btn").addEventListener("click", replay);
+document.getElementById("step-btn").addEventListener("click", step);
+document.getElementById("step-frame-btn").addEventListener("click", stepFrame);
 
 // Load Rom List
 
@@ -346,14 +353,14 @@ function romCard(name, imgsrc, romAuthors, description, event) {
         }
     }
 
-    return `<div class="rom-card" title="${description}" onclick="runRomByName('${name}')">
-            <img src="${imgsrc}" alt="${name}">
-            <div class="rom-card-title">${name}</div>
-            <div class="rom-card-author-event">
-                ${authorLinks}
-                ${event ? ` • ${event}` : ""}
-            </div>
-        </div>`;
+    return `<div class="rom-card" title="${description}" card-name="${name}">
+                <img src="${imgsrc}" alt="${name}">
+                <div class="rom-card-title">${name}</div>
+                <div class="rom-card-author-event">
+                    ${authorLinks}
+                    ${event ? ` • ${event}` : ""}
+                </div>
+            </div>`;
 }
 
 // Load a list of roms from a json file
@@ -385,6 +392,13 @@ function loadRomsList() {
                     );
                 }
             }
+            romList.querySelectorAll(".rom-card").forEach((card) => {
+                card.onclick = (e) => {
+                    let romName = card.getAttribute("card-name");
+                    runRomByName(romName);
+                    e.stopPropagation();
+                };
+            })
             romList.querySelectorAll("a").forEach((a) => {
                 a.onclick = (e) => {
                     e.stopPropagation();
@@ -419,13 +433,21 @@ function showUploadRomWindow() {
 function hideUploadRomWindow() {
     hideWindow(uploadRomWindow);
 }
-
+document
+    .getElementById("load-rom-btn")
+    .addEventListener("click", showLoadRomWindow);
+document
+    .getElementById("close-load-rom-window-btn")
+    .addEventListener("click", hideLoadRomWindow);
 loadRomWindow.addEventListener("click", hideLoadRomWindow);
 loadRomWindow.firstChild.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
 });
 
+document
+    .getElementById("upload-rom-btn")
+    .addEventListener("click", showUploadRomWindow);
 uploadRomWindow.addEventListener("click", hideUploadRomWindow);
 
 // Drag and drop rom file
@@ -570,8 +592,6 @@ function updateSettingsUI() {
 }
 
 // Main
-
-let playPauseBtn = document.getElementById("play-pause");
 
 function runRom(rom) {
     playPauseBtn.textContent = "pause";
