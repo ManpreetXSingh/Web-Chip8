@@ -17,6 +17,27 @@ class Keyboard {
         this.onkeyup = null;
     }
 
+    moveKeyboard(container, dx, dy, containerX = null, containerY = null) {
+        var newX =
+            (containerX === null ? container.offsetLeft : containerX) + dx;
+        var newY =
+            (containerY === null ? container.offsetTop : containerY) + dy;
+
+        if (newX < 0) {
+            newX = 0;
+        } else if (newX + container.offsetWidth > window.innerWidth) {
+            newX = window.innerWidth - container.offsetWidth;
+        }
+        if (newY < 0) {
+            newY = 0;
+        } else if (newY + container.offsetHeight > window.innerHeight) {
+            newY = window.innerHeight - container.offsetHeight;
+        }
+
+        container.style.left = newX + "px";
+        container.style.top = newY + "px";
+    }
+
     /**
      * Draws the keyboard
      * @param {HTMLElement} container - The parent element
@@ -29,6 +50,62 @@ class Keyboard {
         dragger.classList.add("dragger");
         container.appendChild(dragger);
 
+        dragger.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            var initialX = event.clientX,
+                initialY = event.clientY;
+            var elementX = container.offsetLeft,
+                elementY = container.offsetTop;
+
+            const dragEventHandler = (event) => {
+                event.preventDefault();
+                this.moveKeyboard(
+                    container,
+                    event.clientX - initialX,
+                    event.clientY - initialY,
+                    elementX,
+                    elementY
+                );
+            };
+
+            document.addEventListener("mousemove", dragEventHandler);
+            document.addEventListener(
+                "mouseup",
+                () => {
+                    document.removeEventListener("mousemove", dragEventHandler);
+                },
+                { once: true }
+            );
+        });
+
+        dragger.addEventListener("touchstart", (event) => {
+            event.preventDefault();
+            var initialX = event.touches[0].clientX,
+                initialY = event.touches[0].clientY;
+            var elementX = container.offsetLeft,
+                elementY = container.offsetTop;
+
+            const dragEventHandler = (event) => {
+                event.preventDefault();
+                this.moveKeyboard(
+                    container,
+                    event.touches[0].clientX - initialX,
+                    event.touches[0].clientY - initialY,
+                    elementX,
+                    elementY
+                );
+            };
+
+            document.addEventListener("touchmove", dragEventHandler);
+            document.addEventListener(
+                "touchend",
+                () => {
+                    document.removeEventListener("touchmove", dragEventHandler);
+                },
+                { once: true }
+            );
+        });
+
         let table = document.createElement("table");
         table.classList.add("keyboard-table");
 
@@ -38,7 +115,6 @@ class Keyboard {
                 let cell = row.insertCell();
                 this._addButton(i * this.#nCols + j, cell);
             }
-            table.appendChild(row);
         }
         container.appendChild(table);
     }

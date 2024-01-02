@@ -1,5 +1,12 @@
 import Chip8Emulator from "./emulator.js";
-import { DisplayTableOptions, displayTable, updateTable, addTableAttributes, removeTableAttributes } from "./JS/Utils.js";
+import Keyboard from "./JS/Keyboard.js";
+import {
+    DisplayTableOptions,
+    displayTable,
+    updateTable,
+    addTableAttributes,
+    removeTableAttributes,
+} from "./JS/Utils.js";
 
 let chip8 = new Chip8Emulator();
 
@@ -398,7 +405,7 @@ function loadRomsList() {
                     runRomByName(romName);
                     e.stopPropagation();
                 };
-            })
+            });
             romList.querySelectorAll("a").forEach((a) => {
                 a.onclick = (e) => {
                     e.stopPropagation();
@@ -603,14 +610,53 @@ function runRom(rom) {
 }
 
 window.onload = function () {
+    let keyboard = new Keyboard(
+        [
+            "1",
+            "2",
+            "3",
+            "C",
+            "4",
+            "5",
+            "6",
+            "D",
+            "7",
+            "8",
+            "9",
+            "E",
+            "0",
+            "A",
+            "B",
+            "F",
+        ],
+        {
+            1: ["1"],
+            2: ["2"],
+            3: ["3"],
+            C: ["4"],
+            4: ["q"],
+            5: ["w"],
+            6: ["e"],
+            D: ["r"],
+            7: ["a"],
+            8: ["s"],
+            9: ["d"],
+            E: ["f"],
+            0: ["z"],
+            A: ["x"],
+            B: ["c"],
+            F: ["v"],
+        },
+        4
+    );
+
     // Virtual keyboard events
     let keyboardContainer = document.getElementById("keyboard-container");
-    let virtualKeyboard = document.getElementById("keyboard");
-    let virtualKeys = virtualKeyboard.querySelectorAll("button");
     let showHideKeyboardButton = document.getElementById(
         "show-hide-keyboard-btn"
     );
     let main = document.querySelector("main");
+    keyboard.draw(keyboardContainer);
 
     showHideKeyboardButton.addEventListener("click", () => {
         if (!keyboardContainer.classList.contains("keyboard-active")) {
@@ -624,29 +670,8 @@ window.onload = function () {
         }
     });
 
-    for (let btnIdx = 0; virtualKeys[btnIdx]; btnIdx++) {
-        // Mouse events
-        virtualKeys[btnIdx].addEventListener("mousedown", function (e) {
-            var key = this.attributes.key.value;
-            chip8.pressKey(key);
-
-            document.addEventListener(
-                "mouseup",
-                function (e) {
-                    chip8.releaseKey(key);
-                },
-                { once: true }
-            );
-        });
-
-        // Touch Events
-        virtualKeys[btnIdx].addEventListener("touchstart", function (e) {
-            chip8.pressKey(this.attributes.key.value);
-        });
-        virtualKeys[btnIdx].addEventListener("touchend", function (e) {
-            chip8.releaseKey(this.attributes.key.value);
-        });
-    }
+    keyboard.onkeydown = chip8.pressKey.bind(chip8);
+    keyboard.onkeyup = chip8.releaseKey.bind(chip8);
 
     // Quirk checkbox events
     for (let checkbox of quirkCheckboxes) {
