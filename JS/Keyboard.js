@@ -86,7 +86,6 @@ class Keyboard {
                 elementY = container.offsetTop;
 
             const dragEventHandler = (event) => {
-                event.preventDefault();
                 this.moveKeyboard(
                     container,
                     event.touches[0].clientX - initialX,

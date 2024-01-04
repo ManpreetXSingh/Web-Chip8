@@ -465,6 +465,9 @@ document.querySelector("body").addEventListener("dragenter", dragEnterHandler);
 document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
 document.querySelector("body").addEventListener("drop", dropCancelHandler);
 document.querySelector("body").addEventListener("dragover", dragOverHandler);
+document
+    .getElementById("upload-rom-window")
+    .addEventListener("drop", dropHandler);
 
 function dropHandler(ev) {
     function onLoad(e2) {
@@ -624,8 +627,8 @@ window.onload = function () {
             "8",
             "9",
             "E",
-            "0",
             "A",
+            "0",
             "B",
             "F",
         ],
@@ -642,8 +645,8 @@ window.onload = function () {
             8: ["s"],
             9: ["d"],
             E: ["f"],
-            0: ["z"],
-            A: ["x"],
+            A: ["z"],
+            0: ["x"],
             B: ["c"],
             F: ["v"],
         },

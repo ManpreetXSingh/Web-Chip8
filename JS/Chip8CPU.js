@@ -325,7 +325,7 @@ class Chip8Cpu {
                     // 8XY6
                     case 0x6:
                         if (!this.quirkshift) {
-                            this.registers.set(instruction.x, Vy);
+                            Vx = Vy;
                         }
                         var result = Vx >> 1;
                         this._set_carry(instruction.x, result, Vy & 0x1);
@@ -340,7 +340,7 @@ class Chip8Cpu {
                     // 8XYE
                     case 0xe:
                         if (!this.quirkshift) {
-                            this.registers.set(instruction.x, Vy);
+                            Vx = Vy;
                         }
                         var result = Vx << 1;
                         this._set_carry(instruction.x, result, (Vy >> 7) & 0x1);
