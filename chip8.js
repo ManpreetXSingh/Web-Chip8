@@ -8,7 +8,7 @@ import {
     removeTableAttributes,
 } from "./JS/Utils.js";
 
-let chip8 = new Chip8Emulator();
+let chip8 = new Chip8Emulator(60, 20);
 
 var InfoRenderer = (() => {
     let stackTable = document.getElementById("stack-table");

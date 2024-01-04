@@ -51,7 +51,7 @@ class Chip8Screen {
     }
 
     updateResScale(scale) {
-        this.#updateIndices = [-1];
+        this.#updateIndices[0] = -1;
 
         this.resScale = scale;
         this.#canvas.width = this.renderWidth * scale;
@@ -59,14 +59,14 @@ class Chip8Screen {
     }
 
     clear() {
-        this.#updateIndices = [-1];
+        this.#updateIndices[0] = -1;
 
         this.#screenBuffer.fill(0);
         this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
     }
 
     forceRefresh() {
-        this.#updateIndices = [-1];
+        this.#updateIndices[0] = -1;
         this.refresh();
     }
 
@@ -114,15 +114,19 @@ class Chip8Screen {
                 this.#ctx.fillRect(x * scale, y * scale, scale, scale);
             }
         }
-        this.#updateIndices = [];
+        this.#updateIndices.length = 0;
     }
 
     setPixel(x, y, color) {
-        x = pyModulo(x, this.renderWidth);
-        y = pyModulo(y, this.renderHeight);
+        x = x < this.renderWidth && x >= 0 ? x : pyModulo(x, this.renderWidth);
+        y = y < this.renderHeight && y >= 0 ? y : pyModulo(y, this.renderHeight);
         const idx = y * this.renderWidth + x;
 
-        this.#updateIndices.push(idx);
+        if (this.#updateIndices.length < 1024){
+            this.#updateIndices.push(idx);
+        } else {
+            this.#updateIndices[0] = -1;
+        }
 
         this.#screenBuffer[idx] ^= color;
         return !this.#screenBuffer[idx] && color; // return true on overflow, ie. pixel was set and color was set

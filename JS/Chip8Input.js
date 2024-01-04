@@ -27,7 +27,7 @@ class Chip8Input {
         for (const keyIdx in this.#keysReleased) {
             this.keysPressed[this.#keysReleased[keyIdx]] = false;
         }
-        this.#keysReleased = [];
+        this.#keysReleased.length = 0;
     }
 
     isKeyPressed(key) {

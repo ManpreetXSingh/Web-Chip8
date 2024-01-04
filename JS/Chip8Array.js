@@ -43,7 +43,7 @@ class Chip8Array {
      * Reset the `this.updates` array.
      */
     clearUpdates() {
-        this.#updates = [];
+        this.#updates.length = 0;
     }
 
     /**

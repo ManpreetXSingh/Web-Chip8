@@ -265,7 +265,7 @@ class Chip8Emulator {
                 (Number(this.fps < this.targetFps) -
                     Number(this.fps > this.targetFps));
             this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
-            console.log(`Target Fps Updated: ${this.#adjustedTargetFps}`);
+            // console.log(`Target Fps Updated: ${this.#adjustedTargetFps}`);
         }
     }
 }

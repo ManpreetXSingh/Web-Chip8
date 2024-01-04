@@ -28,7 +28,8 @@ class Chip8Cpu {
         this.screen = new Chip8Screen(screen, 5);
         this.input = new Chip8Input();
         this.speaker = new Chip8Speaker();
-        this._font = font;
+        this.font = font;
+        this.currentInstruction = new Instruction(0);
 
         // Font Location in memory
         this.fontOffset = 0x0050;
@@ -48,7 +49,7 @@ class Chip8Cpu {
         this.indexRegister = 0;
 
         // Load font into memory
-        this.loadFont(this._font);
+        this.loadFont(this.font);
 
         // Pointers //
 
@@ -74,7 +75,7 @@ class Chip8Cpu {
 
         // Events //
 
-        // If the screem was just updated
+        // If the screen was just updated
         this.VBlank = false;
 
         // Terminates the execution until reset
@@ -121,7 +122,7 @@ class Chip8Cpu {
         this.waitForInput = false;
         this.waitForVBlank = true;
         this.interrupted = false;
-        this.loadFont(this._font);
+        this.loadFont(this.font);
     }
 
     resetQuirks() {
@@ -197,7 +198,8 @@ class Chip8Cpu {
      * @param {Instruction} instruction
      */
     _decode(instruction) {
-        return new Instruction(instruction);
+        this.currentInstruction.set(instruction);
+        return this.currentInstruction;
     }
 
     /**
