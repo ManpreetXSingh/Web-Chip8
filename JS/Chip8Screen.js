@@ -4,10 +4,16 @@ class Chip8Screen {
     #canvas;
     #ctx;
     #screenBuffer;
-    #updated;
+    #updateIndices = [];
     #fillColor;
     #backgroundColor;
 
+    /**
+     * @param {HTMLCanvasElement} canvas
+     * @param {number} resolutionScale
+     * @param {number} width
+     * @param {number} height
+     */
     constructor(canvas, resolutionScale = 1, width = 64, height = 32) {
         this.renderWidth = width;
         this.renderHeight = height;
@@ -16,10 +22,9 @@ class Chip8Screen {
         this.#backgroundColor = "#000000";
 
         this.#canvas = canvas;
-        this.#ctx = this.#canvas.getContext("2d");
-        this.#updated = true;
+        this.#ctx = this.#canvas.getContext("2d", { alpha: false });
+        this.#updateIndices = [-1];
 
-        // Buffer for rendering on the screen
         this.#screenBuffer = new Uint8Array(
             this.renderWidth * this.renderHeight
         );
@@ -46,7 +51,7 @@ class Chip8Screen {
     }
 
     updateResScale(scale) {
-        this.#updated = true;
+        this.#updateIndices = [-1];
 
         this.resScale = scale;
         this.#canvas.width = this.renderWidth * scale;
@@ -54,52 +59,73 @@ class Chip8Screen {
     }
 
     clear() {
-        this.#updated = true;
+        this.#updateIndices = [-1];
 
         this.#screenBuffer.fill(0);
         this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
     }
 
     forceRefresh() {
-        this.#updated = true;
+        this.#updateIndices = [-1];
         this.refresh();
     }
 
     refresh() {
-        if (!this.#updated) {
+        if (this.#updateIndices.length === 0) {
             return;
         }
 
-        this.#updated = false;
+        const scale = this.resScale;
 
-        let cellWidth = this.#canvas.width / this.renderWidth;
-        let cellHeight = this.#canvas.height / this.renderHeight;
+        // Refresh entire screen
+        if (this.#updateIndices[0] === -1) {
+            // FIll background
+            this.#ctx.fillStyle = this.#backgroundColor;
+            this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
 
-        for (let y = 0; y < this.renderHeight; y++) {
-            for (let x = 0; x < this.renderWidth; x++) {
-                if (this.#screenBuffer[y * this.renderWidth + x] != 0) {
-                    this.#ctx.fillStyle = this.#fillColor;
-                } else {
-                    this.#ctx.fillStyle = this.#backgroundColor;
+            // Fill foreground
+            this.#ctx.fillStyle = this.#fillColor;
+            for (let y = 0; y < this.renderHeight; y++) {
+                for (let x = 0; x < this.renderWidth; x++) {
+                    if (this.#screenBuffer[y * this.renderWidth + x] != 0) {
+                        this.#ctx.fillRect(x * scale, y * scale, scale, scale);
+                    }
                 }
-                this.#ctx.fillRect(
-                    x * cellWidth,
-                    y * cellHeight,
-                    cellWidth,
-                    cellHeight
-                );
+            }
+            return;
+        }
+
+        // Fill background
+        this.#ctx.fillStyle = this.#backgroundColor;
+        for (let idx of this.#updateIndices) {
+            if (this.#screenBuffer[idx] === 0) {
+                let x = idx % this.renderWidth | 0;
+                let y = (idx / this.renderWidth) | 0;
+                this.#ctx.fillRect(x * scale, y * scale, scale, scale);
             }
         }
+
+        // Fill foreground
+        this.#ctx.fillStyle = this.#fillColor;
+        for (let idx of this.#updateIndices) {
+            if (this.#screenBuffer[idx] !== 0) {
+                let x = idx % this.renderWidth | 0;
+                let y = (idx / this.renderWidth) | 0;
+                this.#ctx.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+        this.#updateIndices = [];
     }
 
     setPixel(x, y, color) {
-        this.#updated = true;
-
         x = pyModulo(x, this.renderWidth);
         y = pyModulo(y, this.renderHeight);
+        const idx = y * this.renderWidth + x;
 
-        this.#screenBuffer[y * this.renderWidth + x] ^= color;
-        return !this.#screenBuffer[y * this.renderWidth + x] && color; // return true on overflow, ie. pixel was set and color was set
+        this.#updateIndices.push(idx);
+
+        this.#screenBuffer[idx] ^= color;
+        return !this.#screenBuffer[idx] && color; // return true on overflow, ie. pixel was set and color was set
     }
 }
 
