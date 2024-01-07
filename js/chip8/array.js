@@ -1,4 +1,4 @@
-class Chip8Array {
+class C8Array {
     #arr;
     #bitness;
     #updates;
@@ -88,4 +88,4 @@ class Chip8Array {
     }
 }
 
-export default Chip8Array;
+export default C8Array;

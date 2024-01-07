@@ -1,4 +1,4 @@
-class Chip8Input {
+class C8Input {
     #keysReleased;
     constructor() {
         this.#keysReleased = [];
@@ -35,4 +35,4 @@ class Chip8Input {
     }
 }
 
-export default Chip8Input;
+export default C8Input;

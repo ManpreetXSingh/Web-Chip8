@@ -1,7 +1,7 @@
-import Chip8Array from "./Chip8Array.js";
-import Chip8Screen from "./Chip8Screen.js";
-import Chip8Input from "./Chip8Input.js";
-import Chip8Speaker from "./Chip8Speaker.js";
+import C8Array from "./array.js";
+import C8Screen from "./screen.js";
+import C8Input from "./input.js";
+import C8Speaker from "./speaker.js";
 
 class Instruction {
     constructor(instruction) {
@@ -18,16 +18,16 @@ class Instruction {
     }
 }
 
-class Chip8Cpu {
+class C8Cpu {
     /**
      *
      * @param {HTMLCanvasElement} screen
      * @param {Object.<string, number[]>} font
      */
     constructor(screen, font) {
-        this.screen = new Chip8Screen(screen, 5);
-        this.input = new Chip8Input();
-        this.speaker = new Chip8Speaker();
+        this.screen = new C8Screen(screen, 5);
+        this.input = new C8Input();
+        this.speaker = new C8Speaker();
         this.font = font;
         this.currentInstruction = new Instruction(0);
 
@@ -37,13 +37,13 @@ class Chip8Cpu {
         // Memory and Registers //
 
         // Allocate 4 kilobytes of memory
-        this.memory = new Chip8Array(4096, 8);
+        this.memory = new C8Array(4096, 8);
 
         // Stack for 16 bit addresses
-        this.stack = new Chip8Array(16, 16);
+        this.stack = new C8Array(16, 16);
 
         // 16 8 bit general purpose registers
-        this.registers = new Chip8Array(16, 8);
+        this.registers = new C8Array(16, 8);
 
         // 16 bit index register
         this.indexRegister = 0;
@@ -528,5 +528,5 @@ class Chip8Cpu {
     }
 }
 
-export default Chip8Cpu;
+export default C8Cpu;
 export { Instruction };

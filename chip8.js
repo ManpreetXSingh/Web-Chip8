@@ -1,12 +1,12 @@
-import Chip8Emulator from "./emulator.js";
-import Keyboard from "./JS/Keyboard.js";
+import Chip8Emulator from "./js/emulator.js";
+import Keyboard from "./js/keyboard.js";
 import {
     DisplayTableOptions,
     displayTable,
     updateTable,
     addTableAttributes,
     removeTableAttributes,
-} from "./JS/Utils.js";
+} from "./js/util.js";
 
 let chip8 = new Chip8Emulator(60, 20);
 

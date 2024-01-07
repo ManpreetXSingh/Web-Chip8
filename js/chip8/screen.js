@@ -1,6 +1,6 @@
-import { pyModulo } from "./Utils.js";
+import { pyModulo } from "../util.js";
 
-class Chip8Screen {
+class C8Screen {
     #canvas;
     #ctx;
     #screenBuffer;
@@ -133,4 +133,4 @@ class Chip8Screen {
     }
 }
 
-export default Chip8Screen;
+export default C8Screen;

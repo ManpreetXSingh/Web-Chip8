@@ -1,4 +1,4 @@
-import Chip8Cpu from "./JS/Chip8CPU.js";
+import C8Cpu from "./chip8/cpu.js";
 
 const C8FONT = {
     0: [0xf0, 0x90, 0x90, 0x90, 0xf0],
@@ -52,7 +52,7 @@ class Chip8Emulator {
         this.#oneSecTimer = 0;
 
         this.updateDisplay = () => {};
-        this.cpu = new Chip8Cpu(document.getElementById("screen"), font);
+        this.cpu = new C8Cpu(document.getElementById("screen"), font);
     }
 
     get speaker() {
@@ -271,3 +271,4 @@ class Chip8Emulator {
 }
 
 export default Chip8Emulator;
+export { C8FONT };

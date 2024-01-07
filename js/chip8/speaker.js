@@ -1,6 +1,6 @@
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
-class Chip8Speaker {
+class C8Speaker {
     constructor() {
         this.audioContext = null;
         this.freq = 655;
@@ -48,4 +48,4 @@ class Chip8Speaker {
     }
 }
 
-export default Chip8Speaker;
+export default C8Speaker;
