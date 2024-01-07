@@ -20,14 +20,6 @@ class TableOptions {
         return this.#id;
     }
 
-    get hasVHeader() {
-        return this.vAddressVisible || this.#vNames !== null;
-    }
-
-    get hasHheader() {
-        return this.hAddressVisible || this.#hNames !== null;
-    }
-
     get vNames() {
         return this.#vNames;
     }
@@ -38,12 +30,12 @@ class TableOptions {
 
     set vNames(names) {
         this.#vNames = names;
-        this.vAddressVisible = names !== null;
+        this.vAddressVisible = names === null;
     }
 
     set hNames(names) {
         this.#hNames = names;
-        this.hAddressVisible = names !== null;
+        this.hAddressVisible = names === null;
     }
 }
 
@@ -60,8 +52,16 @@ class TableRenderer {
         this.displayOptions = displayOptions;
     }
 
+    get hasVheader() {
+        return this.displayOptions.vAddressVisible || this.displayOptions.vNames !== null;
+    }
+
+    get hasHheader() {
+        return this.displayOptions.hAddressVisible || this.displayOptions.hNames !== null;
+    }
+
     get colIdxOffset() {
-        return this.displayOptions.hasVHeader ? 1 : 0;
+        return this.hasVheader ? 1 : 0;
     }
 
     /**
@@ -91,9 +91,9 @@ class TableRenderer {
         const HAddrBitness = calcBitness(numCols) + 1;
 
         // Table Header
-        if (this.displayOptions.hasHheader) {
+        if (this.hasHheader) {
             tableHtml += "<thead><tr>";
-            if (this.displayOptions.hasVHeader) {
+            if (this.hasVheader) {
                 tableHtml += `<th>${
                     this.displayOptions.tableName ||
                     (this.displayOptions.vAddressVisible ? "Address" : "Name")
@@ -117,7 +117,7 @@ class TableRenderer {
             tableHtml += "<tr>";
 
             // Memory Address in first column
-            if (this.displayOptions.hasVHeader) {
+            if (this.hasVheader) {
                 tableHtml += `<td>${
                     this.displayOptions.vAddressVisible
                         ? toHex(i, Math.ceil(VAddrBitness / 4))
