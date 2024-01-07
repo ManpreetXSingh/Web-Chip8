@@ -10,6 +10,8 @@ import {
 
 let chip8 = new Chip8Emulator(60, 20);
 
+// Display Chip8 internal data
+
 var InfoRenderer = (() => {
     let stackTable = document.getElementById("stack-table");
     let memoryTable = document.getElementById("memory-table");
@@ -205,8 +207,8 @@ InfoRenderer.displayInfo(chip8);
 chip8.updateDisplay = InfoRenderer.updateInfo.bind(null, chip8);
 
 // Load JSON
-function loadJson(file_path, on_load) {
-    if (!file_path || !on_load) {
+function loadJson(filePath, onLoad) {
+    if (!filePath || !onLoad) {
         return;
     }
 
@@ -216,16 +218,16 @@ function loadJson(file_path, on_load) {
             console.log("Error loading JSON");
             return;
         }
-        on_load(JSON.parse(request.response));
+        onLoad(JSON.parse(request.response));
     };
-    request.open("GET", file_path, true);
+    request.open("GET", filePath, true);
     request.responseType = "text";
     request.send();
 }
 
 // Load a file as a Uint8Array
-function loadFileU8(file_path, on_load) {
-    if (!file_path || !on_load) {
+function loadFileU8(filePath, onLoad) {
+    if (!filePath || !onLoad) {
         return;
     }
 
@@ -236,9 +238,9 @@ function loadFileU8(file_path, on_load) {
             return;
         }
         let rom = new Uint8Array(request.response);
-        on_load(rom);
+        onLoad(rom);
     };
-    request.open("GET", file_path, true);
+    request.open("GET", filePath, true);
     request.responseType = "arraybuffer";
     request.send();
 }
@@ -281,6 +283,15 @@ function stepFrame() {
     if (chip8.paused) {
         chip8.stepFrame();
     }
+}
+
+function runRom(rom) {
+    playPauseBtn.textContent = "pause";
+    chip8.killProcess();
+    if (!chip8.loadRom(rom)) {
+        return;
+    }
+    chip8.beginProcess();
 }
 
 // Pause/Resume based on page visibility
@@ -415,6 +426,8 @@ function loadRomsList() {
     });
 }
 
+loadRomsList();
+
 // Show Hide Windows
 
 function showWindow(windowElement) {
@@ -536,7 +549,7 @@ function dragLeaveHandler(ev) {
     }
 }
 
-// Quirks
+// Quirks & Settings
 
 let quirkCheckboxes = document
     .getElementById("quirk-checkboxes")
@@ -601,147 +614,132 @@ function updateSettingsUI() {
     }
 }
 
-// Main
+for (let checkbox of quirkCheckboxes) {
+    checkbox.addEventListener("change", function (e) {
+        let quirkName = this.name;
+        let quirkValue = this.checked;
 
-function runRom(rom) {
-    playPauseBtn.textContent = "pause";
-    chip8.killProcess();
-    if (!chip8.loadRom(rom)) {
-        return;
-    }
-    chip8.beginProcess();
+        switch (quirkName) {
+            case "quirkshift":
+                chip8.cpu.quirkshift = quirkValue;
+                break;
+            case "quirkmemoryLeaveIUnchanged":
+                chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue;
+                chip8.cpu.quirkmemoryIncrementByX = quirkValue
+                    ? false
+                    : chip8.cpu.quirkmemoryIncrementByX;
+                break;
+            case "quirkmemoryIncrementByX":
+                chip8.cpu.quirkmemoryIncrementByX = quirkValue;
+                chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue
+                    ? false
+                    : chip8.cpu.quirkmemoryLeaveIUnchanged;
+                break;
+            case "quirkjump":
+                chip8.cpu.quirkjump = quirkValue;
+                break;
+            case "quirkwrap":
+                chip8.cpu.quirkwrap = quirkValue;
+                break;
+            case "quirklogic":
+                chip8.cpu.quirklogic = quirkValue;
+                break;
+        }
+        updateQuirksUI();
+    });
 }
 
-window.onload = function () {
-    let keyboard = new Keyboard(
-        [
-            "1",
-            "2",
-            "3",
-            "C",
-            "4",
-            "5",
-            "6",
-            "D",
-            "7",
-            "8",
-            "9",
-            "E",
-            "A",
-            "0",
-            "B",
-            "F",
-        ],
-        {
-            1: ["1"],
-            2: ["2"],
-            3: ["3"],
-            C: ["4"],
-            4: ["q"],
-            5: ["w"],
-            6: ["e"],
-            D: ["r"],
-            7: ["a"],
-            8: ["s"],
-            9: ["d"],
-            E: ["f"],
-            A: ["z"],
-            0: ["x"],
-            B: ["c"],
-            F: ["v"],
-        },
-        4
-    );
+for (let setting of settingsInputs) {
+    setting.addEventListener("input", function (e) {
+        let settingName = this.name;
+        let settingValue = this.value;
 
-    // Virtual keyboard events
-    let keyboardContainer = document.getElementById("keyboard-container");
-    let showHideKeyboardButton = document.getElementById(
-        "show-hide-keyboard-btn"
-    );
-    let main = document.querySelector("main");
-    keyboard.draw(keyboardContainer);
-
-    showHideKeyboardButton.addEventListener("click", () => {
-        if (!keyboardContainer.classList.contains("keyboard-active")) {
-            keyboardContainer.classList.add("keyboard-active");
-            main.classList.add("keyboard-active");
-            showHideKeyboardButton.textContent = "Hide Keyboard";
-        } else {
-            keyboardContainer.classList.remove("keyboard-active");
-            main.classList.remove("keyboard-active");
-            showHideKeyboardButton.textContent = "Show Keyboard";
+        switch (settingName) {
+            case "screen-scale":
+                chip8.screen.updateResScale(settingValue);
+                chip8.screen.forceRefresh();
+                break;
+            case "target-fps":
+                chip8.targetFps = settingValue;
+                break;
+            case "target-ipf":
+                chip8.instructionsPerFrame = settingValue;
+                break;
+            case "bg-color":
+                chip8.screen.backgroundColor = settingValue;
+                chip8.screen.forceRefresh();
+                break;
+            case "fg-color":
+                chip8.screen.fillColor = settingValue;
+                chip8.screen.forceRefresh();
+                break;
         }
+        updateSettingsUI();
     });
+}
 
-    keyboard.onkeydown = chip8.pressKey.bind(chip8);
-    keyboard.onkeyup = chip8.releaseKey.bind(chip8);
+updateSettingsUI();
+updateQuirksUI();
 
-    // Quirk checkbox events
-    for (let checkbox of quirkCheckboxes) {
-        checkbox.addEventListener("change", function (e) {
-            let quirkName = this.name;
-            let quirkValue = this.checked;
+// Keyboard
 
-            switch (quirkName) {
-                case "quirkshift":
-                    chip8.cpu.quirkshift = quirkValue;
-                    break;
-                case "quirkmemoryLeaveIUnchanged":
-                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue;
-                    chip8.cpu.quirkmemoryIncrementByX = quirkValue
-                        ? false
-                        : chip8.cpu.quirkmemoryIncrementByX;
-                    break;
-                case "quirkmemoryIncrementByX":
-                    chip8.cpu.quirkmemoryIncrementByX = quirkValue;
-                    chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue
-                        ? false
-                        : chip8.cpu.quirkmemoryLeaveIUnchanged;
-                    break;
-                case "quirkjump":
-                    chip8.cpu.quirkjump = quirkValue;
-                    break;
-                case "quirkwrap":
-                    chip8.cpu.quirkwrap = quirkValue;
-                    break;
-                case "quirklogic":
-                    chip8.cpu.quirklogic = quirkValue;
-                    break;
-            }
-            updateQuirksUI();
-        });
+let keyboard = new Keyboard(
+    [
+        "1",
+        "2",
+        "3",
+        "C",
+        "4",
+        "5",
+        "6",
+        "D",
+        "7",
+        "8",
+        "9",
+        "E",
+        "A",
+        "0",
+        "B",
+        "F",
+    ],
+    {
+        1: ["1"],
+        2: ["2"],
+        3: ["3"],
+        C: ["4"],
+        4: ["q"],
+        5: ["w"],
+        6: ["e"],
+        D: ["r"],
+        7: ["a"],
+        8: ["s"],
+        9: ["d"],
+        E: ["f"],
+        A: ["z"],
+        0: ["x"],
+        B: ["c"],
+        F: ["v"],
+    },
+    4
+);
+
+// Virtual keyboard events
+let keyboardContainer = document.getElementById("keyboard-container");
+let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
+let main = document.querySelector("main");
+keyboard.draw(keyboardContainer);
+
+showHideKeyboardButton.addEventListener("click", () => {
+    if (!keyboardContainer.classList.contains("keyboard-active")) {
+        keyboardContainer.classList.add("keyboard-active");
+        main.classList.add("keyboard-active");
+        showHideKeyboardButton.textContent = "Hide Keyboard";
+    } else {
+        keyboardContainer.classList.remove("keyboard-active");
+        main.classList.remove("keyboard-active");
+        showHideKeyboardButton.textContent = "Show Keyboard";
     }
+});
 
-    for (let setting of settingsInputs) {
-        setting.addEventListener("input", function (e) {
-            let settingName = this.name;
-            let settingValue = this.value;
-
-            switch (settingName) {
-                case "screen-scale":
-                    chip8.screen.updateResScale(settingValue);
-                    chip8.screen.forceRefresh();
-                    break;
-                case "target-fps":
-                    chip8.targetFps = settingValue;
-                    break;
-                case "target-ipf":
-                    chip8.instructionsPerFrame = settingValue;
-                    break;
-                case "bg-color":
-                    chip8.screen.backgroundColor = settingValue;
-                    chip8.screen.forceRefresh();
-                    break;
-                case "fg-color":
-                    chip8.screen.fillColor = settingValue;
-                    chip8.screen.forceRefresh();
-                    break;
-            }
-            updateSettingsUI();
-        });
-    }
-
-    updateSettingsUI();
-    updateQuirksUI();
-    loadRomsList();
-};
+keyboard.onkeydown = chip8.pressKey.bind(chip8);
+keyboard.onkeyup = chip8.releaseKey.bind(chip8);

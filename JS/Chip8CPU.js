@@ -209,12 +209,15 @@ class Chip8Cpu {
     _execute(instruction) {
         let Vx = this.registers.get(instruction.x);
         let Vy = this.registers.get(instruction.y);
+
+        // Original CHIP-8 incremented index register by X+1
         let i_increment =
             (this.quirkmemoryLeaveIUnchanged
                 ? 0
                 : this.quirkmemoryIncrementByX
                 ? instruction.x
                 : instruction.x + 1) & 0xfff;
+
         switch (instruction.type) {
             case 0x0:
                 switch (instruction.nnn) {
@@ -502,7 +505,6 @@ class Chip8Cpu {
                             );
                         }
 
-                        // Original CHIP-8 incremented index register by X+1
                         this.indexRegister += i_increment;
                         return true;
 
@@ -517,7 +519,6 @@ class Chip8Cpu {
                             );
                         }
 
-                        // Original CHIP-8 incremented index register by X+1
                         this.indexRegister += i_increment;
                         return true;
                 }
