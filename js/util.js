@@ -2,8 +2,8 @@
  * Similar to the % (modulo) operator in python.\
  * It returns the remainder from the division of the first argument by the second. A zero right argument returns NaN.\
  * This always yields a result with the same sign as its second operand (or zero).\
- * The absolute value of the result is strictly smaller than the absolute value of the second operand.
- * e.g., 3.14%0.7 equals 0.34 (since 3.14 equals 4*0.7 + 0.34.)\
+ * The absolute value of the result is strictly smaller than the absolute value of the second operand.\
+ * e.g., 3.14%0.7 equals 0.34 (since 3.14 equals 4*0.7 + 0.34.)
  */
 export function pyModulo(a, b) {
     return ((a % b) + b) % b;

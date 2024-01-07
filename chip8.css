@@ -158,7 +158,7 @@ main {
         border-bottom-right-radius: 0;
     }
 
-    /* #keyboard-container {
+    /* .keyboard-container {
         /* width: 100vw; * /
         /* max-width: none !important; * /
         max-width: var(--max-width) !important;
