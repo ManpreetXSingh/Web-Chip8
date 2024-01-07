@@ -1,94 +1,82 @@
 import Chip8Emulator from "./js/emulator.js";
 import Keyboard from "./js/keyboard.js";
-import {
-    DisplayTableOptions,
-    displayTable,
-    updateTable,
-    addTableAttributes,
-    removeTableAttributes,
-} from "./js/util.js";
-
+import TableRenderer, { TableOptions } from "./js/table_renderer.js";
 let chip8 = new Chip8Emulator(60, 20);
 
 // Display Chip8 internal data
 
 var InfoRenderer = (() => {
-    let stackTable = document.getElementById("stack-table");
-    let memoryTable = document.getElementById("memory-table");
-    let registersTable = document.getElementById("registers-table");
-    let pointersTable = document.getElementById("pointers-table");
-    let timersTable = document.getElementById("timers-table");
+    let stackTable;
+    let memoryTable;
+    let registersTable;
+    let pointersTable;
+    let timersTable;
+
     let fpsDisplay = document.getElementById("fps");
     let ipsDisplay = document.getElementById("ips");
 
     let prevStackPointer;
     let prevProgramCounter;
 
-    let pointersDisplayOptions;
-    let timersDisplayOptions;
-    let memoryDisplayOptions;
-    let stackDisplayOptions;
-    let registersDisplayOptions;
-
     function displayInfo(emulator) {
         prevStackPointer = emulator.stackPointer;
         prevProgramCounter = emulator.programCounter;
 
-        pointersDisplayOptions = new DisplayTableOptions();
-        pointersDisplayOptions.tableName = "Pointers";
-        pointersDisplayOptions.vNames = ["PC", "I", "SP"];
-        pointersDisplayOptions.hNames = ["Value"];
-        pointersDisplayOptions.numCols = 1;
-        pointersDisplayOptions.bitness = 16;
-        displayTable(
-            pointersTable,
-            [
-                emulator.programCounter,
-                emulator.indexRegister,
-                emulator.stackPointer,
-            ],
-            pointersDisplayOptions
+        let pointerOp = new TableOptions();
+        pointerOp.tableName = "Pointers";
+        pointerOp.vNames = ["PC", "I", "SP"];
+        pointerOp.hNames = ["Value"];
+        pointerOp.numCols = 1;
+        pointerOp.bitness = 16;
+        pointersTable = new TableRenderer(
+            document.getElementById("pointers-table"),
+            pointerOp
         );
+        pointersTable.display([
+            emulator.programCounter,
+            emulator.indexRegister,
+            emulator.stackPointer,
+        ]);
 
-        timersDisplayOptions = new DisplayTableOptions();
-        timersDisplayOptions.tableName = "Timers";
-        timersDisplayOptions.vNames = ["DT", "ST"];
-        timersDisplayOptions.hNames = ["Value"];
-        timersDisplayOptions.numCols = 1;
-        timersDisplayOptions.bitness = 16;
-        displayTable(
-            timersTable,
-            [emulator.delayTimer, emulator.soundTimer],
-            timersDisplayOptions
+        let timerOp = new TableOptions();
+        timerOp.tableName = "Timers";
+        timerOp.vNames = ["DT", "ST"];
+        timerOp.hNames = ["Value"];
+        timerOp.numCols = 1;
+        timerOp.bitness = 16;
+        timersTable = new TableRenderer(
+            document.getElementById("timers-table"),
+            timerOp
         );
+        timersTable.display([emulator.delayTimer, emulator.soundTimer]);
 
-        memoryDisplayOptions = new DisplayTableOptions();
-        memoryDisplayOptions.tableName = "Memory";
-        memoryDisplayOptions.numCols = 16;
-        memoryDisplayOptions.bitness = emulator.memory.bitness;
-        displayTable(
-            memoryTable,
-            emulator.memory.underlyingArray,
-            memoryDisplayOptions
+        let memoryOp = new TableOptions();
+        memoryOp.tableName = "Memory";
+        memoryOp.numCols = 16;
+        memoryOp.bitness = emulator.memory.bitness;
+        memoryTable = new TableRenderer(
+            document.getElementById("memory-table"),
+            memoryOp
         );
+        memoryTable.display(emulator.memory.underlyingArray);
 
-        stackDisplayOptions = new DisplayTableOptions();
-        stackDisplayOptions.tableName = "Stack";
-        stackDisplayOptions.numCols = 16;
-        stackDisplayOptions.bitness = emulator.stack.bitness;
-        stackDisplayOptions.vNames = ["Value"];
-        displayTable(
-            stackTable,
-            emulator.stack.underlyingArray,
-            stackDisplayOptions
+        let stackOp = new TableOptions();
+        stackOp.tableName = "Stack";
+        stackOp.numCols = 16;
+        stackOp.bitness = emulator.stack.bitness;
+        stackOp.vNames = ["Value"];
+        stackTable = new TableRenderer(
+            document.getElementById("stack-table"),
+            stackOp
         );
+        stackTable.display(emulator.stack.underlyingArray);
 
-        registersDisplayOptions = new DisplayTableOptions();
-        registersDisplayOptions.tableName = "Registers";
-        registersDisplayOptions.numCols = 16;
-        registersDisplayOptions.bitness = emulator.registers.bitness;
-        registersDisplayOptions.vNames = ["Value"];
-        registersDisplayOptions.hNames = [
+        let registerOp = new TableOptions();
+        registerOp.tableName = "Registers";
+        registerOp.numCols = 16;
+        registerOp.bitness = emulator.registers.bitness;
+        registerOp.vNames = ["Value"];
+        registerOp.hNames = [
             "V0",
             "V1",
             "V2",
@@ -106,11 +94,11 @@ var InfoRenderer = (() => {
             "VE",
             "VF",
         ];
-        displayTable(
-            registersTable,
-            emulator.registers.underlyingArray,
-            registersDisplayOptions
+        registersTable = new TableRenderer(
+            document.getElementById("registers-table"),
+            registerOp
         );
+        registersTable.display(emulator.registers.underlyingArray);
     }
 
     function updateInfo(emulator) {
@@ -118,82 +106,55 @@ var InfoRenderer = (() => {
         ipsDisplay.textContent = emulator.ips.toFixed(1);
 
         // Display tables
-        updateTable(
-            pointersTable,
+        pointersTable.update(
             [
                 emulator.programCounter,
                 emulator.indexRegister,
                 emulator.stackPointer,
             ],
-            [-1],
-            pointersDisplayOptions
+            [-1]
         );
-        updateTable(
-            timersTable,
-            [emulator.delayTimer, emulator.soundTimer],
-            [-1],
-            timersDisplayOptions
-        );
-        updateTable(
-            memoryTable,
+        timersTable.update([emulator.delayTimer, emulator.soundTimer], [-1]);
+        memoryTable.update(
             emulator.memory.underlyingArray,
-            emulator.memory.updates,
-            memoryDisplayOptions
+            emulator.memory.updates
         );
-        updateTable(
-            stackTable,
+        stackTable.update(
             emulator.stack.underlyingArray,
-            emulator.stack.updates,
-            stackDisplayOptions
+            emulator.stack.updates
         );
-        updateTable(
-            registersTable,
+        registersTable.update(
             emulator.registers.underlyingArray,
-            emulator.registers.updates,
-            registersDisplayOptions
+            emulator.registers.updates
         );
 
         // Display stack pointer highlight
-        removeTableAttributes(
-            stackTable,
-            { [prevStackPointer]: ["stack-pointer", "title"] },
-            stackDisplayOptions
-        );
-        addTableAttributes(
-            stackTable,
-            {
-                [emulator.stackPointer]: {
-                    "stack-pointer": null,
-                    title: `Stack Pointer: {${emulator.stackPointer}}`,
-                },
+        stackTable.removeAttributes({
+            [prevStackPointer]: ["stack-pointer", "title"],
+        });
+        stackTable.addAttributes({
+            [emulator.stackPointer]: {
+                "stack-pointer": null,
+                title: `Stack Pointer: {${emulator.stackPointer}}`,
             },
-            stackDisplayOptions
-        );
+        });
         prevStackPointer = emulator.stackPointer;
 
         // Display program counter highlight
-        removeTableAttributes(
-            memoryTable,
-            {
-                [prevProgramCounter]: ["program-counter", "title"],
-                [prevProgramCounter + 1]: ["program-counter", "title"],
+        memoryTable.removeAttributes({
+            [prevProgramCounter]: ["program-counter", "title"],
+            [prevProgramCounter + 1]: ["program-counter", "title"],
+        });
+        memoryTable.addAttributes({
+            [emulator.programCounter]: {
+                "program-counter": null,
+                title: `Program Counter: {${emulator.programCounter}}`,
             },
-            memoryDisplayOptions
-        );
-        addTableAttributes(
-            memoryTable,
-            {
-                [emulator.programCounter]: {
-                    "program-counter": null,
-                    title: `Program Counter: {${emulator.programCounter}}`,
-                },
-                [emulator.programCounter + 1]: {
-                    "program-counter": null,
-                    title: `Program Counter: {${emulator.programCounter}}`,
-                },
+            [emulator.programCounter + 1]: {
+                "program-counter": null,
+                title: `Program Counter: {${emulator.programCounter}}`,
             },
-            memoryDisplayOptions
-        );
+        });
         prevProgramCounter = emulator.programCounter;
     }
 
