@@ -195,9 +195,9 @@ class Chip8Emulator {
         for (let i = this.#instructionIdx; i < this.instructionsPerFrame; i++) {
             this.#instructionIdx++;
             this.cpu.processNext();
-            // if ((new Instruction(this.cpu._fetch())).type == 0xD) {
-            //     i = this.instructionsPerFrame;
-            // }
+            if (this.cpu.quirkVBlank && this.cpu.nextInstruction.type == 0xD) {
+                break;
+            }
         }
         this.#instructionIdx = 0;
 

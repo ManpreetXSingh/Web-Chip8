@@ -187,8 +187,8 @@
                             <label title="Shift Quirk">
                                 <input
                                     type="checkbox"
-                                    name="quirkshift"
-                                    id="quirkshift"
+                                    name="quirkShift"
+                                    id="quirkShift"
                                 />
                                 <code>&lt;&lt;=</code> and
                                 <code>&gt;&gt;=</code> modify <var>Vx</var> in
@@ -198,8 +198,8 @@
                             <label title="Memory Quirk Leave I Unchanged">
                                 <input
                                     type="checkbox"
-                                    name="quirkmemoryLeaveIUnchanged"
-                                    id="quirkmemoryLeaveIUnchanged"
+                                    name="quirkMemoryLeaveIUnchanged"
+                                    id="quirkMemoryLeaveIUnchanged"
                                 />
                                 Load and Store operations leave
                                 <var>I</var> unchanged
@@ -208,8 +208,8 @@
                             <label title="Memory Quirk Increment I By X">
                                 <input
                                     type="checkbox"
-                                    name="quirkmemoryIncrementByX"
-                                    id="quirkmemoryIncrementByX"
+                                    name="quirkMemoryIncrementByX"
+                                    id="quirkMemoryIncrementByX"
                                 />
                                 Load and Store operations Increment
                                 <var>I</var> by <var>X</var>
@@ -218,8 +218,8 @@
                             <label title="Jump Quirk">
                                 <input
                                     type="checkbox"
-                                    name="quirkjump"
-                                    id="quirkjump"
+                                    name="quirkJump"
+                                    id="quirkJump"
                                 />
                                 Jump to
                                 <code><var>address</var> + <var>Vx</var></code>
@@ -230,23 +230,31 @@
                             <label title="Wrap Quirk">
                                 <input
                                     type="checkbox"
-                                    name="quirkwrap"
-                                    id="quirkwrap"
+                                    name="quirkWrap"
+                                    id="quirkWrap"
                                 />
-                                Sprite wrap
+                                Wrap sprite instead of clipping
                             </label>
 
                             <label title="Logic Quirk">
                                 <input
                                     type="checkbox"
-                                    name="quirklogic"
-                                    id="quirklogic"
+                                    name="quirkLogic"
+                                    id="quirkLogic"
                                 />
                                 Reset <var>Vf</var> after
                                 <code><var>Vx</var> |= <var>Vy</var></code
                                 >,
                                 <code><var>Vx</var> &= <var>Vy</var></code> and
                                 <code><var>Vx</var> ^= <var>Vy</var></code>
+                            </label>
+                            <label title="VBlank Quirk">
+                                <input
+                                    type="checkbox"
+                                    name="quirkVBlank"
+                                    id="quirkVBlank"
+                                />
+                                Wait for VBlank before drawing sprite
                             </label>
                         </div>
                     </div>

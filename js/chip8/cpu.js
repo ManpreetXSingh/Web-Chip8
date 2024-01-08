@@ -4,6 +4,11 @@ import C8Input from "./input.js";
 import C8Speaker from "./speaker.js";
 
 class Instruction {
+    /**
+     * Create a chip8 instruction
+     * @param {number} instruction
+     * @returns {Instruction}
+     */
     constructor(instruction) {
         this.set(instruction);
     }
@@ -70,19 +75,22 @@ class C8Cpu {
         // Wait for a key press
         this.waitForInput = false;
 
-        // Wait for the next frame
-        this.waitForVBlank = false;
-
         // Events //
-
-        // If the screen was just updated
-        this.VBlank = false;
 
         // Terminates the execution until reset
         this.interrupted = false;
 
         // Quirks //
+
         this.resetQuirks();
+    }
+
+    /**
+     * Get the next instruction to be executed
+     * @returns {Instruction}
+     */
+    get nextInstruction() {
+        return new Instruction(this._fetch());
     }
 
     /**
@@ -120,18 +128,37 @@ class C8Cpu {
         this.delayTimer = 0;
         this.soundTimer = 0;
         this.waitForInput = false;
-        this.waitForVBlank = true;
         this.interrupted = false;
         this.loadFont(this.font);
     }
 
-    resetQuirks() {
-        this.quirkshift = false; // Shift Vy into Vx
-        this.quirkmemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
-        this.quirkmemoryIncrementByX = false; // Increment I by X (in save/load instructions)
-        this.quirkwrap = false; // sprite wrap
-        this.quirkjump = false; // jump to <address+vx> instead of <address+v0>
-        this.quirklogic = true; // reset vf to 0
+    /**
+     * Reset quirks
+     * @param {string} mode
+     * @returns {void}
+     */
+    resetQuirks(mode) {
+        switch (mode) {
+            case "chip8":
+                this.quirkShift = false; // Shift Vy into Vx
+                this.quirkMemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
+                this.quirkMemoryIncrementByX = false; // Increment I by X (in save/load instructions)
+                this.quirkWrap = false; // Sprite wrap
+                this.quirkJump = false; // Jump to <address+vx> instead of <address+v0>
+                this.quirkLogic = true; // Reset vf to 0
+                this.quirkVBlank = false; // Wait for VBlank
+                break;
+            default:
+            case "octo":
+                this.quirkShift = false; // Shift Vy into Vx
+                this.quirkMemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
+                this.quirkMemoryIncrementByX = false; // Increment I by X (in save/load instructions)
+                this.quirkWrap = true; // Sprite wrap
+                this.quirkJump = false; // Jump to <address+vx> instead of <address+v0>
+                this.quirkLogic = true; // Reset vf to 0
+                this.quirkVBlank = false; // Wait for VBlank
+                break;
+        }
     }
 
     updateTimers() {
@@ -141,8 +168,6 @@ class C8Cpu {
 
     updateScreen() {
         this.screen.refresh();
-        this.VBlank = true;
-        this.waitForVBlank = false;
     }
 
     /**
@@ -153,9 +178,6 @@ class C8Cpu {
         if (this.interrupted || this.waitForInput) {
             return;
         }
-        // if (this.waitForVBlank) {
-        //     return;
-        // }
 
         // Fetch 16 bit instruction
         let instruction = this._fetch();
@@ -167,7 +189,6 @@ class C8Cpu {
             console.warn(`Unknown instruction ${instruction}`);
         }
         this.input.update();
-        this.VBlank = false;
     }
 
     /**
@@ -212,9 +233,9 @@ class C8Cpu {
 
         // Original CHIP-8 incremented index register by X+1
         let i_increment =
-            (this.quirkmemoryLeaveIUnchanged
+            (this.quirkMemoryLeaveIUnchanged
                 ? 0
-                : this.quirkmemoryIncrementByX
+                : this.quirkMemoryIncrementByX
                 ? instruction.x
                 : instruction.x + 1) & 0xfff;
 
@@ -294,7 +315,7 @@ class C8Cpu {
                     // 8XY1
                     case 0x1:
                         this.registers.set(instruction.x, Vx | Vy);
-                        if (this.quirklogic) {
+                        if (this.quirkLogic) {
                             this.registers.set(0xf, 0);
                         }
                         return true;
@@ -302,7 +323,7 @@ class C8Cpu {
                     // 8XY2
                     case 0x2:
                         this.registers.set(instruction.x, Vx & Vy);
-                        if (this.quirklogic) {
+                        if (this.quirkLogic) {
                             this.registers.set(0xf, 0);
                         }
                         return true;
@@ -310,7 +331,7 @@ class C8Cpu {
                     // 8XY3
                     case 0x3:
                         this.registers.set(instruction.x, Vx ^ Vy);
-                        if (this.quirklogic) {
+                        if (this.quirkLogic) {
                             this.registers.set(0xf, 0);
                         }
                         return true;
@@ -329,7 +350,7 @@ class C8Cpu {
 
                     // 8XY6
                     case 0x6:
-                        if (!this.quirkshift) {
+                        if (!this.quirkShift) {
                             Vx = Vy;
                         }
                         var result = Vx >> 1;
@@ -344,7 +365,7 @@ class C8Cpu {
 
                     // 8XYE
                     case 0xe:
-                        if (!this.quirkshift) {
+                        if (!this.quirkShift) {
                             Vx = Vy;
                         }
                         var result = Vx << 1;
@@ -367,7 +388,7 @@ class C8Cpu {
 
             // BNNN
             case 0xb:
-                if (this.quirkjump) {
+                if (this.quirkJump) {
                     this.programCounter = instruction.nnn + Vx;
                 } else {
                     this.programCounter =
@@ -385,22 +406,16 @@ class C8Cpu {
 
             // DXYN
             case 0xd:
-                // if (!this.VBlank) {
-                //     this.waitForVBlank = true;
-                //     this.programCounter -= 2;
-                //     return true;
-                // }
-                // this.waitForVBlank = false;
                 let screenX = Vx % this.screen.renderWidth; // Both Vx and renderWidth are positive, so no need to use pymodulo
                 let screenY = Vy % this.screen.renderHeight; // Both Vy and renderHeight are also positive
                 let spriteHeight = instruction.n;
                 let spriteWidth = 8;
-                let yCondition = this.quirkwrap
+                let yCondition = this.quirkWrap
                     ? (y) => y < spriteHeight
                     : (y) =>
                           y < spriteHeight &&
                           y + screenY < this.screen.renderHeight;
-                let xCondition = this.quirkwrap
+                let xCondition = this.quirkWrap
                     ? (x) => x < spriteWidth
                     : (x) =>
                           x < spriteWidth &&

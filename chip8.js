@@ -289,29 +289,33 @@ function runRomByName(name) {
     updateSettingsUI();
 
     chip8.cpu.resetQuirks();
-    chip8.cpu.quirkmemoryLeaveIUnchanged =
+    chip8.cpu.quirkMemoryLeaveIUnchanged =
         "loadStoreQuirks" in romsJSON[name]["options"]
             ? romsJSON[name]["options"]["loadStoreQuirks"]
-            : chip8.cpu.quirkmemoryLeaveIUnchanged;
-    chip8.cpu.quirkmemoryIncrementByX = chip8.cpu.quirkmemoryLeaveIUnchanged
+            : chip8.cpu.quirkMemoryLeaveIUnchanged;
+    chip8.cpu.quirkMemoryIncrementByX = chip8.cpu.quirkMemoryLeaveIUnchanged
         ? false
-        : chip8.cpu.quirkmemoryIncrementByX;
-    chip8.cpu.quirkshift =
+        : chip8.cpu.quirkMemoryIncrementByX;
+    chip8.cpu.quirkShift =
         "shiftQuirks" in romsJSON[name]["options"]
             ? romsJSON[name]["options"]["shiftQuirks"]
-            : chip8.cpu.quirkshift;
-    chip8.cpu.quirkjump =
+            : chip8.cpu.quirkShift;
+    chip8.cpu.quirkJump =
         "jumpQuirks" in romsJSON[name]["options"]
             ? romsJSON[name]["options"]["jumpQuirks"]
-            : chip8.cpu.quirkjump;
-    chip8.cpu.quirkwrap =
+            : chip8.cpu.quirkJump;
+    chip8.cpu.quirkWrap =
         "clipQuirks" in romsJSON[name]["options"]
             ? !romsJSON[name]["options"]["clipQuirks"]
-            : chip8.cpu.quirkwrap;
-    chip8.cpu.quirklogic =
+            : chip8.cpu.quirkWrap;
+    chip8.cpu.quirkLogic =
         "logicQuirks" in romsJSON[name]["options"]
             ? romsJSON[name]["options"]["logicQuirks"]
-            : chip8.cpu.quirklogic;
+            : chip8.cpu.quirkLogic;
+    chip8.cpu.quirkVBlank =
+        "vBlankQuirks" in romsJSON[name]["options"]
+            ? romsJSON[name]["options"]["vBlankQuirks"]
+            : chip8.cpu.quirkVBlank;
     updateQuirksUI();
 
     loadFileU8(romsrc, (rom) => {
@@ -525,23 +529,26 @@ function updateQuirksUI() {
         let quirkValue;
 
         switch (quirkName) {
-            case "quirkshift":
-                quirkValue = chip8.cpu.quirkshift;
+            case "quirkShift":
+                quirkValue = chip8.cpu.quirkShift;
                 break;
-            case "quirkmemoryLeaveIUnchanged":
-                quirkValue = chip8.cpu.quirkmemoryLeaveIUnchanged;
+            case "quirkMemoryLeaveIUnchanged":
+                quirkValue = chip8.cpu.quirkMemoryLeaveIUnchanged;
                 break;
-            case "quirkmemoryIncrementByX":
-                quirkValue = chip8.cpu.quirkmemoryIncrementByX;
+            case "quirkMemoryIncrementByX":
+                quirkValue = chip8.cpu.quirkMemoryIncrementByX;
                 break;
-            case "quirkjump":
-                quirkValue = chip8.cpu.quirkjump;
+            case "quirkJump":
+                quirkValue = chip8.cpu.quirkJump;
                 break;
-            case "quirkwrap":
-                quirkValue = chip8.cpu.quirkwrap;
+            case "quirkWrap":
+                quirkValue = chip8.cpu.quirkWrap;
                 break;
-            case "quirklogic":
-                quirkValue = chip8.cpu.quirklogic;
+            case "quirkLogic":
+                quirkValue = chip8.cpu.quirkLogic;
+                break;
+            case "quirkVBlank":
+                quirkValue = chip8.cpu.quirkVBlank;
                 break;
         }
         quirkCheckboxes[i].checked = quirkValue;
@@ -584,29 +591,32 @@ for (let checkbox of quirkCheckboxes) {
         let quirkValue = this.checked;
 
         switch (quirkName) {
-            case "quirkshift":
-                chip8.cpu.quirkshift = quirkValue;
+            case "quirkShift":
+                chip8.cpu.quirkShift = quirkValue;
                 break;
-            case "quirkmemoryLeaveIUnchanged":
-                chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue;
-                chip8.cpu.quirkmemoryIncrementByX = quirkValue
+            case "quirkMemoryLeaveIUnchanged":
+                chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue;
+                chip8.cpu.quirkMemoryIncrementByX = quirkValue
                     ? false
-                    : chip8.cpu.quirkmemoryIncrementByX;
+                    : chip8.cpu.quirkMemoryIncrementByX;
                 break;
-            case "quirkmemoryIncrementByX":
-                chip8.cpu.quirkmemoryIncrementByX = quirkValue;
-                chip8.cpu.quirkmemoryLeaveIUnchanged = quirkValue
+            case "quirkMemoryIncrementByX":
+                chip8.cpu.quirkMemoryIncrementByX = quirkValue;
+                chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue
                     ? false
-                    : chip8.cpu.quirkmemoryLeaveIUnchanged;
+                    : chip8.cpu.quirkMemoryLeaveIUnchanged;
                 break;
-            case "quirkjump":
-                chip8.cpu.quirkjump = quirkValue;
+            case "quirkJump":
+                chip8.cpu.quirkJump = quirkValue;
                 break;
-            case "quirkwrap":
-                chip8.cpu.quirkwrap = quirkValue;
+            case "quirkWrap":
+                chip8.cpu.quirkWrap = quirkValue;
                 break;
-            case "quirklogic":
-                chip8.cpu.quirklogic = quirkValue;
+            case "quirkLogic":
+                chip8.cpu.quirkLogic = quirkValue;
+                break;
+            case "quirkVBlank":
+                chip8.cpu.quirkVBlank = quirkValue;
                 break;
         }
         updateQuirksUI();
