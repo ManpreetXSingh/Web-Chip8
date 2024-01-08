@@ -46,11 +46,14 @@ class Keyboard {
         container.style.setProperty("--nRows", this.#nRows);
         container.style.setProperty("--nCols", this.#nCols);
 
+        let draggerContainer = document.createElement("div");
         let dragger = document.createElement("div");
-        dragger.classList.add("dragger");
-        container.appendChild(dragger);
 
-        dragger.addEventListener("mousedown", (event) => {
+        dragger.classList.add("dragger");
+        draggerContainer.appendChild(dragger);
+        container.appendChild(draggerContainer);
+
+        draggerContainer.addEventListener("mousedown", (event) => {
             event.preventDefault();
             var initialX = event.clientX,
                 initialY = event.clientY;
@@ -78,7 +81,7 @@ class Keyboard {
             );
         });
 
-        dragger.addEventListener("touchstart", (event) => {
+        draggerContainer.addEventListener("touchstart", (event) => {
             event.preventDefault();
             var initialX = event.touches[0].clientX,
                 initialY = event.touches[0].clientY;
@@ -168,7 +171,7 @@ class Keyboard {
         button.addEventListener("touchstart", () => {
             this._pressKey(idx);
 
-            document.addEventListener(
+            button.addEventListener(
                 "touchend",
                 () => {
                     this._releaseKey(idx);

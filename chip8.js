@@ -483,6 +483,9 @@ function dropCancelHandler(ev) {
 }
 
 function dragEnterHandler(ev) {
+    if (![...ev.dataTransfer.types].includes("Files")) {
+        return;
+    }
     ev.preventDefault();
     ev.stopPropagation();
 

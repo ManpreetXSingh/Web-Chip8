@@ -108,8 +108,7 @@ main {
     padding: 0;
 }
 
-/* If sceen size is smaller than ((2 * min-width) + extra) */
-@media (max-width: 95rem) {
+@media (max-width: 85rem) {
     body {
         width: var(--max-width);
     }
@@ -513,7 +512,7 @@ input[type="number"]:focus {
 } */
 
 /* Keyboard */
-.keyboard-container > .dragger {
+.keyboard-container .dragger {
     margin-inline: auto;
     margin-block: 5px;
     width: 10rem;
@@ -694,6 +693,7 @@ input[type="number"]:focus {
 #screen {
     margin: auto;
     max-width: 100%;
+    max-height: 100%;
 }
 
 /* Rom List */
