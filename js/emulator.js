@@ -222,6 +222,10 @@ class Chip8Emulator {
     }
 
     process(time) {
+        if (this.cpu.interrupted) {
+            this.pause();
+            return;
+        }
         // if (time - this.#time_previous > this.targetFrameInterval) {
         this.#oneSecTimer += time - this.#timePrevious;
         this.stepFrame();
@@ -229,10 +233,6 @@ class Chip8Emulator {
         // }
         // console.log("Frame")
 
-        if (this.cpu.interrupted) {
-            this.pause();
-            return;
-        }
         this.#processId = setTimeout(() => {
             this.process(window.performance.now());
         }, this.targetFrameInterval);

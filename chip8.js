@@ -267,49 +267,43 @@ let uploadRomWindow = document.getElementById("upload-rom-window");
 let romsJSON;
 
 function runRomByName(name) {
-    let romsrc = `./chip8Archive/roms/${name}.ch8`;
-
-    chip8.screen.fillColor = romsJSON[name]["options"]["fillColor"]
-        ? romsJSON[name]["options"]["fillColor"]
-        : "#FFFFFF";
-    chip8.screen.backgroundColor = romsJSON[name]["options"]["backgroundColor"]
-        ? romsJSON[name]["options"]["backgroundColor"]
-        : "#000000";
-    chip8.instructionsPerFrame = romsJSON[name]["options"]["tickrate"];
-    updateSettingsUI();
-
-    chip8.cpu.resetQuirks();
-    chip8.cpu.quirkMemoryLeaveIUnchanged =
-        "loadStoreQuirks" in romsJSON[name]["options"]
-            ? romsJSON[name]["options"]["loadStoreQuirks"]
-            : chip8.cpu.quirkMemoryLeaveIUnchanged;
-    chip8.cpu.quirkMemoryIncrementByX = chip8.cpu.quirkMemoryLeaveIUnchanged
-        ? false
-        : chip8.cpu.quirkMemoryIncrementByX;
-    chip8.cpu.quirkShift =
-        "shiftQuirks" in romsJSON[name]["options"]
-            ? romsJSON[name]["options"]["shiftQuirks"]
-            : chip8.cpu.quirkShift;
-    chip8.cpu.quirkJump =
-        "jumpQuirks" in romsJSON[name]["options"]
-            ? romsJSON[name]["options"]["jumpQuirks"]
-            : chip8.cpu.quirkJump;
-    chip8.cpu.quirkWrap =
-        "clipQuirks" in romsJSON[name]["options"]
-            ? !romsJSON[name]["options"]["clipQuirks"]
-            : chip8.cpu.quirkWrap;
-    chip8.cpu.quirkLogic =
-        "logicQuirks" in romsJSON[name]["options"]
-            ? romsJSON[name]["options"]["logicQuirks"]
-            : chip8.cpu.quirkLogic;
-    chip8.cpu.quirkVBlank =
-        "vBlankQuirks" in romsJSON[name]["options"]
-            ? romsJSON[name]["options"]["vBlankQuirks"]
-            : chip8.cpu.quirkVBlank;
-    updateQuirksUI();
+    const romsrc = `./chip8Archive/roms/${name}.ch8`;
+    pause();
+    hideLoadRomWindow();
 
     loadFileU8(romsrc, (rom) => {
-        hideLoadRomWindow();
+        const cpu = chip8.cpu;
+        const options = romsJSON[name]["options"];
+        chip8.screen.fillColor = options["fillColor"]
+            ? options["fillColor"]
+            : "#FFFFFF";
+        chip8.screen.backgroundColor = options["backgroundColor"]
+            ? options["backgroundColor"]
+            : "#000000";
+        chip8.instructionsPerFrame = options["tickrate"];
+        updateSettingsUI();
+
+        cpu.resetQuirks();
+        cpu.quirkMemoryLeaveIUnchanged =
+            "loadStoreQuirks" in options
+                ? options["loadStoreQuirks"]
+                : cpu.quirkMemoryLeaveIUnchanged;
+        cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
+            ? false
+            : cpu.quirkMemoryIncrementByX;
+        cpu.quirkShift =
+            "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
+        cpu.quirkJump =
+            "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
+        cpu.quirkWrap =
+            "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
+        cpu.quirkLogic =
+            "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
+        cpu.quirkVBlank =
+            "vBlankQuirks" in options
+                ? options["vBlankQuirks"]
+                : cpu.quirkVBlank;
+        updateQuirksUI();
         runRom(rom);
     });
 }
@@ -327,7 +321,7 @@ function romCard(name, imgsrc, romAuthors, description, event) {
     }
 
     return `<div class="rom-card" title="${description}" card-name="${name}">
-                <img src="${imgsrc}" alt="${name}">
+                <img loading="lazy" src="${imgsrc}" alt="${name}">
                 <div class="rom-card-title">${name}</div>
                 <div class="rom-card-author-event">
                     ${authorLinks}
@@ -695,17 +689,14 @@ let keyboard = new Keyboard(
 
 let keyboardContainer = document.getElementById("keyboard-container");
 let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
-let main = document.querySelector("main");
 keyboard.draw(keyboardContainer);
 
 showHideKeyboardButton.addEventListener("click", () => {
     if (!keyboardContainer.classList.contains("keyboard-active")) {
         keyboardContainer.classList.add("keyboard-active");
-        main.classList.add("keyboard-active");
         showHideKeyboardButton.textContent = "Hide Keyboard";
     } else {
         keyboardContainer.classList.remove("keyboard-active");
-        main.classList.remove("keyboard-active");
         showHideKeyboardButton.textContent = "Show Keyboard";
     }
 });

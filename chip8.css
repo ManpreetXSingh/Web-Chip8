@@ -126,10 +126,6 @@ main {
         overflow: auto;
     }
 
-    main.keyboard-active {
-        padding-bottom: 50vh;
-    }
-
     .layout-column {
         border: none;
         max-width: 100%;
