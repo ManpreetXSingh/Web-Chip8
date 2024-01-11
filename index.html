@@ -58,7 +58,7 @@
                 <h1>Chip 8 Emulator</h1>
             </div>
             <div class="layout-column">
-                <div id="emulator-container" class="window-item">
+                <div id="emulator-container">
                     <div class="control-bar">
                         <div id="controls">
                             <button
@@ -112,7 +112,7 @@
                     </div>
                 </div>
 
-                <div id="settings-container" class="window-item">
+                <div id="settings-container">
                     <div>
                         <button id="load-rom-btn">Load ROM</button>
                         <button id="upload-rom-btn">Upload ROM</button>
@@ -163,21 +163,21 @@
                             </label>
 
                             <label title="Background Color">
-                                Background Color
                                 <input
                                     type="color"
                                     name="bg-color"
                                     id="bg-color"
                                 />
+                                Background Color
                             </label>
 
                             <label title="Fill Color">
-                                Fill Color
                                 <input
                                     type="color"
                                     name="fg-color"
                                     id="fg-color"
                                 />
+                                Fill Color
                             </label>
                         </div>
                     </div>
@@ -262,7 +262,7 @@
             </div>
 
             <div class="layout-column">
-                <div id="debug-items-container" class="window-item">
+                <div id="debug-items-container">
                     <div class="table-container">
                         <table id="pointers-table" class="hex-table"></table>
                     </div>

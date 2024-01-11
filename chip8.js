@@ -5,7 +5,7 @@ let chip8 = new Chip8Emulator(60, 20);
 
 // Display Chip8 internal data
 
-var InfoRenderer = (() => {
+let InfoRenderer = (() => {
     let stackTable;
     let memoryTable;
     let registersTable;
@@ -624,7 +624,7 @@ for (let checkbox of quirkCheckboxes) {
 }
 
 for (let setting of settingsInputs) {
-    setting.addEventListener("input", function (e) {
+    let onInput = function () {
         let settingName = this.name;
         let settingValue = this.value;
 
@@ -649,7 +649,13 @@ for (let setting of settingsInputs) {
                 break;
         }
         updateSettingsUI();
-    });
+    };
+
+    if (setting.type === "range") {
+        setting.addEventListener("change", onInput);
+    } else {
+        setting.addEventListener("input", onInput);
+    }
 }
 
 updateSettingsUI();
@@ -697,7 +703,6 @@ let keyboard = new Keyboard(
     4
 );
 
-// Virtual keyboard events
 let keyboardContainer = document.getElementById("keyboard-container");
 let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
 let main = document.querySelector("main");

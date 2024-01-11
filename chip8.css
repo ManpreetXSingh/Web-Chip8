@@ -349,16 +349,6 @@ td[program-counter] {
 
 /* General Purpose CSS */
 
-.window-item {
-    max-width: calc(100% - 1rem);
-    /* min-width: min(100%, min-content); */
-
-    max-height: calc(100% - 1rem);
-    /* min-height: min(100%, min-content); */
-
-    margin-inline: 0.5rem;
-}
-
 .window {
     position: fixed;
     display: flex;
@@ -475,6 +465,8 @@ input[type="range"] {
 }
 
 input[type="color"] {
+    height: 0.8rem;
+    width: 1.6rem;
     border: none;
     background: none;
     outline: none;

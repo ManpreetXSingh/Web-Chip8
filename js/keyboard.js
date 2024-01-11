@@ -18,9 +18,9 @@ class Keyboard {
     }
 
     moveKeyboard(container, dx, dy, containerX = null, containerY = null) {
-        var newX =
+        let newX =
             (containerX === null ? container.offsetLeft : containerX) + dx;
-        var newY =
+        let newY =
             (containerY === null ? container.offsetTop : containerY) + dy;
 
         if (newX < 0) {
@@ -55,9 +55,9 @@ class Keyboard {
 
         draggerContainer.addEventListener("mousedown", (event) => {
             event.preventDefault();
-            var initialX = event.clientX,
+            let initialX = event.clientX,
                 initialY = event.clientY;
-            var elementX = container.offsetLeft,
+            let elementX = container.offsetLeft,
                 elementY = container.offsetTop;
 
             const dragEventHandler = (event) => {
@@ -83,9 +83,9 @@ class Keyboard {
 
         draggerContainer.addEventListener("touchstart", (event) => {
             event.preventDefault();
-            var initialX = event.touches[0].clientX,
+            let initialX = event.touches[0].clientX,
                 initialY = event.touches[0].clientY;
-            var elementX = container.offsetLeft,
+            let elementX = container.offsetLeft,
                 elementY = container.offsetTop;
 
             const dragEventHandler = (event) => {
