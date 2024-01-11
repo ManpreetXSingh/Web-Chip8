@@ -6,11 +6,26 @@ let chip8 = new Chip8Emulator(60, 20);
 // Display Chip8 internal data
 
 let InfoRenderer = (() => {
-    let stackTable;
-    let memoryTable;
-    let registersTable;
-    let pointersTable;
-    let timersTable;
+    let pointersTable = new TableRenderer(
+        document.getElementById("pointers-table"),
+        new TableOptions()
+    );
+    let timersTable = new TableRenderer(
+        document.getElementById("timers-table"),
+        new TableOptions()
+    );
+    let memoryTable = new TableRenderer(
+        document.getElementById("memory-table"),
+        new TableOptions()
+    );
+    let stackTable = new TableRenderer(
+        document.getElementById("stack-table"),
+        new TableOptions()
+    );
+    let registersTable = new TableRenderer(
+        document.getElementById("registers-table"),
+        new TableOptions()
+    );
 
     let fpsDisplay = document.getElementById("fps");
     let ipsDisplay = document.getElementById("ips");
@@ -22,61 +37,40 @@ let InfoRenderer = (() => {
         prevStackPointer = emulator.stackPointer;
         prevProgramCounter = emulator.programCounter;
 
-        let pointerOp = new TableOptions();
-        pointerOp.tableName = "Pointers";
-        pointerOp.vNames = ["PC", "I", "SP"];
-        pointerOp.hNames = ["Value"];
-        pointerOp.numCols = 1;
-        pointerOp.bitness = 16;
-        pointersTable = new TableRenderer(
-            document.getElementById("pointers-table"),
-            pointerOp
-        );
+        pointersTable.displayOptions.tableName = "Pointers";
+        pointersTable.displayOptions.vNames = ["PC", "I", "SP"];
+        pointersTable.displayOptions.hNames = ["Value"];
+        pointersTable.displayOptions.numCols = 1;
+        pointersTable.displayOptions.bitness = 16;
         pointersTable.display([
             emulator.programCounter,
             emulator.indexRegister,
             emulator.stackPointer,
         ]);
 
-        let timerOp = new TableOptions();
-        timerOp.tableName = "Timers";
-        timerOp.vNames = ["DT", "ST"];
-        timerOp.hNames = ["Value"];
-        timerOp.numCols = 1;
-        timerOp.bitness = 16;
-        timersTable = new TableRenderer(
-            document.getElementById("timers-table"),
-            timerOp
-        );
+        timersTable.displayOptions.tableName = "Timers";
+        timersTable.displayOptions.vNames = ["DT", "ST"];
+        timersTable.displayOptions.hNames = ["Value"];
+        timersTable.displayOptions.numCols = 1;
+        timersTable.displayOptions.bitness = 16;
         timersTable.display([emulator.delayTimer, emulator.soundTimer]);
 
-        let memoryOp = new TableOptions();
-        memoryOp.tableName = "Memory";
-        memoryOp.numCols = 16;
-        memoryOp.bitness = emulator.memory.bitness;
-        memoryTable = new TableRenderer(
-            document.getElementById("memory-table"),
-            memoryOp
-        );
+        memoryTable.displayOptions.tableName = "Memory";
+        memoryTable.displayOptions.numCols = 16;
+        memoryTable.displayOptions.bitness = emulator.memory.bitness;
         memoryTable.display(emulator.memory.underlyingArray);
 
-        let stackOp = new TableOptions();
-        stackOp.tableName = "Stack";
-        stackOp.numCols = 16;
-        stackOp.bitness = emulator.stack.bitness;
-        stackOp.vNames = ["Value"];
-        stackTable = new TableRenderer(
-            document.getElementById("stack-table"),
-            stackOp
-        );
+        stackTable.displayOptions.tableName = "Stack";
+        stackTable.displayOptions.numCols = 16;
+        stackTable.displayOptions.bitness = emulator.stack.bitness;
+        stackTable.displayOptions.vNames = ["Value"];
         stackTable.display(emulator.stack.underlyingArray);
 
-        let registerOp = new TableOptions();
-        registerOp.tableName = "Registers";
-        registerOp.numCols = 16;
-        registerOp.bitness = emulator.registers.bitness;
-        registerOp.vNames = ["Value"];
-        registerOp.hNames = [
+        registersTable.displayOptions.tableName = "Registers";
+        registersTable.displayOptions.numCols = 16;
+        registersTable.displayOptions.bitness = emulator.registers.bitness;
+        registersTable.displayOptions.vNames = ["Value"];
+        registersTable.displayOptions.hNames = [
             "V0",
             "V1",
             "V2",
@@ -94,10 +88,6 @@ let InfoRenderer = (() => {
             "VE",
             "VF",
         ];
-        registersTable = new TableRenderer(
-            document.getElementById("registers-table"),
-            registerOp
-        );
         registersTable.display(emulator.registers.underlyingArray);
     }
 

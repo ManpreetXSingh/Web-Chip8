@@ -755,6 +755,7 @@ input[type="number"]:focus {
 .rom-card img {
     width: 100%;
     max-height: 100%;
+    border-radius: 0.25rem;
 }
 
 /* Rom Title */

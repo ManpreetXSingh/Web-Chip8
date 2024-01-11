@@ -188,7 +188,7 @@ class TableRenderer {
 
     /**
      * Add attributes to the specified elements in the table.
-     * @param {Object<number, string[]>} tableAttributes
+     * @param {Object<number, Object<string, string>>} tableAttributes
      * @returns {void}
      */
     addAttributes(tableAttributes) {
