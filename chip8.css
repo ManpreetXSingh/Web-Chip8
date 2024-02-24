@@ -194,9 +194,11 @@ noscript {
 
 /* Scrollbar */
 
-* {
-    scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg-color);
-    scrollbar-width: var(--scrollbar-width);
+@supports not selector(::-webkit-scrollbar) {
+    * {
+        scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg-color);
+        scrollbar-width: var(--scrollbar-width);
+    }
 }
 
 ::-webkit-scrollbar {
