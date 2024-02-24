@@ -463,23 +463,26 @@ input[type="range"] {
 }
 
 input[type="color"] {
+    accent-color: var(--primary);
     height: 0.8rem;
     width: 1.6rem;
+    border-radius: 1rem;
+    border: 1px solid var(--secondary);
+}
+input[type="color"]:hover {
+    border-color: var(--primary);
+}
+input[type="color"]::-moz-color-swatch {
     border: none;
-    background: none;
-    outline: none;
-}
-
-::-webkit-color-swatch-wrapper {
-    background: none;
-    padding: 0;
-    overflow: hidden;
-}
-
-::-webkit-color-swatch {
     border-radius: 1rem;
 }
-
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 1rem;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
 /* input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
     appearance: none;
