@@ -397,6 +397,10 @@ td[program-counter] {
     transform: translateY(0);
 }
 
+.window.window-no-display {
+    display: none;
+}
+
 .close-btn {
     position: absolute;
     padding: 0.5rem;

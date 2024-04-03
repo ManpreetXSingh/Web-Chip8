@@ -1,5 +1,6 @@
 import Chip8Emulator from "./js/emulator.js";
 import Keyboard from "./js/keyboard.js";
+import Popup from "./js/popup.js";
 import TableRenderer, { TableOptions } from "./js/table_renderer.js";
 let chip8 = new Chip8Emulator(60, 20);
 
@@ -262,14 +263,12 @@ document.getElementById("step-frame-btn").addEventListener("click", stepFrame);
 // Load Rom List
 
 let romList = document.getElementById("rom-list");
-let loadRomWindow = document.getElementById("load-rom-window");
-let uploadRomWindow = document.getElementById("upload-rom-window");
 let romsJSON;
 
 function runRomByName(name) {
     const romsrc = `./chip8Archive/roms/${name}.ch8`;
     pause();
-    hideLoadRomWindow();
+    loadRomWindow.hide();
 
     loadFileU8(romsrc, (rom) => {
         const cpu = chip8.cpu;
@@ -313,9 +312,9 @@ function romCard(name, imgsrc, romAuthors, description, event) {
     for (const author in romAuthors) {
         if (romAuthors.hasOwnProperty(author)) {
             if (romAuthors[author].url) {
-                authorLinks += `<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a>`;
+                authorLinks += `<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a> `;
             } else {
-                authorLinks += author;
+                authorLinks += `${author} `;
             }
         }
     }
@@ -360,13 +359,22 @@ function loadRomsList() {
                 }
             }
             romList.querySelectorAll(".rom-card").forEach((card) => {
-                card.onclick = (e) => {
+                let onCardClicked = (e) => {
                     let romName = card.getAttribute("card-name");
                     runRomByName(romName);
                     e.stopPropagation();
                 };
+                card.onclick = onCardClicked;
+                card.onkeydown = (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.target.click();
+                    }
+                };
             });
             romList.querySelectorAll("a").forEach((a) => {
+                // prevent loading rom when a link is clicked
                 a.onclick = (e) => {
                     e.stopPropagation();
                 };
@@ -379,45 +387,31 @@ loadRomsList();
 
 // Show Hide Windows
 
-function showWindow(windowElement) {
-    windowElement.classList.add("window-active");
-}
+let loadRomWindow = new Popup(document.getElementById("load-rom-window"));
+let uploadRomWindow = new Popup(document.getElementById("upload-rom-window"));
 
-function hideWindow(windowElement) {
-    windowElement.classList.remove("window-active");
-}
-
-function showLoadRomWindow() {
-    showWindow(loadRomWindow);
-}
-
-function hideLoadRomWindow() {
-    hideWindow(loadRomWindow);
-}
-
-function showUploadRomWindow() {
-    showWindow(uploadRomWindow);
-}
-
-function hideUploadRomWindow() {
-    hideWindow(uploadRomWindow);
-}
-document
-    .getElementById("load-rom-btn")
-    .addEventListener("click", showLoadRomWindow);
+document.getElementById("load-rom-btn").addEventListener("click", () => {
+    loadRomWindow.show();
+});
 document
     .getElementById("close-load-rom-window-btn")
-    .addEventListener("click", hideLoadRomWindow);
-loadRomWindow.addEventListener("click", hideLoadRomWindow);
-loadRomWindow.firstChild.addEventListener("click", (e) => {
+    .addEventListener("click", () => {
+        loadRomWindow.hide();
+    });
+loadRomWindow.htmlElement.addEventListener("click", () => {
+    loadRomWindow.hide();
+});
+loadRomWindow.htmlElement.firstChild.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
 });
 
-document
-    .getElementById("upload-rom-btn")
-    .addEventListener("click", showUploadRomWindow);
-uploadRomWindow.addEventListener("click", hideUploadRomWindow);
+document.getElementById("upload-rom-btn").addEventListener("click", () => {
+    uploadRomWindow.show();
+});
+uploadRomWindow.htmlElement.addEventListener("click", () => {
+    uploadRomWindow.hide();
+});
 
 // Drag and drop rom file
 
@@ -433,7 +427,7 @@ document
 
 function dropHandler(ev) {
     function onLoad(e2) {
-        uploadRomWindow.classList.remove("window-active");
+        uploadRomWindow.hide();
         let rom = new Uint8Array(e2.target.result);
         runRom(rom);
     }
@@ -467,7 +461,7 @@ function dropHandler(ev) {
 }
 
 function dropCancelHandler(ev) {
-    uploadRomWindow.classList.remove("window-active");
+    uploadRomWindow.hide();
 }
 
 function dragEnterHandler(ev) {
@@ -477,7 +471,7 @@ function dragEnterHandler(ev) {
     ev.preventDefault();
     ev.stopPropagation();
 
-    uploadRomWindow.classList.add("window-active");
+    uploadRomWindow.show();
 }
 
 function dragOverHandler(ev) {
@@ -496,7 +490,7 @@ function dragLeaveHandler(ev) {
 
     if (!dragLeaveTimeout) {
         dragLeaveTimeout = setTimeout(() => {
-            uploadRomWindow.classList.remove("window-active");
+            uploadRomWindow.hide();
         }, 500);
     }
 }
