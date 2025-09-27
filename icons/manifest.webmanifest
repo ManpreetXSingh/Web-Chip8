@@ -1,14 +1,14 @@
 {
     "name": "Web Chip8 Emulator",
     "short_name": "Web Chip8",
-    "start_url": "/../chip8.html",
+    "start_url": "/index.html",
     "display": "standalone",
     "theme_color": "#9901fe",
     "background_color": "#fdfaff",
     "description": "A chip 8 emulator.",
     "icons": [
         {
-            "src": "icons/C8_Icon_48.png",
+            "src": "/icons/C8_Icon_48.png",
             "sizes": "48x48",
             "type": "image/png"
         },
