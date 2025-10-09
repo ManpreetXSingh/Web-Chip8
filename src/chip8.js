@@ -327,7 +327,7 @@ function romCard(name, imgsrc, romAuthors, description, event) {
         }
     }
 
-    return `<div class="rom-card" title="${description}" card-name="${name}">
+    return `<div class="rom-card" title="${description}" card-name="${name}" tabindex="0">
                 <img loading="lazy" src="${imgsrc}" alt="${name}">
                 <div class="rom-card-title">${name}</div>
                 <div class="rom-card-author-event">

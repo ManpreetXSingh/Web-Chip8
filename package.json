@@ -1,0 +1,25 @@
+{
+  "name": "web-chip8",
+  "version": "1.0.0",
+  "description": "A Chip-8 Emulator for the web.",
+  "main": "server.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManpreetXSingh/Web-Chip8.git"
+  },
+  "author": "Manpreet Singh <manpreet.singh.dev@proton.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ManpreetXSingh/Web-Chip8/issues"
+  },
+  "homepage": "https://github.com/ManpreetXSingh/Web-Chip8#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
