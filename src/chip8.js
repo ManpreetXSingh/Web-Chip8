@@ -1,8 +1,8 @@
 // Register service worker
 if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/svc_worker.js").then(function () {
-        console.log("Service Worker Registered");
-    });
+  navigator.serviceWorker.register("/svc_worker.js").then(function () {
+    console.log("Service Worker Registered");
+  });
 }
 
 // Main
@@ -15,152 +15,145 @@ let chip8 = new Chip8Emulator(60, 20);
 // Display Chip8 internal data
 
 let InfoRenderer = (() => {
-    let pointersTable = new TableRenderer(
-        document.getElementById("pointers-table"),
-        new TableOptions()
+  let pointersTable = new TableRenderer(
+    document.getElementById("pointers-table"),
+    new TableOptions(),
+  );
+  let timersTable = new TableRenderer(
+    document.getElementById("timers-table"),
+    new TableOptions(),
+  );
+  let memoryTable = new TableRenderer(
+    document.getElementById("memory-table"),
+    new TableOptions(),
+  );
+  let stackTable = new TableRenderer(
+    document.getElementById("stack-table"),
+    new TableOptions(),
+  );
+  let registersTable = new TableRenderer(
+    document.getElementById("registers-table"),
+    new TableOptions(),
+  );
+
+  let fpsDisplay = document.getElementById("fps");
+  let ipsDisplay = document.getElementById("ips");
+
+  let prevStackPointer;
+  let prevProgramCounter;
+
+  function displayInfo(emulator) {
+    prevStackPointer = emulator.stackPointer;
+    prevProgramCounter = emulator.programCounter;
+
+    pointersTable.displayOptions.tableName = "Pointers";
+    pointersTable.displayOptions.vNames = ["PC", "I", "SP"];
+    pointersTable.displayOptions.hNames = ["Value"];
+    pointersTable.displayOptions.numCols = 1;
+    pointersTable.displayOptions.bitness = 16;
+    pointersTable.display([
+      emulator.programCounter,
+      emulator.indexRegister,
+      emulator.stackPointer,
+    ]);
+
+    timersTable.displayOptions.tableName = "Timers";
+    timersTable.displayOptions.vNames = ["DT", "ST"];
+    timersTable.displayOptions.hNames = ["Value"];
+    timersTable.displayOptions.numCols = 1;
+    timersTable.displayOptions.bitness = 16;
+    timersTable.display([emulator.delayTimer, emulator.soundTimer]);
+
+    memoryTable.displayOptions.tableName = "Memory";
+    memoryTable.displayOptions.numCols = 16;
+    memoryTable.displayOptions.bitness = emulator.memory.bitness;
+    memoryTable.display(emulator.memory.underlyingArray);
+
+    stackTable.displayOptions.tableName = "Stack";
+    stackTable.displayOptions.numCols = 16;
+    stackTable.displayOptions.bitness = emulator.stack.bitness;
+    stackTable.displayOptions.vNames = ["Value"];
+    stackTable.display(emulator.stack.underlyingArray);
+
+    registersTable.displayOptions.tableName = "Registers";
+    registersTable.displayOptions.numCols = 16;
+    registersTable.displayOptions.bitness = emulator.registers.bitness;
+    registersTable.displayOptions.vNames = ["Value"];
+    registersTable.displayOptions.hNames = [
+      "V0",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "VA",
+      "VB",
+      "VC",
+      "VD",
+      "VE",
+      "VF",
+    ];
+    registersTable.display(emulator.registers.underlyingArray);
+  }
+
+  function updateInfo(emulator) {
+    fpsDisplay.textContent = emulator.fps.toFixed(1);
+    ipsDisplay.textContent = emulator.ips.toFixed(1);
+
+    // Display tables
+    pointersTable.update(
+      [emulator.programCounter, emulator.indexRegister, emulator.stackPointer],
+      [-1],
     );
-    let timersTable = new TableRenderer(
-        document.getElementById("timers-table"),
-        new TableOptions()
+    timersTable.update([emulator.delayTimer, emulator.soundTimer], [-1]);
+    memoryTable.update(
+      emulator.memory.underlyingArray,
+      emulator.memory.updates,
     );
-    let memoryTable = new TableRenderer(
-        document.getElementById("memory-table"),
-        new TableOptions()
-    );
-    let stackTable = new TableRenderer(
-        document.getElementById("stack-table"),
-        new TableOptions()
-    );
-    let registersTable = new TableRenderer(
-        document.getElementById("registers-table"),
-        new TableOptions()
+    stackTable.update(emulator.stack.underlyingArray, emulator.stack.updates);
+    registersTable.update(
+      emulator.registers.underlyingArray,
+      emulator.registers.updates,
     );
 
-    let fpsDisplay = document.getElementById("fps");
-    let ipsDisplay = document.getElementById("ips");
+    // Display stack pointer highlight
+    stackTable.removeAttributes({
+      [prevStackPointer]: ["stack-pointer", "title"],
+    });
+    stackTable.addAttributes({
+      [emulator.stackPointer]: {
+        "stack-pointer": null,
+        title: `Stack Pointer: {${emulator.stackPointer}}`,
+      },
+    });
+    prevStackPointer = emulator.stackPointer;
 
-    let prevStackPointer;
-    let prevProgramCounter;
+    // Display program counter highlight
+    memoryTable.removeAttributes({
+      [prevProgramCounter]: ["program-counter", "title"],
+      [prevProgramCounter + 1]: ["program-counter", "title"],
+    });
+    memoryTable.addAttributes({
+      [emulator.programCounter]: {
+        "program-counter": null,
+        title: `Program Counter: {${emulator.programCounter}}`,
+      },
+      [emulator.programCounter + 1]: {
+        "program-counter": null,
+        title: `Program Counter: {${emulator.programCounter}}`,
+      },
+    });
+    prevProgramCounter = emulator.programCounter;
+  }
 
-    function displayInfo(emulator) {
-        prevStackPointer = emulator.stackPointer;
-        prevProgramCounter = emulator.programCounter;
-
-        pointersTable.displayOptions.tableName = "Pointers";
-        pointersTable.displayOptions.vNames = ["PC", "I", "SP"];
-        pointersTable.displayOptions.hNames = ["Value"];
-        pointersTable.displayOptions.numCols = 1;
-        pointersTable.displayOptions.bitness = 16;
-        pointersTable.display([
-            emulator.programCounter,
-            emulator.indexRegister,
-            emulator.stackPointer,
-        ]);
-
-        timersTable.displayOptions.tableName = "Timers";
-        timersTable.displayOptions.vNames = ["DT", "ST"];
-        timersTable.displayOptions.hNames = ["Value"];
-        timersTable.displayOptions.numCols = 1;
-        timersTable.displayOptions.bitness = 16;
-        timersTable.display([emulator.delayTimer, emulator.soundTimer]);
-
-        memoryTable.displayOptions.tableName = "Memory";
-        memoryTable.displayOptions.numCols = 16;
-        memoryTable.displayOptions.bitness = emulator.memory.bitness;
-        memoryTable.display(emulator.memory.underlyingArray);
-
-        stackTable.displayOptions.tableName = "Stack";
-        stackTable.displayOptions.numCols = 16;
-        stackTable.displayOptions.bitness = emulator.stack.bitness;
-        stackTable.displayOptions.vNames = ["Value"];
-        stackTable.display(emulator.stack.underlyingArray);
-
-        registersTable.displayOptions.tableName = "Registers";
-        registersTable.displayOptions.numCols = 16;
-        registersTable.displayOptions.bitness = emulator.registers.bitness;
-        registersTable.displayOptions.vNames = ["Value"];
-        registersTable.displayOptions.hNames = [
-            "V0",
-            "V1",
-            "V2",
-            "V3",
-            "V4",
-            "V5",
-            "V6",
-            "V7",
-            "V8",
-            "V9",
-            "VA",
-            "VB",
-            "VC",
-            "VD",
-            "VE",
-            "VF",
-        ];
-        registersTable.display(emulator.registers.underlyingArray);
-    }
-
-    function updateInfo(emulator) {
-        fpsDisplay.textContent = emulator.fps.toFixed(1);
-        ipsDisplay.textContent = emulator.ips.toFixed(1);
-
-        // Display tables
-        pointersTable.update(
-            [
-                emulator.programCounter,
-                emulator.indexRegister,
-                emulator.stackPointer,
-            ],
-            [-1]
-        );
-        timersTable.update([emulator.delayTimer, emulator.soundTimer], [-1]);
-        memoryTable.update(
-            emulator.memory.underlyingArray,
-            emulator.memory.updates
-        );
-        stackTable.update(
-            emulator.stack.underlyingArray,
-            emulator.stack.updates
-        );
-        registersTable.update(
-            emulator.registers.underlyingArray,
-            emulator.registers.updates
-        );
-
-        // Display stack pointer highlight
-        stackTable.removeAttributes({
-            [prevStackPointer]: ["stack-pointer", "title"],
-        });
-        stackTable.addAttributes({
-            [emulator.stackPointer]: {
-                "stack-pointer": null,
-                title: `Stack Pointer: {${emulator.stackPointer}}`,
-            },
-        });
-        prevStackPointer = emulator.stackPointer;
-
-        // Display program counter highlight
-        memoryTable.removeAttributes({
-            [prevProgramCounter]: ["program-counter", "title"],
-            [prevProgramCounter + 1]: ["program-counter", "title"],
-        });
-        memoryTable.addAttributes({
-            [emulator.programCounter]: {
-                "program-counter": null,
-                title: `Program Counter: {${emulator.programCounter}}`,
-            },
-            [emulator.programCounter + 1]: {
-                "program-counter": null,
-                title: `Program Counter: {${emulator.programCounter}}`,
-            },
-        });
-        prevProgramCounter = emulator.programCounter;
-    }
-
-    return {
-        displayInfo: displayInfo,
-        updateInfo: updateInfo,
-    };
+  return {
+    displayInfo: displayInfo,
+    updateInfo: updateInfo,
+  };
 })();
 
 InfoRenderer.displayInfo(chip8);
@@ -168,41 +161,41 @@ chip8.updateDisplay = InfoRenderer.updateInfo.bind(null, chip8);
 
 // Load JSON
 function loadJson(filePath, onLoad) {
-    if (!filePath || !onLoad) {
-        return;
-    }
+  if (!filePath || !onLoad) {
+    return;
+  }
 
-    let request = new XMLHttpRequest();
-    request.onload = function () {
-        if (!request.response) {
-            console.log("Error loading JSON");
-            return;
-        }
-        onLoad(JSON.parse(request.response));
-    };
-    request.open("GET", filePath, true);
-    request.responseType = "text";
-    request.send();
+  let request = new XMLHttpRequest();
+  request.onload = function () {
+    if (!request.response) {
+      console.log("Error loading JSON");
+      return;
+    }
+    onLoad(JSON.parse(request.response));
+  };
+  request.open("GET", filePath, true);
+  request.responseType = "text";
+  request.send();
 }
 
 // Load a file as a Uint8Array
 function loadFileU8(filePath, onLoad) {
-    if (!filePath || !onLoad) {
-        return;
-    }
+  if (!filePath || !onLoad) {
+    return;
+  }
 
-    let request = new XMLHttpRequest();
-    request.onload = function () {
-        if (!request.response) {
-            console.log("Error loading rom");
-            return;
-        }
-        let rom = new Uint8Array(request.response);
-        onLoad(rom);
-    };
-    request.open("GET", filePath, true);
-    request.responseType = "arraybuffer";
-    request.send();
+  let request = new XMLHttpRequest();
+  request.onload = function () {
+    if (!request.response) {
+      console.log("Error loading rom");
+      return;
+    }
+    let rom = new Uint8Array(request.response);
+    onLoad(rom);
+  };
+  request.open("GET", filePath, true);
+  request.responseType = "arraybuffer";
+  request.send();
 }
 
 // Controls
@@ -210,56 +203,56 @@ function loadFileU8(filePath, onLoad) {
 let playPauseBtn = document.getElementById("play-pause-btn");
 
 function resume() {
-    playPauseBtn.textContent = "pause";
-    chip8.resume();
+  playPauseBtn.textContent = "pause";
+  chip8.resume();
 }
 
 function pause() {
-    playPauseBtn.textContent = "play_arrow";
-    chip8.pause();
+  playPauseBtn.textContent = "play_arrow";
+  chip8.pause();
 }
 
 function playPause() {
-    if (chip8.paused) {
-        resume();
-    } else {
-        pause();
-    }
+  if (chip8.paused) {
+    resume();
+  } else {
+    pause();
+  }
 }
 
 function replay() {
-    playPauseBtn.textContent = "play_arrow";
-    chip8.killProcess();
-    chip8.updateDisplay();
+  playPauseBtn.textContent = "play_arrow";
+  chip8.killProcess();
+  chip8.updateDisplay();
 }
 
 function step() {
-    if (chip8.paused) {
-        chip8.step();
-    }
+  if (chip8.paused) {
+    chip8.step();
+  }
 }
 
 function stepFrame() {
-    if (chip8.paused) {
-        chip8.stepFrame();
-    }
+  if (chip8.paused) {
+    chip8.stepFrame();
+  }
 }
 
 function runRom(rom) {
-    playPauseBtn.textContent = "pause";
-    chip8.killProcess();
-    if (!chip8.loadRom(rom)) {
-        return;
-    }
-    chip8.beginProcess();
+  playPauseBtn.textContent = "pause";
+  chip8.killProcess();
+  if (!chip8.loadRom(rom)) {
+    return;
+  }
+  chip8.beginProcess();
 }
 
 // Pause/Resume based on page visibility
 function handleVisibilityChange() {
-    if (document.hidden) {
-        pause();
-    }
-    // resume();
+  if (document.hidden) {
+    pause();
+  }
+  // resume();
 }
 
 playPauseBtn.addEventListener("click", playPause);
@@ -274,60 +267,58 @@ let romList = document.getElementById("rom-list");
 let romsJSON;
 
 function runRomByName(name) {
-    const romsrc = `./chip8Archive/roms/${name}.ch8`;
-    pause();
-    loadRomWindow.hide();
+  const romsrc = `./chip8Archive/roms/${name}.ch8`;
+  pause();
+  loadRomWindow.hide();
 
-    loadFileU8(romsrc, (rom) => {
-        const cpu = chip8.cpu;
-        const options = romsJSON[name]["options"];
-        chip8.screen.fillColor = options["fillColor"]
-            ? options["fillColor"]
-            : "#FFFFFF";
-        chip8.screen.backgroundColor = options["backgroundColor"]
-            ? options["backgroundColor"]
-            : "#000000";
-        chip8.instructionsPerFrame = options["tickrate"];
-        updateSettingsUI();
+  loadFileU8(romsrc, (rom) => {
+    const cpu = chip8.cpu;
+    const options = romsJSON[name]["options"];
+    chip8.screen.fillColor = options["fillColor"]
+      ? options["fillColor"]
+      : "#FFFFFF";
+    chip8.screen.backgroundColor = options["backgroundColor"]
+      ? options["backgroundColor"]
+      : "#000000";
+    chip8.instructionsPerFrame = options["tickrate"];
+    updateSettingsUI();
 
-        cpu.resetQuirks();
-        cpu.quirkMemoryLeaveIUnchanged =
-            "loadStoreQuirks" in options
-                ? options["loadStoreQuirks"]
-                : cpu.quirkMemoryLeaveIUnchanged;
-        cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
-            ? false
-            : cpu.quirkMemoryIncrementByX;
-        cpu.quirkShift =
-            "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
-        cpu.quirkJump =
-            "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
-        cpu.quirkWrap =
-            "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
-        cpu.quirkLogic =
-            "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
-        cpu.quirkVBlank =
-            "vBlankQuirks" in options
-                ? options["vBlankQuirks"]
-                : cpu.quirkVBlank;
-        updateQuirksUI();
-        runRom(rom);
-    });
+    cpu.resetQuirks();
+    cpu.quirkMemoryLeaveIUnchanged =
+      "loadStoreQuirks" in options
+        ? options["loadStoreQuirks"]
+        : cpu.quirkMemoryLeaveIUnchanged;
+    cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
+      ? false
+      : cpu.quirkMemoryIncrementByX;
+    cpu.quirkShift =
+      "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
+    cpu.quirkJump =
+      "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
+    cpu.quirkWrap =
+      "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
+    cpu.quirkLogic =
+      "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
+    cpu.quirkVBlank =
+      "vBlankQuirks" in options ? options["vBlankQuirks"] : cpu.quirkVBlank;
+    updateQuirksUI();
+    runRom(rom);
+  });
 }
 
 function romCard(name, imgsrc, romAuthors, description, event) {
-    let authorLinks = "";
-    for (const author in romAuthors) {
-        if (romAuthors.hasOwnProperty(author)) {
-            if (romAuthors[author].url) {
-                authorLinks += `<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a> `;
-            } else {
-                authorLinks += `${author} `;
-            }
-        }
+  let authorLinks = "";
+  for (const author in romAuthors) {
+    if (romAuthors.hasOwnProperty(author)) {
+      if (romAuthors[author].url) {
+        authorLinks += `<a href="${romAuthors[author].url}" target="_blank" rel="noopener noreferrer">${author}</a> `;
+      } else {
+        authorLinks += `${author} `;
+      }
     }
+  }
 
-    return `<div class="rom-card" title="${description}" card-name="${name}" tabindex="0">
+  return `<div class="rom-card" title="${description}" card-name="${name}" tabindex="0">
                 <img loading="lazy" src="${imgsrc}" alt="${name}">
                 <div class="rom-card-title">${name}</div>
                 <div class="rom-card-author-event">
@@ -339,56 +330,56 @@ function romCard(name, imgsrc, romAuthors, description, event) {
 
 // Load a list of roms from a json file
 function loadRomsList() {
-    loadJson("./chip8Archive/authors.json", (authors) => {
-        loadJson("./chip8Archive/programs.json", (roms) => {
-            romsJSON = roms;
-            for (const key in roms) {
-                if (roms.hasOwnProperty(key)) {
-                    if (roms[key].platform != "chip8") {
-                        continue;
-                    }
+  loadJson("./chip8Archive/authors.json", (authors) => {
+    loadJson("./chip8Archive/programs.json", (roms) => {
+      romsJSON = roms;
+      for (const key in roms) {
+        if (roms.hasOwnProperty(key)) {
+          if (roms[key].platform != "chip8") {
+            continue;
+          }
 
-                    let romAuthors = {};
-                    for (const i in roms[key].authors) {
-                        let author =
-                            roms[key].authors[i] != "your name here"
-                                ? roms[key].authors[i]
-                                : "Unknown";
-                        romAuthors[author] = authors[roms[key].authors[i]];
-                    }
+          let romAuthors = {};
+          for (const i in roms[key].authors) {
+            let author =
+              roms[key].authors[i] != "your name here"
+                ? roms[key].authors[i]
+                : "Unknown";
+            romAuthors[author] = authors[roms[key].authors[i]];
+          }
 
-                    romList.innerHTML += romCard(
-                        key, // rom name
-                        `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
-                        romAuthors, // authors
-                        roms[key].desc, // description
-                        roms[key].event // event
-                    );
-                }
-            }
-            romList.querySelectorAll(".rom-card").forEach((card) => {
-                let onCardClicked = (e) => {
-                    let romName = card.getAttribute("card-name");
-                    runRomByName(romName);
-                    e.stopPropagation();
-                };
-                card.onclick = onCardClicked;
-                card.onkeydown = (e) => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.target.click();
-                    }
-                };
-            });
-            romList.querySelectorAll("a").forEach((a) => {
-                // prevent loading rom when a link is clicked
-                a.onclick = (e) => {
-                    e.stopPropagation();
-                };
-            });
-        });
+          romList.innerHTML += romCard(
+            key, // rom name
+            `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
+            romAuthors, // authors
+            roms[key].desc, // description
+            roms[key].event, // event
+          );
+        }
+      }
+      romList.querySelectorAll(".rom-card").forEach((card) => {
+        let onCardClicked = (e) => {
+          let romName = card.getAttribute("card-name");
+          runRomByName(romName);
+          e.stopPropagation();
+        };
+        card.onclick = onCardClicked;
+        card.onkeydown = (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            e.target.click();
+          }
+        };
+      });
+      romList.querySelectorAll("a").forEach((a) => {
+        // prevent loading rom when a link is clicked
+        a.onclick = (e) => {
+          e.stopPropagation();
+        };
+      });
     });
+  });
 }
 
 loadRomsList();
@@ -399,26 +390,26 @@ let loadRomWindow = new Popup(document.getElementById("load-rom-window"));
 let uploadRomWindow = new Popup(document.getElementById("upload-rom-window"));
 
 document.getElementById("load-rom-btn").addEventListener("click", () => {
-    loadRomWindow.show();
+  loadRomWindow.show();
 });
 document
-    .getElementById("close-load-rom-window-btn")
-    .addEventListener("click", () => {
-        loadRomWindow.hide();
-    });
-loadRomWindow.htmlElement.addEventListener("click", () => {
+  .getElementById("close-load-rom-window-btn")
+  .addEventListener("click", () => {
     loadRomWindow.hide();
+  });
+loadRomWindow.htmlElement.addEventListener("click", () => {
+  loadRomWindow.hide();
 });
 loadRomWindow.htmlElement.firstChild.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
 });
 
 document.getElementById("upload-rom-btn").addEventListener("click", () => {
-    uploadRomWindow.show();
+  uploadRomWindow.show();
 });
 uploadRomWindow.htmlElement.addEventListener("click", () => {
-    uploadRomWindow.hide();
+  uploadRomWindow.hide();
 });
 
 // Drag and drop rom file
@@ -430,218 +421,218 @@ document.querySelector("body").addEventListener("dragleave", dragLeaveHandler);
 document.querySelector("body").addEventListener("drop", dropCancelHandler);
 document.querySelector("body").addEventListener("dragover", dragOverHandler);
 document
-    .getElementById("upload-rom-window")
-    .addEventListener("drop", dropHandler);
+  .getElementById("upload-rom-window")
+  .addEventListener("drop", dropHandler);
 
 function dropHandler(ev) {
-    function onLoad(e2) {
-        uploadRomWindow.hide();
-        let rom = new Uint8Array(e2.target.result);
-        runRom(rom);
+  function onLoad(e2) {
+    uploadRomWindow.hide();
+    let rom = new Uint8Array(e2.target.result);
+    runRom(rom);
+  }
+
+  // Prevent default behavior
+  ev.preventDefault();
+  ev.stopPropagation();
+
+  if (ev.dataTransfer.items) {
+    for (const fileIdx in ev.dataTransfer.items) {
+      let item = ev.dataTransfer.items[fileIdx];
+
+      if (!(item.kind === "file")) {
+        continue;
+      }
+
+      const file = item.getAsFile();
+      let reader = new FileReader();
+
+      reader.onload = onLoad;
+      reader.readAsArrayBuffer(file);
+      return;
     }
+  } else {
+    const file = ev.dataTransfer.files[0];
+    let reader = new FileReader();
 
-    // Prevent default behavior
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    if (ev.dataTransfer.items) {
-        for (const fileIdx in ev.dataTransfer.items) {
-            let item = ev.dataTransfer.items[fileIdx];
-
-            if (!(item.kind === "file")) {
-                continue;
-            }
-
-            const file = item.getAsFile();
-            let reader = new FileReader();
-
-            reader.onload = onLoad;
-            reader.readAsArrayBuffer(file);
-            return;
-        }
-    } else {
-        const file = ev.dataTransfer.files[0];
-        let reader = new FileReader();
-
-        reader.onload = onLoad;
-        reader.readAsArrayBuffer(file);
-    }
+    reader.onload = onLoad;
+    reader.readAsArrayBuffer(file);
+  }
 }
 
 function dropCancelHandler(ev) {
-    uploadRomWindow.hide();
+  uploadRomWindow.hide();
 }
 
 function dragEnterHandler(ev) {
-    if (![...ev.dataTransfer.types].includes("Files")) {
-        return;
-    }
-    ev.preventDefault();
-    ev.stopPropagation();
+  if (![...ev.dataTransfer.types].includes("Files")) {
+    return;
+  }
+  ev.preventDefault();
+  ev.stopPropagation();
 
-    uploadRomWindow.show();
+  uploadRomWindow.show();
 }
 
 function dragOverHandler(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
+  ev.preventDefault();
+  ev.stopPropagation();
 
-    if (dragLeaveTimeout != null) {
-        clearTimeout(dragLeaveTimeout);
-        dragLeaveTimeout = null;
-    }
+  if (dragLeaveTimeout != null) {
+    clearTimeout(dragLeaveTimeout);
+    dragLeaveTimeout = null;
+  }
 }
 
 function dragLeaveHandler(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
+  ev.preventDefault();
+  ev.stopPropagation();
 
-    if (!dragLeaveTimeout) {
-        dragLeaveTimeout = setTimeout(() => {
-            uploadRomWindow.hide();
-        }, 500);
-    }
+  if (!dragLeaveTimeout) {
+    dragLeaveTimeout = setTimeout(() => {
+      uploadRomWindow.hide();
+    }, 500);
+  }
 }
 
 // Quirks & Settings
 
 let quirkCheckboxes = document
-    .getElementById("quirk-checkboxes")
-    .querySelectorAll('input[type="checkbox"]');
+  .getElementById("quirk-checkboxes")
+  .querySelectorAll('input[type="checkbox"]');
 
 function updateQuirksUI() {
-    for (let i = 0; i < quirkCheckboxes.length; i++) {
-        let quirkName = quirkCheckboxes[i].name;
-        let quirkValue;
+  for (let i = 0; i < quirkCheckboxes.length; i++) {
+    let quirkName = quirkCheckboxes[i].name;
+    let quirkValue;
 
-        switch (quirkName) {
-            case "quirkShift":
-                quirkValue = chip8.cpu.quirkShift;
-                break;
-            case "quirkMemoryLeaveIUnchanged":
-                quirkValue = chip8.cpu.quirkMemoryLeaveIUnchanged;
-                break;
-            case "quirkMemoryIncrementByX":
-                quirkValue = chip8.cpu.quirkMemoryIncrementByX;
-                break;
-            case "quirkJump":
-                quirkValue = chip8.cpu.quirkJump;
-                break;
-            case "quirkWrap":
-                quirkValue = chip8.cpu.quirkWrap;
-                break;
-            case "quirkLogic":
-                quirkValue = chip8.cpu.quirkLogic;
-                break;
-            case "quirkVBlank":
-                quirkValue = chip8.cpu.quirkVBlank;
-                break;
-        }
-        quirkCheckboxes[i].checked = quirkValue;
+    switch (quirkName) {
+      case "quirkShift":
+        quirkValue = chip8.cpu.quirkShift;
+        break;
+      case "quirkMemoryLeaveIUnchanged":
+        quirkValue = chip8.cpu.quirkMemoryLeaveIUnchanged;
+        break;
+      case "quirkMemoryIncrementByX":
+        quirkValue = chip8.cpu.quirkMemoryIncrementByX;
+        break;
+      case "quirkJump":
+        quirkValue = chip8.cpu.quirkJump;
+        break;
+      case "quirkWrap":
+        quirkValue = chip8.cpu.quirkWrap;
+        break;
+      case "quirkLogic":
+        quirkValue = chip8.cpu.quirkLogic;
+        break;
+      case "quirkVBlank":
+        quirkValue = chip8.cpu.quirkVBlank;
+        break;
     }
+    quirkCheckboxes[i].checked = quirkValue;
+  }
 }
 
 let settingsInputs = document
-    .getElementById("settings-inputs")
-    .querySelectorAll("input");
+  .getElementById("settings-inputs")
+  .querySelectorAll("input");
 
 function updateSettingsUI() {
-    for (let i = 0; i < settingsInputs.length; i++) {
-        let settingName = settingsInputs[i].name;
-        let settingValue;
+  for (let i = 0; i < settingsInputs.length; i++) {
+    let settingName = settingsInputs[i].name;
+    let settingValue;
 
-        switch (settingName) {
-            case "screen-scale":
-                settingValue = chip8.screen.resScale;
-                break;
-            case "target-fps":
-                settingValue = chip8.targetFps;
-                break;
-            case "target-ipf":
-                settingValue = chip8.instructionsPerFrame;
-                break;
-            case "bg-color":
-                settingValue = chip8.screen.backgroundColor;
-                break;
-            case "fg-color":
-                settingValue = chip8.screen.fillColor;
-                break;
-        }
-        settingsInputs[i].value = settingValue;
+    switch (settingName) {
+      case "screen-scale":
+        settingValue = chip8.screen.resScale;
+        break;
+      case "target-fps":
+        settingValue = chip8.targetFps;
+        break;
+      case "target-ipf":
+        settingValue = chip8.instructionsPerFrame;
+        break;
+      case "bg-color":
+        settingValue = chip8.screen.backgroundColor;
+        break;
+      case "fg-color":
+        settingValue = chip8.screen.fillColor;
+        break;
     }
+    settingsInputs[i].value = settingValue;
+  }
 }
 
 for (let checkbox of quirkCheckboxes) {
-    checkbox.addEventListener("change", function (e) {
-        let quirkName = this.name;
-        let quirkValue = this.checked;
+  checkbox.addEventListener("change", function (e) {
+    let quirkName = this.name;
+    let quirkValue = this.checked;
 
-        switch (quirkName) {
-            case "quirkShift":
-                chip8.cpu.quirkShift = quirkValue;
-                break;
-            case "quirkMemoryLeaveIUnchanged":
-                chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue;
-                chip8.cpu.quirkMemoryIncrementByX = quirkValue
-                    ? false
-                    : chip8.cpu.quirkMemoryIncrementByX;
-                break;
-            case "quirkMemoryIncrementByX":
-                chip8.cpu.quirkMemoryIncrementByX = quirkValue;
-                chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue
-                    ? false
-                    : chip8.cpu.quirkMemoryLeaveIUnchanged;
-                break;
-            case "quirkJump":
-                chip8.cpu.quirkJump = quirkValue;
-                break;
-            case "quirkWrap":
-                chip8.cpu.quirkWrap = quirkValue;
-                break;
-            case "quirkLogic":
-                chip8.cpu.quirkLogic = quirkValue;
-                break;
-            case "quirkVBlank":
-                chip8.cpu.quirkVBlank = quirkValue;
-                break;
-        }
-        updateQuirksUI();
-    });
+    switch (quirkName) {
+      case "quirkShift":
+        chip8.cpu.quirkShift = quirkValue;
+        break;
+      case "quirkMemoryLeaveIUnchanged":
+        chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue;
+        chip8.cpu.quirkMemoryIncrementByX = quirkValue
+          ? false
+          : chip8.cpu.quirkMemoryIncrementByX;
+        break;
+      case "quirkMemoryIncrementByX":
+        chip8.cpu.quirkMemoryIncrementByX = quirkValue;
+        chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue
+          ? false
+          : chip8.cpu.quirkMemoryLeaveIUnchanged;
+        break;
+      case "quirkJump":
+        chip8.cpu.quirkJump = quirkValue;
+        break;
+      case "quirkWrap":
+        chip8.cpu.quirkWrap = quirkValue;
+        break;
+      case "quirkLogic":
+        chip8.cpu.quirkLogic = quirkValue;
+        break;
+      case "quirkVBlank":
+        chip8.cpu.quirkVBlank = quirkValue;
+        break;
+    }
+    updateQuirksUI();
+  });
 }
 
 for (let setting of settingsInputs) {
-    let onInput = function () {
-        let settingName = this.name;
-        let settingValue = this.value;
+  let onInput = function () {
+    let settingName = this.name;
+    let settingValue = this.value;
 
-        switch (settingName) {
-            case "screen-scale":
-                chip8.screen.updateResScale(settingValue);
-                chip8.screen.forceRefresh();
-                break;
-            case "target-fps":
-                chip8.targetFps = settingValue;
-                break;
-            case "target-ipf":
-                chip8.instructionsPerFrame = settingValue;
-                break;
-            case "bg-color":
-                chip8.screen.backgroundColor = settingValue;
-                chip8.screen.forceRefresh();
-                break;
-            case "fg-color":
-                chip8.screen.fillColor = settingValue;
-                chip8.screen.forceRefresh();
-                break;
-        }
-        updateSettingsUI();
-    };
-
-    if (setting.type === "range") {
-        setting.addEventListener("change", onInput);
-    } else {
-        setting.addEventListener("input", onInput);
+    switch (settingName) {
+      case "screen-scale":
+        chip8.screen.updateResScale(settingValue);
+        chip8.screen.forceRefresh();
+        break;
+      case "target-fps":
+        chip8.targetFps = settingValue;
+        break;
+      case "target-ipf":
+        chip8.instructionsPerFrame = settingValue;
+        break;
+      case "bg-color":
+        chip8.screen.backgroundColor = settingValue;
+        chip8.screen.forceRefresh();
+        break;
+      case "fg-color":
+        chip8.screen.fillColor = settingValue;
+        chip8.screen.forceRefresh();
+        break;
     }
+    updateSettingsUI();
+  };
+
+  if (setting.type === "range") {
+    setting.addEventListener("change", onInput);
+  } else {
+    setting.addEventListener("input", onInput);
+  }
 }
 
 updateSettingsUI();
@@ -650,43 +641,43 @@ updateQuirksUI();
 // Keyboard
 
 let keyboard = new Keyboard(
-    [
-        "1",
-        "2",
-        "3",
-        "C",
-        "4",
-        "5",
-        "6",
-        "D",
-        "7",
-        "8",
-        "9",
-        "E",
-        "A",
-        "0",
-        "B",
-        "F",
-    ],
-    {
-        1: ["1"],
-        2: ["2"],
-        3: ["3"],
-        C: ["4"],
-        4: ["q"],
-        5: ["w"],
-        6: ["e"],
-        D: ["r"],
-        7: ["a"],
-        8: ["s"],
-        9: ["d"],
-        E: ["f"],
-        A: ["z"],
-        0: ["x"],
-        B: ["c"],
-        F: ["v"],
-    },
-    4
+  [
+    "1",
+    "2",
+    "3",
+    "C",
+    "4",
+    "5",
+    "6",
+    "D",
+    "7",
+    "8",
+    "9",
+    "E",
+    "A",
+    "0",
+    "B",
+    "F",
+  ],
+  {
+    1: ["1"],
+    2: ["2"],
+    3: ["3"],
+    C: ["4"],
+    4: ["q"],
+    5: ["w"],
+    6: ["e"],
+    D: ["r"],
+    7: ["a"],
+    8: ["s"],
+    9: ["d"],
+    E: ["f"],
+    A: ["z"],
+    0: ["x"],
+    B: ["c"],
+    F: ["v"],
+  },
+  4,
 );
 
 let keyboardContainer = document.getElementById("keyboard-container");
@@ -694,13 +685,13 @@ let showHideKeyboardButton = document.getElementById("show-hide-keyboard-btn");
 keyboard.draw(keyboardContainer);
 
 showHideKeyboardButton.addEventListener("click", () => {
-    if (!keyboardContainer.classList.contains("keyboard-active")) {
-        keyboardContainer.classList.add("keyboard-active");
-        showHideKeyboardButton.textContent = "Hide Keyboard";
-    } else {
-        keyboardContainer.classList.remove("keyboard-active");
-        showHideKeyboardButton.textContent = "Show Keyboard";
-    }
+  if (!keyboardContainer.classList.contains("keyboard-active")) {
+    keyboardContainer.classList.add("keyboard-active");
+    showHideKeyboardButton.textContent = "Hide Keyboard";
+  } else {
+    keyboardContainer.classList.remove("keyboard-active");
+    showHideKeyboardButton.textContent = "Show Keyboard";
+  }
 });
 
 keyboard.onkeydown = chip8.pressKey.bind(chip8);

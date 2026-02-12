@@ -1,362 +1,330 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="theme-color" content="#9901fe" />
-        <title>Chip-8 Emulator</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#9901fe" />
+    <title>Chip-8 Emulator</title>
 
-        <!-- Favicon -->
-        <link
-            rel="apple-touch-icon"
-            sizes="180x180"
-            href="./icons/C8_Icon_180.png"
-        />
-        <link
-            rel="icon"
-            type="image/png"
-            sizes="32x32"
-            href="./icons/C8_Icon_32.png"
-        />
-        <link
-            rel="icon"
-            type="image/png"
-            sizes="16x16"
-            href="./icons/C8_Icon_16.png"
-        />
-        <link rel="manifest" href="./icons/manifest.webmanifest" />
+    <!-- Favicon -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./icons/C8_Icon_180.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./icons/C8_Icon_32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="./icons/C8_Icon_16.png"
+    />
+    <link rel="manifest" href="./icons/manifest.webmanifest" />
 
-        <!-- Stylesheets -->
-        <link rel="stylesheet" href="chip8.css" defer />
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="chip8.css" defer />
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap"
-            rel="stylesheet"
-        />
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"
-        />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"
+    />
 
-        <!-- Icons -->
-        <link
-            href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
-            rel="stylesheet"
-        />
+    <!-- Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
 
-        <!-- Scripts -->
-        <script src="./chip8.js" type="module"></script>
-    </head>
+    <!-- Scripts -->
+    <script src="./chip8.js" type="module"></script>
+  </head>
 
-    <body>
-        <main>
-            <div class="layout-row">
-                <img src="./icons/C8_Icon_192.png" alt="C8" />
-                <h1>Chip 8 Emulator</h1>
+  <body>
+    <main>
+      <div class="layout-row">
+        <img src="./icons/C8_Icon_192.png" alt="C8" />
+        <h1>Chip 8 Emulator</h1>
+      </div>
+      <div class="layout-column">
+        <div id="emulator-container">
+          <div class="control-bar">
+            <div id="controls">
+              <button
+                id="replay-btn"
+                class="material-icons-round md-light md-24"
+                title="Replay"
+              >
+                replay
+              </button>
+              <button
+                id="play-pause-btn"
+                class="material-icons-round md-light md-24"
+                title="Play/Pause"
+              >
+                play_arrow
+              </button>
+              <button
+                id="step-btn"
+                class="material-icons-round md-light md-24"
+                title="Step Instruction"
+              >
+                skip_next
+              </button>
+              <button
+                id="step-frame-btn"
+                class="material-icons-round md-light md-24"
+                title="Step Frame"
+              >
+                keyboard_tab
+              </button>
             </div>
-            <div class="layout-column">
-                <div id="emulator-container">
-                    <div class="control-bar">
-                        <div id="controls">
-                            <button
-                                id="replay-btn"
-                                class="material-icons-round md-light md-24"
-                                title="Replay"
-                            >
-                                replay
-                            </button>
-                            <button
-                                id="play-pause-btn"
-                                class="material-icons-round md-light md-24"
-                                title="Play/Pause"
-                            >
-                                play_arrow
-                            </button>
-                            <button
-                                id="step-btn"
-                                class="material-icons-round md-light md-24"
-                                title="Step Instruction"
-                            >
-                                skip_next
-                            </button>
-                            <button
-                                id="step-frame-btn"
-                                class="material-icons-round md-light md-24"
-                                title="Step Frame"
-                            >
-                                keyboard_tab
-                            </button>
-                        </div>
-                        <div id="info">
-                            <div title="Frames Per Second">
-                                FPS:
-                                <div id="fps">00.0</div>
-                            </div>
-                            <div title="Instructions Per Second">
-                                IPS:
-                                <div id="ips">000.0</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="screen-container">
-                        <canvas
-                            id="screen"
-                            width="320"
-                            height="160"
-                            style="border: 1px solid #000000"
-                        ></canvas>
-                    </div>
-                </div>
-
-                <div id="settings-container">
-                    <div>
-                        <button id="load-rom-btn">Load ROM</button>
-                        <button id="upload-rom-btn">Upload ROM</button>
-                        <button id="show-hide-keyboard-btn">
-                            Show Keyboard
-                        </button>
-                    </div>
-                    <div>
-                        <h2>Settings</h2>
-                        <div id="settings-inputs">
-                            <label title="Screen Scale">
-                                Screen Scale
-                                <input
-                                    type="range"
-                                    name="screen-scale"
-                                    id="screen-scale"
-                                    min="1"
-                                    max="15"
-                                    value="2"
-                                    step="1"
-                                    list="screen-scales"
-                                />
-                                <datalist id="screen-scales">
-                                    <option value="1" />
-                                    <option value="2" />
-                                    <option value="3" />
-                                    <option value="4" />
-                                    <option value="5" />
-                                    <option value="6" />
-                                    <option value="7" />
-                                    <option value="8" />
-                                    <option value="9" />
-                                    <option value="10" />
-                                    <option value="11" />
-                                    <option value="12" />
-                                    <option value="13" />
-                                    <option value="14" />
-                                    <option value="15" />
-                                </datalist>
-                            </label>
-
-                            <label title="Frames Per Second">
-                                Target FPS
-                                <input
-                                    type="range"
-                                    name="target-fps"
-                                    id="target-fps"
-                                    min="1"
-                                    max="60"
-                                    value="60"
-                                    step="1"
-                                    list="target-fps-list"
-                                />
-                                <datalist id="target-fps-list">
-                                    <option value="1" />
-                                    <option value="10" />
-                                    <option value="20" />
-                                    <option value="30" />
-                                    <option value="40" />
-                                    <option value="50" />
-                                    <option value="60" />
-                                </datalist>
-                            </label>
-
-                            <label title="Instructions Per Frame">
-                                Target IPF
-                                <input
-                                    type="range"
-                                    name="target-ipf"
-                                    id="target-ipf"
-                                    min="1"
-                                    max="1000"
-                                    value="10"
-                                    step="1"
-                                    list="target-ipf-list"
-                                />
-                                <datalist id="target-ipf-list">
-                                    <option value="1" />
-                                    <option value="100" />
-                                    <option value="200" />
-                                    <option value="300" />
-                                    <option value="400" />
-                                    <option value="500" />
-                                    <option value="600" />
-                                    <option value="700" />
-                                    <option value="800" />
-                                    <option value="900" />
-                                    <option value="1000" />
-                                </datalist>
-                            </label>
-
-                            <label title="Background Color">
-                                <input
-                                    type="color"
-                                    name="bg-color"
-                                    id="bg-color"
-                                />
-                                Background Color
-                            </label>
-
-                            <label title="Fill Color">
-                                <input
-                                    type="color"
-                                    name="fg-color"
-                                    id="fg-color"
-                                />
-                                Fill Color
-                            </label>
-                        </div>
-                    </div>
-                    <div>
-                        <h2>Quirks</h2>
-                        <div id="quirk-checkboxes">
-                            <label title="Shift Quirk">
-                                <input
-                                    type="checkbox"
-                                    name="quirkShift"
-                                    id="quirkShift"
-                                />
-                                <code>&lt;&lt;=</code> and
-                                <code>&gt;&gt;=</code> modify <var>Vx</var> in
-                                place and leave <var>Vy</var> unchanged
-                            </label>
-
-                            <label title="Memory Quirk Leave I Unchanged">
-                                <input
-                                    type="checkbox"
-                                    name="quirkMemoryLeaveIUnchanged"
-                                    id="quirkMemoryLeaveIUnchanged"
-                                />
-                                Load and Store operations leave
-                                <var>I</var> unchanged
-                            </label>
-
-                            <label title="Memory Quirk Increment I By X">
-                                <input
-                                    type="checkbox"
-                                    name="quirkMemoryIncrementByX"
-                                    id="quirkMemoryIncrementByX"
-                                />
-                                Load and Store operations Increment
-                                <var>I</var> by <var>X</var>
-                            </label>
-
-                            <label title="Jump Quirk">
-                                <input
-                                    type="checkbox"
-                                    name="quirkJump"
-                                    id="quirkJump"
-                                />
-                                Jump to
-                                <code><var>address</var> + <var>Vx</var></code>
-                                instead of
-                                <code><var>address</var> + <var>V0</var></code>
-                            </label>
-
-                            <label title="Wrap Quirk">
-                                <input
-                                    type="checkbox"
-                                    name="quirkWrap"
-                                    id="quirkWrap"
-                                />
-                                Wrap sprite instead of clipping
-                            </label>
-
-                            <label title="Logic Quirk">
-                                <input
-                                    type="checkbox"
-                                    name="quirkLogic"
-                                    id="quirkLogic"
-                                />
-                                Reset <var>Vf</var> after
-                                <code><var>Vx</var> |= <var>Vy</var></code
-                                >,
-                                <code><var>Vx</var> &= <var>Vy</var></code> and
-                                <code><var>Vx</var> ^= <var>Vy</var></code>
-                            </label>
-                            <label title="VBlank Quirk">
-                                <input
-                                    type="checkbox"
-                                    name="quirkVBlank"
-                                    id="quirkVBlank"
-                                />
-                                Wait for VBlank before drawing sprite
-                            </label>
-                        </div>
-                    </div>
-                </div>
+            <div id="info">
+              <div title="Frames Per Second">
+                FPS:
+                <div id="fps">00.0</div>
+              </div>
+              <div title="Instructions Per Second">
+                IPS:
+                <div id="ips">000.0</div>
+              </div>
             </div>
+          </div>
 
-            <div class="layout-column">
-                <div id="debug-items-container">
-                    <div class="table-container">
-                        <table id="pointers-table" class="hex-table"></table>
-                    </div>
-
-                    <div class="table-container">
-                        <table id="timers-table" class="hex-table"></table>
-                    </div>
-                    <div class="table-container">
-                        <table id="registers-table" class="hex-table"></table>
-                    </div>
-                    <div class="table-container">
-                        <table id="stack-table" class="hex-table"></table>
-                    </div>
-
-                    <div class="table-container">
-                        <table id="memory-table" class="hex-table"></table>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <div id="keyboard-container" class="keyboard-container"></div>
-
-        <div id="load-rom-window" class="window window-no-display">
-            <div>
-                <button
-                    id="close-load-rom-window-btn"
-                    class="material-icons-round md-24 close-btn"
-                    title="Close"
-                >
-                    close
-                </button>
-                <h1>Load ROM</h1>
-                <div id="rom-list"></div>
-            </div>
+          <div id="screen-container">
+            <canvas
+              id="screen"
+              width="320"
+              height="160"
+              style="border: 1px solid #000000"
+            ></canvas>
+          </div>
         </div>
 
-        <div id="upload-rom-window" class="window window-no-display">
-            <div>
-                <span class="material-icons-round md-dark"> upload_file </span>
-                <p>Drop your file here</p>
-            </div>
-        </div>
+        <div id="settings-container">
+          <div>
+            <button id="load-rom-btn">Load ROM</button>
+            <button id="upload-rom-btn">Upload ROM</button>
+            <button id="show-hide-keyboard-btn">Show Keyboard</button>
+          </div>
+          <div>
+            <h2>Settings</h2>
+            <div id="settings-inputs">
+              <label title="Screen Scale">
+                Screen Scale
+                <input
+                  type="range"
+                  name="screen-scale"
+                  id="screen-scale"
+                  min="1"
+                  max="15"
+                  value="2"
+                  step="1"
+                  list="screen-scales"
+                />
+                <datalist id="screen-scales">
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                  <option value="4" />
+                  <option value="5" />
+                  <option value="6" />
+                  <option value="7" />
+                  <option value="8" />
+                  <option value="9" />
+                  <option value="10" />
+                  <option value="11" />
+                  <option value="12" />
+                  <option value="13" />
+                  <option value="14" />
+                  <option value="15" />
+                </datalist>
+              </label>
 
-        <noscript>
-            <div>
-                <h1>JavaScript is Disabled</h1>
-                <p>
-                    JavaScript is disabled in your browser. Please enable it to
-                    access this website.
-                </p>
+              <label title="Frames Per Second">
+                Target FPS
+                <input
+                  type="range"
+                  name="target-fps"
+                  id="target-fps"
+                  min="1"
+                  max="60"
+                  value="60"
+                  step="1"
+                  list="target-fps-list"
+                />
+                <datalist id="target-fps-list">
+                  <option value="1" />
+                  <option value="10" />
+                  <option value="20" />
+                  <option value="30" />
+                  <option value="40" />
+                  <option value="50" />
+                  <option value="60" />
+                </datalist>
+              </label>
+
+              <label title="Instructions Per Frame">
+                Target IPF
+                <input
+                  type="range"
+                  name="target-ipf"
+                  id="target-ipf"
+                  min="1"
+                  max="1000"
+                  value="10"
+                  step="1"
+                  list="target-ipf-list"
+                />
+                <datalist id="target-ipf-list">
+                  <option value="1" />
+                  <option value="100" />
+                  <option value="200" />
+                  <option value="300" />
+                  <option value="400" />
+                  <option value="500" />
+                  <option value="600" />
+                  <option value="700" />
+                  <option value="800" />
+                  <option value="900" />
+                  <option value="1000" />
+                </datalist>
+              </label>
+
+              <label title="Background Color">
+                <input type="color" name="bg-color" id="bg-color" />
+                Background Color
+              </label>
+
+              <label title="Fill Color">
+                <input type="color" name="fg-color" id="fg-color" />
+                Fill Color
+              </label>
             </div>
-        </noscript>
-    </body>
+          </div>
+          <div>
+            <h2>Quirks</h2>
+            <div id="quirk-checkboxes">
+              <label title="Shift Quirk">
+                <input type="checkbox" name="quirkShift" id="quirkShift" />
+                <code>&lt;&lt;=</code> and <code>&gt;&gt;=</code> modify
+                <var>Vx</var> in place and leave <var>Vy</var> unchanged
+              </label>
+
+              <label title="Memory Quirk Leave I Unchanged">
+                <input
+                  type="checkbox"
+                  name="quirkMemoryLeaveIUnchanged"
+                  id="quirkMemoryLeaveIUnchanged"
+                />
+                Load and Store operations leave
+                <var>I</var> unchanged
+              </label>
+
+              <label title="Memory Quirk Increment I By X">
+                <input
+                  type="checkbox"
+                  name="quirkMemoryIncrementByX"
+                  id="quirkMemoryIncrementByX"
+                />
+                Load and Store operations Increment
+                <var>I</var> by <var>X</var>
+              </label>
+
+              <label title="Jump Quirk">
+                <input type="checkbox" name="quirkJump" id="quirkJump" />
+                Jump to
+                <code><var>address</var> + <var>Vx</var></code>
+                instead of
+                <code><var>address</var> + <var>V0</var></code>
+              </label>
+
+              <label title="Wrap Quirk">
+                <input type="checkbox" name="quirkWrap" id="quirkWrap" />
+                Wrap sprite instead of clipping
+              </label>
+
+              <label title="Logic Quirk">
+                <input type="checkbox" name="quirkLogic" id="quirkLogic" />
+                Reset <var>Vf</var> after
+                <code><var>Vx</var> |= <var>Vy</var></code
+                >, <code><var>Vx</var> &= <var>Vy</var></code> and
+                <code><var>Vx</var> ^= <var>Vy</var></code>
+              </label>
+              <label title="VBlank Quirk">
+                <input type="checkbox" name="quirkVBlank" id="quirkVBlank" />
+                Wait for VBlank before drawing sprite
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout-column">
+        <div id="debug-items-container">
+          <div class="table-container">
+            <table id="pointers-table" class="hex-table"></table>
+          </div>
+
+          <div class="table-container">
+            <table id="timers-table" class="hex-table"></table>
+          </div>
+          <div class="table-container">
+            <table id="registers-table" class="hex-table"></table>
+          </div>
+          <div class="table-container">
+            <table id="stack-table" class="hex-table"></table>
+          </div>
+
+          <div class="table-container">
+            <table id="memory-table" class="hex-table"></table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="keyboard-container" class="keyboard-container"></div>
+
+    <div id="load-rom-window" class="window window-no-display">
+      <div>
+        <button
+          id="close-load-rom-window-btn"
+          class="material-icons-round md-24 close-btn"
+          title="Close"
+        >
+          close
+        </button>
+        <h1>Load ROM</h1>
+        <div id="rom-list"></div>
+      </div>
+    </div>
+
+    <div id="upload-rom-window" class="window window-no-display">
+      <div>
+        <span class="material-icons-round md-dark"> upload_file </span>
+        <p>Drop your file here</p>
+      </div>
+    </div>
+
+    <noscript>
+      <div>
+        <h1>JavaScript is Disabled</h1>
+        <p>
+          JavaScript is disabled in your browser. Please enable it to access
+          this website.
+        </p>
+      </div>
+    </noscript>
+  </body>
 </html>

@@ -6,7 +6,7 @@
  * e.g., 3.14%0.7 equals 0.34 (since 3.14 equals 4*0.7 + 0.34.)
  */
 export function pyModulo(a, b) {
-    return ((a % b) + b) % b;
+  return ((a % b) + b) % b;
 }
 
 /**
@@ -16,7 +16,7 @@ export function pyModulo(a, b) {
  * @returns {string}
  */
 export function toHex(number, digits = 2) {
-    return number.toString(16).padStart(digits, "0");
+  return number.toString(16).padStart(digits, "0");
 }
 
 /**
@@ -25,7 +25,7 @@ export function toHex(number, digits = 2) {
  * @returns {number}
  */
 export function calcBitness(num) {
-    return Math.ceil(Math.log2(num));
+  return Math.ceil(Math.log2(num));
 }
 
 /**
@@ -34,6 +34,6 @@ export function calcBitness(num) {
  * @returns {number}
  */
 export const generateId = (() => {
-    let id = 0;
-    return () => id++;
+  let id = 0;
+  return () => id++;
 })();
