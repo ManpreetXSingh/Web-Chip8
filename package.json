@@ -21,5 +21,8 @@
   "homepage": "https://github.com/ManpreetXSingh/Web-Chip8#readme",
   "dependencies": {
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "prettier": "3.8.1"
   }
 }
