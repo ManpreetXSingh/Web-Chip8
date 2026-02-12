@@ -17,6 +17,15 @@ class Keyboard {
     this.onkeyup = null;
   }
 
+  destroy() {
+    if (this._onKeyDown) {
+      document.removeEventListener("keydown", this._onKeyDown);
+      document.removeEventListener("keyup", this._onKeyUp);
+      this._onKeyDown = null;
+      this._onKeyUp = null;
+    }
+  }
+
   moveKeyboard(container, dx, dy, containerX = null, containerY = null) {
     let newX = (containerX === null ? container.offsetLeft : containerX) + dx;
     let newY = (containerY === null ? container.offsetTop : containerY) + dy;
@@ -117,6 +126,35 @@ class Keyboard {
       }
     }
     container.appendChild(table);
+
+    this._keyToIndex = new Map();
+    for (let i = 0; i < this.keyNames.length; i++) {
+      for (const physicalKey of this.keyMap[this.keyNames[i]]) {
+        this._keyToIndex.set(physicalKey, i);
+      }
+    }
+
+    this._heldKeys = new Set();
+
+    this._onKeyDown = (event) => {
+      if (this._heldKeys.has(event.key)) return;
+      const idx = this._keyToIndex.get(event.key);
+      if (idx !== undefined) {
+        this._heldKeys.add(event.key);
+        this._pressKey(idx);
+      }
+    };
+
+    this._onKeyUp = (event) => {
+      this._heldKeys.delete(event.key);
+      const idx = this._keyToIndex.get(event.key);
+      if (idx !== undefined) {
+        this._releaseKey(idx);
+      }
+    };
+
+    document.addEventListener("keydown", this._onKeyDown);
+    document.addEventListener("keyup", this._onKeyUp);
   }
 
   _pressKey(idx) {
@@ -176,23 +214,6 @@ class Keyboard {
         },
         { once: true },
       );
-    });
-
-    // Keyboard Events
-    document.addEventListener("keydown", (event) => {
-      const key = event.key;
-      if (this.keyMap[keyName].includes(key)) {
-        this._pressKey(idx);
-
-        let keyUp = (event) => {
-          if (key === event.key) {
-            this._releaseKey(idx);
-            document.removeEventListener("keyup", keyUp);
-          }
-        };
-
-        document.addEventListener("keyup", keyUp);
-      }
     });
   }
 }
