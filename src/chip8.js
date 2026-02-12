@@ -159,43 +159,22 @@ let InfoRenderer = (() => {
 InfoRenderer.displayInfo(chip8);
 chip8.updateDisplay = InfoRenderer.updateInfo.bind(null, chip8);
 
-// Load JSON
-function loadJson(filePath, onLoad) {
-  if (!filePath || !onLoad) {
-    return;
+async function loadJson(filePath) {
+  const response = await fetch(filePath);
+  if (!response.ok) {
+    console.log("Error loading JSON");
+    return null;
   }
-
-  let request = new XMLHttpRequest();
-  request.onload = function () {
-    if (!request.response) {
-      console.log("Error loading JSON");
-      return;
-    }
-    onLoad(JSON.parse(request.response));
-  };
-  request.open("GET", filePath, true);
-  request.responseType = "text";
-  request.send();
+  return response.json();
 }
 
-// Load a file as a Uint8Array
-function loadFileU8(filePath, onLoad) {
-  if (!filePath || !onLoad) {
-    return;
+async function loadFileU8(filePath) {
+  const response = await fetch(filePath);
+  if (!response.ok) {
+    console.log("Error loading rom");
+    return null;
   }
-
-  let request = new XMLHttpRequest();
-  request.onload = function () {
-    if (!request.response) {
-      console.log("Error loading rom");
-      return;
-    }
-    let rom = new Uint8Array(request.response);
-    onLoad(rom);
-  };
-  request.open("GET", filePath, true);
-  request.responseType = "arraybuffer";
-  request.send();
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 // Controls
@@ -266,44 +245,45 @@ document.getElementById("step-frame-btn").addEventListener("click", stepFrame);
 let romList = document.getElementById("rom-list");
 let romsJSON;
 
-function runRomByName(name) {
+async function runRomByName(name) {
   const romsrc = `./chip8Archive/roms/${name}.ch8`;
   pause();
   loadRomWindow.hide();
 
-  loadFileU8(romsrc, (rom) => {
-    const cpu = chip8.cpu;
-    const options = romsJSON[name]["options"];
-    chip8.screen.fillColor = options["fillColor"]
-      ? options["fillColor"]
-      : "#FFFFFF";
-    chip8.screen.backgroundColor = options["backgroundColor"]
-      ? options["backgroundColor"]
-      : "#000000";
-    chip8.instructionsPerFrame = options["tickrate"];
-    updateSettingsUI();
+  const rom = await loadFileU8(romsrc);
+  if (!rom) return;
 
-    cpu.resetQuirks();
-    cpu.quirkMemoryLeaveIUnchanged =
-      "loadStoreQuirks" in options
-        ? options["loadStoreQuirks"]
-        : cpu.quirkMemoryLeaveIUnchanged;
-    cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
-      ? false
-      : cpu.quirkMemoryIncrementByX;
-    cpu.quirkShift =
-      "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
-    cpu.quirkJump =
-      "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
-    cpu.quirkWrap =
-      "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
-    cpu.quirkLogic =
-      "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
-    cpu.quirkVBlank =
-      "vBlankQuirks" in options ? options["vBlankQuirks"] : cpu.quirkVBlank;
-    updateQuirksUI();
-    runRom(rom);
-  });
+  const cpu = chip8.cpu;
+  const options = romsJSON[name]["options"];
+  chip8.screen.fillColor = options["fillColor"]
+    ? options["fillColor"]
+    : "#FFFFFF";
+  chip8.screen.backgroundColor = options["backgroundColor"]
+    ? options["backgroundColor"]
+    : "#000000";
+  chip8.instructionsPerFrame = options["tickrate"];
+  updateSettingsUI();
+
+  cpu.resetQuirks();
+  cpu.quirkMemoryLeaveIUnchanged =
+    "loadStoreQuirks" in options
+      ? options["loadStoreQuirks"]
+      : cpu.quirkMemoryLeaveIUnchanged;
+  cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
+    ? false
+    : cpu.quirkMemoryIncrementByX;
+  cpu.quirkShift =
+    "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
+  cpu.quirkJump =
+    "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
+  cpu.quirkWrap =
+    "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
+  cpu.quirkLogic =
+    "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
+  cpu.quirkVBlank =
+    "vBlankQuirks" in options ? options["vBlankQuirks"] : cpu.quirkVBlank;
+  updateQuirksUI();
+  runRom(rom);
 }
 
 function romCard(name, imgsrc, romAuthors, description, event) {
@@ -329,56 +309,56 @@ function romCard(name, imgsrc, romAuthors, description, event) {
 }
 
 // Load a list of roms from a json file
-function loadRomsList() {
-  loadJson("./chip8Archive/authors.json", (authors) => {
-    loadJson("./chip8Archive/programs.json", (roms) => {
-      romsJSON = roms;
-      for (const key in roms) {
-        if (roms.hasOwnProperty(key)) {
-          if (roms[key].platform != "chip8") {
-            continue;
-          }
+async function loadRomsList() {
+  const authors = await loadJson("./chip8Archive/authors.json");
+  const roms = await loadJson("./chip8Archive/programs.json");
+  if (!authors || !roms) return;
 
-          let romAuthors = {};
-          for (const i in roms[key].authors) {
-            let author =
-              roms[key].authors[i] != "your name here"
-                ? roms[key].authors[i]
-                : "Unknown";
-            romAuthors[author] = authors[roms[key].authors[i]];
-          }
-
-          romList.innerHTML += romCard(
-            key, // rom name
-            `./chip8Archive/src/${key}/${roms[key].images[0]}`, // image url
-            romAuthors, // authors
-            roms[key].desc, // description
-            roms[key].event, // event
-          );
-        }
+  romsJSON = roms;
+  for (const key in roms) {
+    if (roms.hasOwnProperty(key)) {
+      if (roms[key].platform != "chip8") {
+        continue;
       }
-      romList.querySelectorAll(".rom-card").forEach((card) => {
-        let onCardClicked = (e) => {
-          let romName = card.getAttribute("card-name");
-          runRomByName(romName);
-          e.stopPropagation();
-        };
-        card.onclick = onCardClicked;
-        card.onkeydown = (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            e.stopPropagation();
-            e.target.click();
-          }
-        };
-      });
-      romList.querySelectorAll("a").forEach((a) => {
-        // prevent loading rom when a link is clicked
-        a.onclick = (e) => {
-          e.stopPropagation();
-        };
-      });
-    });
+
+      let romAuthors = {};
+      for (const i in roms[key].authors) {
+        let author =
+          roms[key].authors[i] != "your name here"
+            ? roms[key].authors[i]
+            : "Unknown";
+        romAuthors[author] = authors[roms[key].authors[i]];
+      }
+
+      romList.innerHTML += romCard(
+        key,
+        `./chip8Archive/src/${key}/${roms[key].images[0]}`,
+        romAuthors,
+        roms[key].desc,
+        roms[key].event,
+      );
+    }
+  }
+  romList.querySelectorAll(".rom-card").forEach((card) => {
+    let onCardClicked = (e) => {
+      let romName = card.getAttribute("card-name");
+      runRomByName(romName);
+      e.stopPropagation();
+    };
+    card.onclick = onCardClicked;
+    card.onkeydown = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.click();
+      }
+    };
+  });
+  romList.querySelectorAll("a").forEach((a) => {
+    // prevent loading rom when a link is clicked
+    a.onclick = (e) => {
+      e.stopPropagation();
+    };
   });
 }
 
