@@ -27,7 +27,7 @@ class Chip8Emulator {
   #oneSecTimer;
   #adjustedTargetFps;
 
-  constructor(fps = 60, ipf = 7, font = C8FONT) {
+  constructor(canvas, fps = 60, ipf = 7, font = C8FONT) {
     // Target fps to achieve
     this.targetFps = fps;
 
@@ -52,7 +52,7 @@ class Chip8Emulator {
     this.#oneSecTimer = 0;
 
     this.updateDisplay = () => {};
-    this.cpu = new C8Cpu(document.getElementById("screen"), font);
+    this.cpu = new C8Cpu(canvas, font);
   }
 
   get speaker() {

@@ -10,7 +10,7 @@ import Chip8Emulator from "./js/emulator.js";
 import Keyboard from "./js/keyboard.js";
 import Popup from "./js/popup.js";
 import TableRenderer, { TableOptions } from "./js/table_renderer.js";
-let chip8 = new Chip8Emulator(60, 20);
+let chip8 = new Chip8Emulator(document.getElementById("screen"), 60, 20);
 
 // Display Chip8 internal data
 
@@ -264,24 +264,21 @@ async function runRomByName(name) {
   chip8.instructionsPerFrame = options["tickrate"];
   updateSettingsUI();
 
+  const OPTION_TO_QUIRK = {
+    loadStoreQuirks: "quirkMemoryLeaveIUnchanged",
+    shiftQuirks: "quirkShift",
+    jumpQuirks: "quirkJump",
+    logicQuirks: "quirkLogic",
+    vBlankQuirks: "quirkVBlank",
+  };
+
   cpu.resetQuirks();
-  cpu.quirkMemoryLeaveIUnchanged =
-    "loadStoreQuirks" in options
-      ? options["loadStoreQuirks"]
-      : cpu.quirkMemoryLeaveIUnchanged;
-  cpu.quirkMemoryIncrementByX = cpu.quirkMemoryLeaveIUnchanged
-    ? false
-    : cpu.quirkMemoryIncrementByX;
-  cpu.quirkShift =
-    "shiftQuirks" in options ? options["shiftQuirks"] : cpu.quirkShift;
-  cpu.quirkJump =
-    "jumpQuirks" in options ? options["jumpQuirks"] : cpu.quirkJump;
-  cpu.quirkWrap =
-    "clipQuirks" in options ? !options["clipQuirks"] : cpu.quirkWrap;
-  cpu.quirkLogic =
-    "logicQuirks" in options ? options["logicQuirks"] : cpu.quirkLogic;
-  cpu.quirkVBlank =
-    "vBlankQuirks" in options ? options["vBlankQuirks"] : cpu.quirkVBlank;
+  for (const [optKey, quirkKey] of Object.entries(OPTION_TO_QUIRK)) {
+    if (optKey in options) cpu.quirks[quirkKey] = options[optKey];
+  }
+  if ("clipQuirks" in options) cpu.quirks.quirkWrap = !options["clipQuirks"];
+  if (cpu.quirks.quirkMemoryLeaveIUnchanged)
+    cpu.quirks.quirkMemoryIncrementByX = false;
   updateQuirksUI();
   runRom(rom);
 }
@@ -481,34 +478,8 @@ let quirkCheckboxes = document
   .querySelectorAll('input[type="checkbox"]');
 
 function updateQuirksUI() {
-  for (let i = 0; i < quirkCheckboxes.length; i++) {
-    let quirkName = quirkCheckboxes[i].name;
-    let quirkValue;
-
-    switch (quirkName) {
-      case "quirkShift":
-        quirkValue = chip8.cpu.quirkShift;
-        break;
-      case "quirkMemoryLeaveIUnchanged":
-        quirkValue = chip8.cpu.quirkMemoryLeaveIUnchanged;
-        break;
-      case "quirkMemoryIncrementByX":
-        quirkValue = chip8.cpu.quirkMemoryIncrementByX;
-        break;
-      case "quirkJump":
-        quirkValue = chip8.cpu.quirkJump;
-        break;
-      case "quirkWrap":
-        quirkValue = chip8.cpu.quirkWrap;
-        break;
-      case "quirkLogic":
-        quirkValue = chip8.cpu.quirkLogic;
-        break;
-      case "quirkVBlank":
-        quirkValue = chip8.cpu.quirkVBlank;
-        break;
-    }
-    quirkCheckboxes[i].checked = quirkValue;
+  for (const cb of quirkCheckboxes) {
+    cb.checked = chip8.cpu.quirks[cb.name];
   }
 }
 
@@ -516,95 +487,64 @@ let settingsInputs = document
   .getElementById("settings-inputs")
   .querySelectorAll("input");
 
-function updateSettingsUI() {
-  for (let i = 0; i < settingsInputs.length; i++) {
-    let settingName = settingsInputs[i].name;
-    let settingValue;
+const SETTINGS = {
+  "screen-scale": {
+    get: () => chip8.screen.resScale,
+    set: (v) => {
+      chip8.screen.updateResScale(v);
+      chip8.screen.forceRefresh();
+    },
+  },
+  "target-fps": {
+    get: () => chip8.targetFps,
+    set: (v) => {
+      chip8.targetFps = v;
+    },
+  },
+  "target-ipf": {
+    get: () => chip8.instructionsPerFrame,
+    set: (v) => {
+      chip8.instructionsPerFrame = v;
+    },
+  },
+  "bg-color": {
+    get: () => chip8.screen.backgroundColor,
+    set: (v) => {
+      chip8.screen.backgroundColor = v;
+      chip8.screen.forceRefresh();
+    },
+  },
+  "fg-color": {
+    get: () => chip8.screen.fillColor,
+    set: (v) => {
+      chip8.screen.fillColor = v;
+      chip8.screen.forceRefresh();
+    },
+  },
+};
 
-    switch (settingName) {
-      case "screen-scale":
-        settingValue = chip8.screen.resScale;
-        break;
-      case "target-fps":
-        settingValue = chip8.targetFps;
-        break;
-      case "target-ipf":
-        settingValue = chip8.instructionsPerFrame;
-        break;
-      case "bg-color":
-        settingValue = chip8.screen.backgroundColor;
-        break;
-      case "fg-color":
-        settingValue = chip8.screen.fillColor;
-        break;
-    }
-    settingsInputs[i].value = settingValue;
+function updateSettingsUI() {
+  for (const input of settingsInputs) {
+    input.value = SETTINGS[input.name].get();
   }
 }
 
-for (let checkbox of quirkCheckboxes) {
-  checkbox.addEventListener("change", function (e) {
-    let quirkName = this.name;
-    let quirkValue = this.checked;
+for (const checkbox of quirkCheckboxes) {
+  checkbox.addEventListener("change", function () {
+    chip8.cpu.quirks[this.name] = this.checked;
 
-    switch (quirkName) {
-      case "quirkShift":
-        chip8.cpu.quirkShift = quirkValue;
-        break;
-      case "quirkMemoryLeaveIUnchanged":
-        chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue;
-        chip8.cpu.quirkMemoryIncrementByX = quirkValue
-          ? false
-          : chip8.cpu.quirkMemoryIncrementByX;
-        break;
-      case "quirkMemoryIncrementByX":
-        chip8.cpu.quirkMemoryIncrementByX = quirkValue;
-        chip8.cpu.quirkMemoryLeaveIUnchanged = quirkValue
-          ? false
-          : chip8.cpu.quirkMemoryLeaveIUnchanged;
-        break;
-      case "quirkJump":
-        chip8.cpu.quirkJump = quirkValue;
-        break;
-      case "quirkWrap":
-        chip8.cpu.quirkWrap = quirkValue;
-        break;
-      case "quirkLogic":
-        chip8.cpu.quirkLogic = quirkValue;
-        break;
-      case "quirkVBlank":
-        chip8.cpu.quirkVBlank = quirkValue;
-        break;
+    if (this.name === "quirkMemoryLeaveIUnchanged" && this.checked) {
+      chip8.cpu.quirks.quirkMemoryIncrementByX = false;
+    } else if (this.name === "quirkMemoryIncrementByX" && this.checked) {
+      chip8.cpu.quirks.quirkMemoryLeaveIUnchanged = false;
     }
     updateQuirksUI();
   });
 }
 
-for (let setting of settingsInputs) {
+for (const setting of settingsInputs) {
   let onInput = function () {
-    let settingName = this.name;
-    let settingValue = this.value;
-
-    switch (settingName) {
-      case "screen-scale":
-        chip8.screen.updateResScale(settingValue);
-        chip8.screen.forceRefresh();
-        break;
-      case "target-fps":
-        chip8.targetFps = settingValue;
-        break;
-      case "target-ipf":
-        chip8.instructionsPerFrame = settingValue;
-        break;
-      case "bg-color":
-        chip8.screen.backgroundColor = settingValue;
-        chip8.screen.forceRefresh();
-        break;
-      case "fg-color":
-        chip8.screen.fillColor = settingValue;
-        chip8.screen.forceRefresh();
-        break;
-    }
+    SETTINGS[this.name].set(this.value);
     updateSettingsUI();
   };
 

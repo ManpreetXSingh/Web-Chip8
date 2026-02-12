@@ -138,27 +138,15 @@ class C8Cpu {
    * @returns {void}
    */
   resetQuirks(mode) {
-    switch (mode) {
-      case "chip8":
-        this.quirkShift = false; // Shift Vy into Vx
-        this.quirkMemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
-        this.quirkMemoryIncrementByX = false; // Increment I by X (in save/load instructions)
-        this.quirkWrap = false; // Sprite wrap
-        this.quirkJump = false; // Jump to <address+vx> instead of <address+v0>
-        this.quirkLogic = true; // Reset vf to 0
-        this.quirkVBlank = false; // Wait for VBlank
-        break;
-      default:
-      case "octo":
-        this.quirkShift = false; // Shift Vy into Vx
-        this.quirkMemoryLeaveIUnchanged = false; // Leave I unchanged (in save/load instructions)
-        this.quirkMemoryIncrementByX = false; // Increment I by X (in save/load instructions)
-        this.quirkWrap = true; // Sprite wrap
-        this.quirkJump = false; // Jump to <address+vx> instead of <address+v0>
-        this.quirkLogic = true; // Reset vf to 0
-        this.quirkVBlank = false; // Wait for VBlank
-        break;
-    }
+    this.quirks = {
+      quirkShift: false,
+      quirkMemoryLeaveIUnchanged: false,
+      quirkMemoryIncrementByX: false,
+      quirkWrap: mode !== "chip8",
+      quirkJump: false,
+      quirkLogic: true,
+      quirkVBlank: false,
+    };
   }
 
   updateTimers() {
@@ -233,9 +221,9 @@ class C8Cpu {
 
     // Original CHIP-8 incremented index register by X+1
     let i_increment =
-      (this.quirkMemoryLeaveIUnchanged
+      (this.quirks.quirkMemoryLeaveIUnchanged
         ? 0
-        : this.quirkMemoryIncrementByX
+        : this.quirks.quirkMemoryIncrementByX
           ? instruction.x
           : instruction.x + 1) & 0xfff;
 
@@ -315,7 +303,7 @@ class C8Cpu {
           // 8XY1
           case 0x1:
             this.registers.set(instruction.x, Vx | Vy);
-            if (this.quirkLogic) {
+            if (this.quirks.quirkLogic) {
               this.registers.set(0xf, 0);
             }
             return true;
@@ -323,7 +311,7 @@ class C8Cpu {
           // 8XY2
           case 0x2:
             this.registers.set(instruction.x, Vx & Vy);
-            if (this.quirkLogic) {
+            if (this.quirks.quirkLogic) {
               this.registers.set(0xf, 0);
             }
             return true;
@@ -331,7 +319,7 @@ class C8Cpu {
           // 8XY3
           case 0x3:
             this.registers.set(instruction.x, Vx ^ Vy);
-            if (this.quirkLogic) {
+            if (this.quirks.quirkLogic) {
               this.registers.set(0xf, 0);
             }
             return true;
@@ -350,7 +338,7 @@ class C8Cpu {
 
           // 8XY6
           case 0x6:
-            if (!this.quirkShift) {
+            if (!this.quirks.quirkShift) {
               Vx = Vy;
             }
             var result = Vx >> 1;
@@ -365,7 +353,7 @@ class C8Cpu {
 
           // 8XYE
           case 0xe:
-            if (!this.quirkShift) {
+            if (!this.quirks.quirkShift) {
               Vx = Vy;
             }
             var result = Vx << 1;
@@ -388,7 +376,7 @@ class C8Cpu {
 
       // BNNN
       case 0xb:
-        if (this.quirkJump) {
+        if (this.quirks.quirkJump) {
           this.programCounter = instruction.nnn + Vx;
         } else {
           this.programCounter = instruction.nnn + this.registers.get(0);
@@ -409,10 +397,10 @@ class C8Cpu {
         let screenY = Vy % this.screen.renderHeight; // Both Vy and renderHeight are also positive
         let spriteHeight = instruction.n;
         let spriteWidth = 8;
-        let yCondition = this.quirkWrap
+        let yCondition = this.quirks.quirkWrap
           ? (y) => y < spriteHeight
           : (y) => y < spriteHeight && y + screenY < this.screen.renderHeight;
-        let xCondition = this.quirkWrap
+        let xCondition = this.quirks.quirkWrap
           ? (x) => x < spriteWidth
           : (x) => x < spriteWidth && x + screenX < this.screen.renderWidth;
         this.registers.set(0xf, 0);
