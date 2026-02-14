@@ -11,10 +11,10 @@ if ("serviceWorker" in navigator) {
 }
 
 // Main
-import Chip8Emulator from "./js/emulator.js";
-import Keyboard from "./js/keyboard.js";
-import Popup from "./js/popup.js";
-import TableRenderer, { TableOptions } from "./js/table_renderer.js";
+import Chip8Emulator from "./emulator/emulator.js";
+import Keyboard from "./components/keyboard.js";
+import Popup from "./components/popup.js";
+import TableRenderer, { TableOptions } from "./components/table_renderer.js";
 let chip8 = new Chip8Emulator(document.getElementById("screen"), 60, 20);
 
 // Display Chip8 internal data

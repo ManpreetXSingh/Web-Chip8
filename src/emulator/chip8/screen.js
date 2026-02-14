@@ -1,4 +1,4 @@
-import { pyModulo } from "../util.js";
+import { pyModulo } from "../../lib/util.js";
 
 class C8Screen {
   #canvas;

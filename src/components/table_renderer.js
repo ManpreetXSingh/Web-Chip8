@@ -1,4 +1,4 @@
-import { generateId, toHex, calcBitness } from "./util.js";
+import { generateId, toHex, calcBitness } from "../lib/util.js";
 
 class TableOptions {
   #id;
