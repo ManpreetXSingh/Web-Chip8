@@ -14,7 +14,6 @@ class Popup {
   }
 
   show() {
-    console.log(this.htmlElement);
     this.htmlElement.removeEventListener(
       "transitionend",
       this._removeWindowEventHandler,

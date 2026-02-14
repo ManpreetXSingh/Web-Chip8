@@ -2,7 +2,7 @@ class C8Input {
   #keysReleased;
   constructor() {
     this.#keysReleased = [];
-    this.keysPressed = new Array(0xf).fill(false);
+    this.keysPressed = new Array(16).fill(false);
 
     // Function to call when a key is pressed. (Initialize when waiting for input)
     this.onKeyPressed = null;

@@ -387,7 +387,7 @@ class C8Cpu {
       case 0xc:
         this.registers.set(
           instruction.x,
-          Math.floor(Math.random() * 0xff) & instruction.kk,
+          Math.floor(Math.random() * 256) & instruction.kk,
         );
         return true;
 

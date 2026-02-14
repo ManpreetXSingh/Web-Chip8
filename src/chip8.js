@@ -3,11 +3,11 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("/svc_worker.js")
     .then(function () {
-    console.log("Service Worker Registered");
+      console.log("Service Worker Registered");
     })
     .catch(function (err) {
       console.error("Service Worker Registration Failed:", err);
-  });
+    });
 }
 
 // Main
@@ -418,9 +418,7 @@ function dropHandler(ev) {
   ev.stopPropagation();
 
   if (ev.dataTransfer.items) {
-    for (const fileIdx in ev.dataTransfer.items) {
-      let item = ev.dataTransfer.items[fileIdx];
-
+    for (const item of ev.dataTransfer.items) {
       if (!(item.kind === "file")) {
         continue;
       }
