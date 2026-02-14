@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    // General
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "target": "ESNext",
-
-    // Modules
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
+    "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-
-    // Type Checking & Safety
     "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client", "@testing-library/jest-dom"]
-  }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["src/svc_worker.js", "src/chip8Archive"]
 }

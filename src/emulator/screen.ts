@@ -1,20 +1,23 @@
-import { pyModulo } from "../../lib/util.js";
+import { pyModulo } from "../lib/util";
 
 class C8Screen {
-  #canvas;
-  #ctx;
-  #screenBuffer;
-  #updateIndices = [];
-  #fillColor;
-  #backgroundColor;
+  #canvas: HTMLCanvasElement;
+  #ctx: CanvasRenderingContext2D;
+  #screenBuffer: Uint8Array;
+  #updateIndices: number[] = [];
+  #fillColor: string;
+  #backgroundColor: string;
 
-  /**
-   * @param {HTMLCanvasElement} canvas
-   * @param {number} resolutionScale
-   * @param {number} width
-   * @param {number} height
-   */
-  constructor(canvas, resolutionScale = 1, width = 64, height = 32) {
+  renderWidth: number;
+  renderHeight: number;
+  resScale = 1;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    resolutionScale = 1,
+    width = 64,
+    height = 32,
+  ) {
     this.renderWidth = width;
     this.renderHeight = height;
 
@@ -22,7 +25,7 @@ class C8Screen {
     this.#backgroundColor = "#000000";
 
     this.#canvas = canvas;
-    this.#ctx = this.#canvas.getContext("2d", { alpha: false });
+    this.#ctx = this.#canvas.getContext("2d", { alpha: false })!;
     this.#updateIndices = [-1];
 
     this.#screenBuffer = new Uint8Array(this.renderWidth * this.renderHeight);
@@ -30,62 +33,56 @@ class C8Screen {
     this.updateResScale(resolutionScale);
   }
 
-  get fillColor() {
+  get fillColor(): string {
     return this.#fillColor;
   }
 
-  set fillColor(color) {
+  set fillColor(color: string) {
     this.#ctx.fillStyle = color;
-    this.#fillColor = this.#ctx.fillStyle;
+    this.#fillColor = this.#ctx.fillStyle as string;
   }
 
-  get backgroundColor() {
+  get backgroundColor(): string {
     return this.#backgroundColor;
   }
 
-  set backgroundColor(color) {
+  set backgroundColor(color: string) {
     this.#ctx.fillStyle = color;
-    this.#backgroundColor = this.#ctx.fillStyle;
+    this.#backgroundColor = this.#ctx.fillStyle as string;
   }
 
-  updateResScale(scale) {
+  updateResScale(scale: number): void {
     this.#updateIndices[0] = -1;
-
     this.resScale = scale;
     this.#canvas.width = this.renderWidth * scale;
     this.#canvas.height = this.renderHeight * scale;
   }
 
-  clear() {
+  clear(): void {
     this.#updateIndices[0] = -1;
-
     this.#screenBuffer.fill(0);
     this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
   }
 
-  forceRefresh() {
+  forceRefresh(): void {
     this.#updateIndices[0] = -1;
     this.refresh();
   }
 
-  refresh() {
-    if (this.#updateIndices.length === 0) {
-      return;
-    }
+  refresh(): void {
+    if (this.#updateIndices.length === 0) return;
 
     const scale = this.resScale;
 
     // Refresh entire screen
     if (this.#updateIndices[0] === -1) {
-      // FIll background
       this.#ctx.fillStyle = this.#backgroundColor;
       this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
 
-      // Fill foreground
       this.#ctx.fillStyle = this.#fillColor;
       for (let y = 0; y < this.renderHeight; y++) {
         for (let x = 0; x < this.renderWidth; x++) {
-          if (this.#screenBuffer[y * this.renderWidth + x] != 0) {
+          if (this.#screenBuffer[y * this.renderWidth + x] !== 0) {
             this.#ctx.fillRect(x * scale, y * scale, scale, scale);
           }
         }
@@ -93,29 +90,27 @@ class C8Screen {
       return;
     }
 
-    // Fill background
     this.#ctx.fillStyle = this.#backgroundColor;
-    for (let idx of this.#updateIndices) {
+    for (const idx of this.#updateIndices) {
       if (this.#screenBuffer[idx] === 0) {
-        let x = (idx % this.renderWidth) | 0;
-        let y = (idx / this.renderWidth) | 0;
+        const x = (idx % this.renderWidth) | 0;
+        const y = (idx / this.renderWidth) | 0;
         this.#ctx.fillRect(x * scale, y * scale, scale, scale);
       }
     }
 
-    // Fill foreground
     this.#ctx.fillStyle = this.#fillColor;
-    for (let idx of this.#updateIndices) {
+    for (const idx of this.#updateIndices) {
       if (this.#screenBuffer[idx] !== 0) {
-        let x = (idx % this.renderWidth) | 0;
-        let y = (idx / this.renderWidth) | 0;
+        const x = (idx % this.renderWidth) | 0;
+        const y = (idx / this.renderWidth) | 0;
         this.#ctx.fillRect(x * scale, y * scale, scale, scale);
       }
     }
     this.#updateIndices.length = 0;
   }
 
-  setPixel(x, y, color) {
+  setPixel(x: number, y: number, color: number): number {
     x = x < this.renderWidth && x >= 0 ? x : pyModulo(x, this.renderWidth);
     y = y < this.renderHeight && y >= 0 ? y : pyModulo(y, this.renderHeight);
     const idx = y * this.renderWidth + x;
@@ -127,7 +122,7 @@ class C8Screen {
     }
 
     this.#screenBuffer[idx] ^= color;
-    return !this.#screenBuffer[idx] && color; // return true on overflow, ie. pixel was set and color was set
+    return !this.#screenBuffer[idx] && color ? 1 : 0; // 1 on collision (pixel erased)
   }
 }
 

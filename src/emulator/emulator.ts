@@ -1,6 +1,7 @@
-import C8Cpu from "./chip8/cpu.js";
+import C8Cpu from "./cpu";
+import type { C8Font } from "./cpu";
 
-const C8FONT = {
+const C8FONT: C8Font = {
   0: [0xf0, 0x90, 0x90, 0x90, 0xf0],
   1: [0x20, 0x60, 0x20, 0x20, 0x70],
   2: [0xf0, 0x10, 0xf0, 0x80, 0xf0],
@@ -20,37 +21,40 @@ const C8FONT = {
 };
 
 class Chip8Emulator {
-  #processId;
-  #timePrevious;
-  #loadedRom;
-  #instructionIdx;
-  #oneSecTimer;
-  #adjustedTargetFps;
+  #processId: ReturnType<typeof setTimeout> | null;
+  #timePrevious: number;
+  #loadedRom: Uint8Array | null;
+  #instructionIdx: number;
+  #oneSecTimer: number;
+  #adjustedTargetFps: number;
 
-  constructor(canvas, fps = 60, ipf = 7, font = C8FONT) {
-    // Target fps to achieve
+  targetFps: number;
+  targetFrameInterval: number;
+  FpsCounter: number;
+  instructionsPerFrame: number;
+  fps: number;
+  ips: number;
+  updateDisplay: () => void;
+  cpu: C8Cpu;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    fps = 60,
+    ipf = 7,
+    font: C8Font = C8FONT,
+  ) {
     this.targetFps = fps;
-
-    // Adjusted target fps (indirectly adjusting frame interval to achieve target fps)
     this.#adjustedTargetFps = fps + 3;
     this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
-
-    // Frames rendered within one second
     this.FpsCounter = 0;
-
-    // Instructions per frame
     this.instructionsPerFrame = ipf;
-
-    // Real fps and ips(instructions per second)
     this.fps = 0;
     this.ips = 0;
-
     this.#processId = null;
     this.#timePrevious = 0;
     this.#loadedRom = null;
     this.#instructionIdx = 0;
     this.#oneSecTimer = 0;
-
     this.updateDisplay = () => {};
     this.cpu = new C8Cpu(canvas, font);
   }
@@ -99,11 +103,11 @@ class Chip8Emulator {
     return this.cpu.soundTimer;
   }
 
-  get paused() {
+  get paused(): boolean {
     return this.#processId == null;
   }
 
-  loadRom(rom) {
+  loadRom(rom: Uint8Array): boolean {
     if (rom.length > this.memory.length - 0x200) {
       console.error(
         `Rom is too large. ${rom.length} > ${this.memory.length - 0x200}`,
@@ -113,19 +117,18 @@ class Chip8Emulator {
     this.#loadedRom = rom;
     this.cpu.loadRom(rom);
     this.speaker.initialize();
-
     return true;
   }
 
-  pressKey(key) {
+  pressKey(key: string): void {
     this.input.pressKey(key);
   }
 
-  releaseKey(key) {
+  releaseKey(key: string): void {
     this.input.releaseKey(key);
   }
 
-  pause() {
+  pause(): void {
     if (this.#processId) {
       clearTimeout(this.#processId);
       this.speaker.stop();
@@ -133,7 +136,7 @@ class Chip8Emulator {
     }
   }
 
-  resume() {
+  resume(): void {
     if (this.#processId == null) {
       if (this.cpu.interrupted) {
         this.killProcess();
@@ -142,15 +145,15 @@ class Chip8Emulator {
       this._updateDisplay();
 
       this.#oneSecTimer = 0;
-      this.#timePrevious = window.performance.now();
+      this.#timePrevious = performance.now();
 
       this.#processId = setTimeout(() => {
-        this.process(window.performance.now());
+        this.process(performance.now());
       }, this.targetFrameInterval);
     }
   }
 
-  killProcess() {
+  killProcess(): void {
     this.pause();
     this.cpu.resetCPU();
     this.#instructionIdx = 0;
@@ -161,18 +164,16 @@ class Chip8Emulator {
     }
   }
 
-  beginProcess() {
+  beginProcess(): void {
     this.resume();
   }
 
-  step() {
-    if (this.cpu.interrupted) {
-      return;
-    }
+  step(): void {
+    if (this.cpu.interrupted) return;
 
-    if (this.#instructionIdx == this.instructionsPerFrame) {
+    if (this.#instructionIdx === this.instructionsPerFrame) {
       this.#instructionIdx = 0;
-      this.stepFrame((autoAdjustFps = false));
+      this.stepFrame(false);
     } else {
       this.#instructionIdx++;
       this.cpu.processNext();
@@ -188,12 +189,15 @@ class Chip8Emulator {
     }
   }
 
-  stepFrame(autoAdjustFps = true) {
+  stepFrame(autoAdjustFps = true): void {
     this.FpsCounter++;
     for (let i = this.#instructionIdx; i < this.instructionsPerFrame; i++) {
       this.#instructionIdx++;
       this.cpu.processNext();
-      if (this.cpu.quirkVBlank && this.cpu.nextInstruction.type == 0xd) {
+      if (
+        this.cpu.quirks.quirkVBlank &&
+        this.cpu.nextInstruction.type === 0xd
+      ) {
         break;
       }
     }
@@ -219,38 +223,35 @@ class Chip8Emulator {
     this._updateDisplay();
   }
 
-  process(time) {
+  process(time: number): void {
     if (this.cpu.interrupted) {
       this.pause();
       return;
     }
-    // if (time - this.#time_previous > this.targetFrameInterval) {
     this.#oneSecTimer += time - this.#timePrevious;
     this.stepFrame();
     this.#timePrevious = time;
-    // }
-    // console.log("Frame")
 
     this.#processId = setTimeout(() => {
-      this.process(window.performance.now());
+      this.process(performance.now());
     }, this.targetFrameInterval);
   }
 
-  calculateFps() {
+  calculateFps(): void {
     this.fps = (this.FpsCounter * 1000) / this.#oneSecTimer;
     this.ips = this.fps * this.instructionsPerFrame;
     this.#oneSecTimer = 0;
     this.FpsCounter = 0;
   }
 
-  _updateDisplay() {
+  _updateDisplay(): void {
     this.updateDisplay();
     this.memory.clearUpdates();
     this.stack.clearUpdates();
     this.registers.clearUpdates();
   }
 
-  _adjustFrameInterval() {
+  _adjustFrameInterval(): void {
     if (this.targetFps < this.fps - 5) {
       this.#adjustedTargetFps += this.targetFps - this.fps;
     } else if (this.targetFps > this.fps + 5) {
@@ -258,9 +259,9 @@ class Chip8Emulator {
     } else if (Math.abs(this.fps - this.targetFps) > 1) {
       this.#adjustedTargetFps =
         this.#adjustedTargetFps +
-        (Number(this.fps < this.targetFps) - Number(this.fps > this.targetFps));
+        (Number(this.fps < this.targetFps) -
+          Number(this.fps > this.targetFps));
       this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
-      // console.log(`Target Fps Updated: ${this.#adjustedTargetFps}`);
     }
   }
 }

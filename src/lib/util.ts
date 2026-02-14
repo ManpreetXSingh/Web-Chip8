@@ -5,33 +5,27 @@
  * The absolute value of the result is strictly smaller than the absolute value of the second operand.\
  * e.g., 3.14%0.7 equals 0.34 (since 3.14 equals 4*0.7 + 0.34.)
  */
-export function pyModulo(a, b) {
+export function pyModulo(a: number, b: number): number {
   return ((a % b) + b) % b;
 }
 
 /**
  * Converts a number to a hex string with the given number of digits.
- * @param {number} number - The number to convert.
- * @param {number} digits - The number of digits to use.
- * @returns {string}
  */
-export function toHex(number, digits = 2) {
+export function toHex(number: number, digits = 2): string {
   return number.toString(16).padStart(digits, "0");
 }
 
 /**
  * Returns the number of bits needed to represent the given number.
- * @param {number} num
- * @returns {number}
  */
-export function calcBitness(num) {
+export function calcBitness(num: number): number {
   return Math.ceil(Math.log2(num));
 }
 
 /**
  * Generates a non-random unique id.
  * id[x] = id[x-1] + 1
- * @returns {number}
  */
 export const generateId = (() => {
   let id = 0;

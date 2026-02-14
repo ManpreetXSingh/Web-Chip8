@@ -1,36 +1,31 @@
 class C8Input {
-  #keysReleased;
-  constructor() {
-    this.#keysReleased = [];
-    this.keysPressed = new Array(16).fill(false);
+  #keysReleased: number[] = [];
+  keysPressed: boolean[] = new Array(16).fill(false);
+  onKeyPressed: ((key: number) => void) | null = null;
 
-    // Function to call when a key is pressed. (Initialize when waiting for input)
-    this.onKeyPressed = null;
+  pressKey(key: string): void {
+    const k = parseInt(key, 16);
+    this.keysPressed[k] = true;
   }
 
-  pressKey(key) {
-    key = parseInt(key, 16);
-    this.keysPressed[key] = true;
-  }
-
-  releaseKey(key) {
-    key = parseInt(key, 16);
-    this.#keysReleased.push(key);
+  releaseKey(key: string): void {
+    const k = parseInt(key, 16);
+    this.#keysReleased.push(k);
 
     if (this.onKeyPressed !== null) {
-      this.onKeyPressed(key);
+      this.onKeyPressed(k);
       this.onKeyPressed = null;
     }
   }
 
-  update() {
-    for (const keyIdx in this.#keysReleased) {
-      this.keysPressed[this.#keysReleased[keyIdx]] = false;
+  update(): void {
+    for (const key of this.#keysReleased) {
+      this.keysPressed[key] = false;
     }
     this.#keysReleased.length = 0;
   }
 
-  isKeyPressed(key) {
+  isKeyPressed(key: number): boolean {
     return this.keysPressed[key];
   }
 }

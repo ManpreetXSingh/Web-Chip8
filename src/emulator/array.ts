@@ -1,86 +1,64 @@
-class C8Array {
-  #arr;
-  #bitness;
-  #updates;
+type Bitness = 8 | 16;
 
-  constructor(length = 4096, bitness = 8) {
+class C8Array {
+  #arr: Uint8Array | Uint16Array;
+  #bitness: Bitness;
+  #updates: number[];
+
+  constructor(length = 4096, bitness: Bitness = 8) {
     this.#bitness = bitness;
-    if (bitness == 8) {
+    if (bitness === 8) {
       this.#arr = new Uint8Array(length);
-    } else if (bitness == 16) {
-      this.#arr = new Uint16Array(length);
     } else {
-      throw new Error("Unsupported bitness");
+      this.#arr = new Uint16Array(length);
     }
     this.#updates = [];
   }
 
-  get length() {
+  get length(): number {
     return this.#arr.length;
   }
 
-  get bitness() {
+  get bitness(): Bitness {
     return this.#bitness;
   }
 
-  get updates() {
+  get updates(): number[] {
     return this.#updates;
   }
 
-  get underlyingArray() {
+  get underlyingArray(): Uint8Array | Uint16Array {
     return this.#arr;
   }
 
-  /**
-   * Clear the array by filling it with zeros.
-   */
-  clear() {
+  clear(): void {
     this.#arr.fill(0);
     this.#updates = [-1];
   }
 
-  /**
-   * Reset the `this.updates` array.
-   */
-  clearUpdates() {
+  clearUpdates(): void {
     this.#updates.length = 0;
   }
 
-  /**
-   * Sets an array of values.
-   * @param {Number} addr The index in the current array at which the values are to be written.
-   * @param {Array} mem A typed or untyped array of values to set.
-   */
-  setArray(addr, mem) {
+  setArray(addr: number, mem: ArrayLike<number>): void {
     if (addr + mem.length > this.#arr.length || addr < 0) {
       throw new Error("Address out of bounds");
     }
     this.#arr.set(mem, addr);
     this.#updates.push(
-      ...Array.from({ length: mem.length }, (v, i) => addr + i),
+      ...Array.from({ length: mem.length }, (_, i) => addr + i),
     );
   }
 
-  /**
-   * Sets a value.
-   * @param {Number} addr The index in the current array at which the values are to be written.
-   * @param {Number} mem A value to set.
-   * @returns {void}
-   */
-  set(addr, mem) {
+  set(addr: number, value: number): void {
     if (addr >= this.#arr.length || addr < 0) {
       throw new Error("Address out of bounds");
     }
-    this.#arr[addr] = mem;
+    this.#arr[addr] = value;
     this.#updates.push(addr);
   }
 
-  /**
-   * Get a value.
-   * @param {Number} addr Address to get
-   * @returns {Number}
-   */
-  get(addr) {
+  get(addr: number): number {
     if (addr >= this.#arr.length || addr < 0) {
       throw new Error("Address out of bounds");
     }
@@ -89,3 +67,4 @@ class C8Array {
 }
 
 export default C8Array;
+export type { Bitness };
