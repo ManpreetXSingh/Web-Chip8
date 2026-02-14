@@ -23,10 +23,12 @@ self.addEventListener("activate", function (event) {
       .then(function (cacheNames) {
         if (devMode) {
           return Promise.all(
-            cacheNames.map(function (cacheName) {
-              console.log("Clearing cache: " + cacheName);
-              return caches.delete(cacheName);
-            }),
+            cacheNames
+              .filter((cacheName) => cacheName.startsWith(cachePrefix))
+              .map(function (cacheName) {
+                console.log("Clearing cache: " + cacheName);
+                return caches.delete(cacheName);
+              }),
           );
         }
         return Promise.all(
