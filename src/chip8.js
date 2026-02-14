@@ -1,7 +1,12 @@
 // Register service worker
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/svc_worker.js").then(function () {
+  navigator.serviceWorker
+    .register("/svc_worker.js")
+    .then(function () {
     console.log("Service Worker Registered");
+    })
+    .catch(function (err) {
+      console.error("Service Worker Registration Failed:", err);
   });
 }
 
