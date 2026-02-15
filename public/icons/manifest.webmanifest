@@ -1,0 +1,36 @@
+{
+  "name": "Web Chip8 Emulator",
+  "short_name": "Web Chip8",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "theme_color": "#9901fe",
+  "background_color": "#fdfaff",
+  "description": "A chip 8 emulator.",
+  "icons": [
+    {
+      "src": "/icons/C8_Icon_48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/C8_Icon_72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/C8_Icon_144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/C8_Icon_168.png",
+      "sizes": "168x168",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/C8_Icon_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

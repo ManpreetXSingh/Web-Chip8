@@ -1,5 +1,6 @@
 import { render } from "solid-js/web";
 import "solid-devtools";
+import App from "./App";
 
 const root = document.getElementById("root");
 
@@ -9,4 +10,4 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => <div>Hello World</div>, root!);
+render(() => <App />, root!);

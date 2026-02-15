@@ -1,0 +1,77 @@
+.settings-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-container > div {
+  margin-block: 0.5rem;
+  margin-inline: 1rem;
+}
+
+.settings-container button {
+  margin-right: 0.5rem;
+  margin-block: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.settings-container button:hover {
+  background-color: var(--accent);
+  color: var(--text-light);
+}
+
+.settings-container button:active {
+  background-color: var(--primary);
+  color: var(--text-light);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--primary);
+  margin-right: 0.25rem;
+  transform: rotateX(180deg);
+  transition: transform 0.25s ease-out;
+}
+
+input[type="checkbox"]:checked {
+  transform: rotateX(0deg);
+}
+
+input[type="checkbox"]:hover {
+  accent-color: var(--accent);
+}
+
+input[type="range"] {
+  accent-color: var(--primary);
+  width: 100%;
+}
+
+input[type="color"] {
+  accent-color: var(--primary);
+  height: 0.8rem;
+  width: 1.6rem;
+  border-radius: 1rem;
+  border: 1px solid var(--secondary);
+}
+
+input[type="color"]:hover {
+  border-color: var(--primary);
+}
+
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 1rem;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 1rem;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}

@@ -1,0 +1,164 @@
+:root {
+  --scrollbar-width: 5px;
+  --scrollbar-color: rgba(0, 0, 0, 0.5);
+  --scrollbar-bg-color: rgba(0, 0, 0, 0.1);
+
+  --max-width: min(70rem, 100%);
+  --min-width: min(33rem, 100%);
+
+  --text: rgb(19, 1, 8);
+  --text-light: rgb(255, 255, 255);
+  --background: rgb(253, 250, 255);
+  --primary: rgb(153, 1, 254);
+  --secondary: rgb(224, 179, 255);
+  --accent: rgb(137, 1, 228);
+
+  --gradient-bg: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--accent) 11%,
+    var(--secondary) 100%
+  );
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  display: contents;
+}
+
+html {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  background: var(--gradient-bg);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: calc(var(--max-width) * 1.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Josefin Sans", sans-serif;
+}
+
+main {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  width: 100%;
+  height: min(calc(100% - 1rem), 65rem);
+  margin: 0.5rem;
+  padding-block: 2rem;
+  border-radius: 1rem;
+  background: var(--background);
+}
+
+.layout-column {
+  padding-top: 0.5rem;
+  padding-inline: 1rem;
+  max-width: 100%;
+  min-width: var(--min-width);
+  border-right: 1px solid var(--secondary);
+  overflow-y: auto;
+}
+
+.layout-column:last-child {
+  border-right: none;
+}
+
+code {
+  font-family: "Courier Prime", monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  padding-inline: 0.35rem;
+  padding-block: 0.2rem;
+  border-radius: 0.35rem;
+}
+
+var {
+  font-family: "Courier Prime", monospace;
+  font-size: 0.8rem;
+  font-style: normal;
+  color: color-mix(in srgb, var(--primary) 95%, black 5%);
+  padding: 0.1rem;
+  border-radius: 0.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Scrollbar */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-color: var(--scrollbar-color) var(--scrollbar-bg-color);
+    scrollbar-width: var(--scrollbar-width);
+  }
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  background-color: var(--scrollbar-bg-color);
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 2.5px;
+  background-color: var(--scrollbar-color);
+}
+
+noscript {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--gradient-bg);
+  color: var(--text-light);
+  font-size: x-large;
+  font-weight: bolder;
+  text-align: center;
+  z-index: 100;
+}
+
+@media (max-width: 85rem) {
+  body {
+    width: var(--max-width);
+    align-items: flex-start;
+  }
+
+  main {
+    display: block;
+    margin: 0;
+    padding-inline: 1rem;
+    border-radius: 0;
+    height: auto;
+    max-height: 100%;
+    overflow: auto;
+  }
+
+  .layout-column {
+    border: none;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    padding-top: 0.5rem;
+  }
+}

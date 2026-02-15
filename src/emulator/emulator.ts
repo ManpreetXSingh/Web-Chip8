@@ -256,11 +256,11 @@ class Chip8Emulator {
       this.#adjustedTargetFps += this.targetFps - this.fps;
     } else if (this.targetFps > this.fps + 5) {
       this.#adjustedTargetFps += this.targetFps - this.fps;
-    } else if (Math.abs(this.fps - this.targetFps) > 1) {
+    }
+    if (Math.abs(this.fps - this.targetFps) > 1) {
       this.#adjustedTargetFps =
         this.#adjustedTargetFps +
-        (Number(this.fps < this.targetFps) -
-          Number(this.fps > this.targetFps));
+        (Number(this.fps < this.targetFps) - Number(this.fps > this.targetFps));
       this.targetFrameInterval = 1000 / this.#adjustedTargetFps;
     }
   }

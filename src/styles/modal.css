@@ -1,0 +1,207 @@
+.modal-overlay {
+  --t-win-transition: 0.25s;
+
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  padding: 1rem;
+
+  background-color: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+
+  will-change: opacity;
+  animation: fade-in var(--t-win-transition) ease;
+}
+
+.modal-content {
+  position: relative;
+  padding: 1rem;
+  background-color: var(--background);
+  border-radius: 1rem;
+  border: 1px solid var(--background);
+  box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+  animation: slide-up var(--t-win-transition) ease;
+}
+
+.modal-close-btn {
+  position: absolute;
+  padding: 0.5rem;
+  border: none;
+  background: var(--background);
+  color: var(--text);
+  border-radius: 100%;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+  cursor: pointer;
+  font-family: "Material Icons Round";
+  font-size: 24px;
+}
+
+.modal-close-btn:hover {
+  background: var(--accent);
+  color: var(--text-light);
+}
+
+.modal-close-btn:active {
+  background: var(--primary);
+  color: var(--text-light);
+}
+
+/* Load ROM Modal */
+
+.load-rom-modal .modal-content {
+  padding: 0;
+  height: 100%;
+  min-width: var(--max-width);
+  overflow: hidden;
+}
+
+.load-rom-modal .modal-content h1 {
+  text-align: center;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  font-weight: 1000;
+  border-bottom: 1px solid var(--secondary);
+  position: sticky;
+}
+
+.rom-list {
+  padding-bottom: 2rem;
+  padding-inline: 2rem;
+  padding-top: 1rem;
+  height: calc(100% - 7rem);
+  overflow: auto;
+  display: grid;
+  grid-auto-flow: dense;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.rom-card {
+  padding: 0.5rem;
+  background-color: var(--background);
+  color: var(--text);
+  border: 1px solid #dfdede;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.rom-card a {
+  color: var(--accent);
+}
+
+.rom-card:hover {
+  box-shadow: 0 0.4rem 0.8rem 0 rgba(39, 41, 44, 0.3);
+}
+
+.rom-card:active {
+  box-shadow: 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.5);
+}
+
+.rom-card img {
+  width: 100%;
+  border-radius: 0.25rem;
+  aspect-ratio: 2/1;
+  background-image: linear-gradient(
+    to bottom right,
+    #f7f7f7,
+    #f0f0f0,
+    #f7f7f7,
+    #f0f0f0,
+    #f7f7f7
+  );
+  background-size: 200% 200%;
+  box-shadow: inset 0 0.4rem 0.8rem 0 rgba(39, 41, 44, 0.3);
+  animation: loading-anim 1s ease infinite;
+}
+
+.rom-card-title {
+  padding-inline: 0.5rem;
+  padding-bottom: 0.25rem;
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.rom-card-author-event {
+  padding-inline: 0.5rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.75rem;
+  text-wrap: pretty;
+}
+
+/* Upload ROM Modal */
+
+.upload-rom-modal .modal-content {
+  max-width: var(--max-width);
+  max-height: 100%;
+  width: 50rem;
+  aspect-ratio: 2/1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  user-select: none;
+}
+
+.upload-rom-modal .modal-content .upload-icon {
+  font-size: 5rem;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(40vh);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes loading-anim {
+  0% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (max-width: 85rem) {
+  .modal-content {
+    box-shadow: none !important;
+  }
+
+  .modal-overlay {
+    backdrop-filter: none !important;
+  }
+
+  .load-rom-modal {
+    padding: 0;
+    align-items: end;
+  }
+
+  .load-rom-modal .modal-content {
+    max-height: 85%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+}

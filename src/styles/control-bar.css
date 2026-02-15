@@ -1,0 +1,63 @@
+.control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  background-color: var(--primary);
+  color: var(--text-light);
+  border-radius: 1rem;
+  padding: 0.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.control-bar .controls {
+  display: flex;
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  overflow: hidden;
+}
+
+.control-bar .controls :first-child {
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+}
+
+.control-bar .info {
+  display: flex;
+  height: auto;
+  justify-content: end;
+}
+
+.control-bar .info > div {
+  display: flex;
+  margin-block: auto;
+  margin-inline: 5px;
+}
+
+.control-bar button {
+  margin: 0;
+  padding: 0.1rem;
+  padding-block: 0.2rem;
+  padding-inline: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  user-select: none;
+}
+
+.control-bar button:hover {
+  box-shadow: inset 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.control-bar button:focus {
+  outline: none;
+  box-shadow: inset 0 0.2rem 0.4rem 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Material Icons */
+.material-icons-round.md-24 {
+  font-size: 24px;
+}
+
+.material-icons-round.md-light {
+  color: rgba(255, 255, 255, 1);
+}
